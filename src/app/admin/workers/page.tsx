@@ -26,16 +26,20 @@ import {
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { MoreHorizontal, PlusCircle } from 'lucide-react';
-import { useCollection, useFirestore } from '@/firebase';
+import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
 import { collection } from 'firebase/firestore';
 import type { Worker } from '@/lib/types';
 import { Badge } from '@/components/ui/badge';
 
 export default function WorkersPage() {
   const firestore = useFirestore();
-  const { data: workers, isLoading } = useCollection<Worker>(
-    firestore ? collection(firestore, 'workers') : null
+
+  const workersQuery = useMemoFirebase(
+    () => (firestore ? collection(firestore, 'workers') : null),
+    [firestore]
   );
+
+  const { data: workers, isLoading } = useCollection<Worker>(workersQuery);
 
   return (
     <Card>
