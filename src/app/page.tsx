@@ -55,7 +55,7 @@ export default function LoginPage() {
   if (isUserLoading || user) {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center">
-        <p>Loading...</p>
+        <p>লোড হচ্ছে...</p>
       </div>
     );
   }
@@ -66,14 +66,14 @@ export default function LoginPage() {
       <Card className="w-full max-w-sm shadow-2xl">
         <CardHeader className="items-center text-center">
           <GarmentFlowIcon className="mb-4 h-12 w-12 text-primary" />
-          <CardTitle className="text-2xl font-bold">Welcome to GarmentFlow</CardTitle>
-          <CardDescription>Enter your credentials to access your dashboard.</CardDescription>
+          <CardTitle className="text-2xl font-bold">গার্মেন্টফ্লোতে স্বাগতম</CardTitle>
+          <CardDescription>আপনার ড্যাশবোর্ড অ্যাক্সেস করতে আপনার তথ্য দিন।</CardDescription>
         </CardHeader>
         <form onSubmit={handleLogin}>
           <CardContent>
             <div className="grid gap-4">
               <div className="grid gap-2">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email">ইমেইল</Label>
                 <Input
                   id="email"
                   type="email"
@@ -84,7 +84,7 @@ export default function LoginPage() {
                 />
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="password">Password</Label>
+                <Label htmlFor="password">পাসওয়ার্ড</Label>
                 <Input
                   id="password"
                   type="password"
@@ -97,12 +97,12 @@ export default function LoginPage() {
           </CardContent>
           <CardFooter className="flex flex-col gap-4">
             <Button type="submit" className="w-full">
-              Login
+              লগইন
             </Button>
             <p className="text-center text-sm text-muted-foreground">
-              Don&apos;t have an account?{' '}
+              অ্যাকাউন্ট নেই?{' '}
               <Link href="#" className="underline">
-                Contact Admin
+                অ্যাডমিনের সাথে যোগাযোগ করুন
               </Link>
             </p>
           </CardFooter>

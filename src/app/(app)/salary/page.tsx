@@ -39,7 +39,7 @@ import { useCollection, useFirestore, useUser, useMemoFirebase } from '@/firebas
 import { collection, query } from 'firebase/firestore';
 
 const formatCurrency = (amount: number) =>
-  new Intl.NumberFormat('en-IN', {
+  new Intl.NumberFormat('bn-BD', {
     style: 'currency',
     currency: 'BDT',
     minimumFractionDigits: 0,
@@ -48,35 +48,35 @@ const formatCurrency = (amount: number) =>
 export const columns: ColumnDef<SalaryDetails>[] = [
   {
     accessorKey: 'workerName',
-    header: 'Worker',
+    header: 'কর্মী',
   },
   {
     accessorKey: 'month',
-    header: 'Month',
+    header: 'মাস',
   },
   {
     accessorKey: 'basicSalary',
-    header: 'Basic',
+    header: 'মূল বেতন',
     cell: ({ row }) => formatCurrency(row.original.basicSalary),
   },
   {
     accessorKey: 'productionPay',
-    header: 'Production',
+    header: 'উৎপাদন',
     cell: ({ row }) => formatCurrency(row.original.productionPay),
   },
   {
     accessorKey: 'overtimePay',
-    header: 'Overtime',
+    header: 'ওভারটাইম',
     cell: ({ row }) => formatCurrency(row.original.overtimePay),
   },
   {
     accessorKey: 'bonus',
-    header: 'Bonus',
+    header: 'বোনাস',
     cell: ({ row }) => formatCurrency(row.original.bonus),
   },
   {
     accessorKey: 'advanceDeduction',
-    header: 'Advance',
+    header: 'অ্যাডভান্স',
     cell: ({ row }) => (
       <span className="text-destructive">
         {formatCurrency(row.original.advanceDeduction)}
@@ -85,7 +85,7 @@ export const columns: ColumnDef<SalaryDetails>[] = [
   },
   {
     accessorKey: 'absenceDeduction',
-    header: 'Absence',
+    header: 'অনুপস্থিতি',
     cell: ({ row }) => (
       <span className="text-destructive">
         {formatCurrency(row.original.absenceDeduction)}
@@ -94,7 +94,7 @@ export const columns: ColumnDef<SalaryDetails>[] = [
   },
   {
     accessorKey: 'netSalary',
-    header: 'Net Salary',
+    header: 'মোট বেতন',
     cell: ({ row }) => (
       <span className="font-bold">
         {formatCurrency(row.original.netSalary)}
@@ -111,8 +111,8 @@ export const columns: ColumnDef<SalaryDetails>[] = [
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent>
-          <DropdownMenuItem>Generate Slip (PDF)</DropdownMenuItem>
-          <DropdownMenuItem>View Details</DropdownMenuItem>
+          <DropdownMenuItem>স্লিপ তৈরি করুন (PDF)</DropdownMenuItem>
+          <DropdownMenuItem>বিস্তারিত দেখুন</DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
     ),
@@ -147,11 +147,11 @@ export default function SalaryPage() {
       return (
           <Card>
               <CardHeader>
-                  <CardTitle>Salary Management</CardTitle>
-                  <CardDescription>Review, manage, and export monthly salary data.</CardDescription>
+                  <CardTitle>বেতন ব্যবস্থাপনা</CardTitle>
+                  <CardDescription>মাসিক বেতনের ডেটা পর্যালোচনা, পরিচালনা এবং এক্সপোর্ট করুন।</CardDescription>
               </CardHeader>
               <CardContent>
-                  <p>Loading salary data...</p>
+                  <p>বেতনের ডেটা লোড হচ্ছে...</p>
               </CardContent>
           </Card>
       )
@@ -160,15 +160,15 @@ export default function SalaryPage() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Salary Management</CardTitle>
+        <CardTitle>বেতন ব্যবস্থাপনা</CardTitle>
         <CardDescription>
-          Review, manage, and export monthly salary data.
+          মাসিক বেতনের ডেটা পর্যালোচনা, পরিচালনা এবং এক্সপোর্ট করুন।
         </CardDescription>
       </CardHeader>
       <CardContent>
         <div className="flex items-center justify-between py-4">
           <Input
-            placeholder="Filter by worker name..."
+            placeholder="কর্মীর নাম দিয়ে ফিল্টার করুন..."
             value={
               (table.getColumn('workerName')?.getFilterValue() as string) ?? ''
             }
@@ -179,7 +179,7 @@ export default function SalaryPage() {
           />
           <Button variant="outline">
             <Download className="mr-2 h-4 w-4" />
-            Export Report (Excel)
+            রিপোর্ট এক্সপোর্ট করুন (এক্সেল)
           </Button>
         </div>
         <div className="rounded-md border">
@@ -218,7 +218,7 @@ export default function SalaryPage() {
                     colSpan={columns.length}
                     className="h-24 text-center"
                   >
-                    No results.
+                    কোনো ফলাফল পাওয়া যায়নি।
                   </TableCell>
                 </TableRow>
               )}
@@ -232,7 +232,7 @@ export default function SalaryPage() {
             onClick={() => table.previousPage()}
             disabled={!table.getCanPreviousPage()}
           >
-            Previous
+            পূর্ববর্তী
           </Button>
           <Button
             variant="outline"
@@ -240,7 +240,7 @@ export default function SalaryPage() {
             onClick={() => table.nextPage()}
             disabled={!table.getCanNextPage()}
           >
-            Next
+            পরবর্তী
           </Button>
         </div>
       </CardContent>

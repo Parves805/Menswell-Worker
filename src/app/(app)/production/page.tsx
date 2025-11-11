@@ -34,20 +34,20 @@ import { collection, query } from 'firebase/firestore';
 export const columns: ColumnDef<ProductionEntry>[] = [
   {
     accessorKey: 'date',
-    header: 'Date',
-    cell: ({ row }) => new Date(row.original.date).toLocaleDateString(),
+    header: 'তারিখ',
+    cell: ({ row }) => new Date(row.original.date).toLocaleDateString('bn-BD'),
   },
   {
     accessorKey: 'workerName',
-    header: 'Worker Name',
+    header: 'কর্মীর নাম',
   },
   {
     accessorKey: 'pieceCount',
-    header: 'Piece Count',
+    header: 'পিস সংখ্যা',
   },
   {
     accessorKey: 'overtimeHours',
-    header: 'Overtime (Hours)',
+    header: 'ওভারটাইম (ঘণ্টা)',
   },
 ];
 
@@ -80,11 +80,11 @@ export default function ProductionPage() {
     return (
         <Card>
             <CardHeader>
-                <CardTitle>Production & Overtime</CardTitle>
-                <CardDescription>Log daily production and overtime hours for workers.</CardDescription>
+                <CardTitle>উৎপাদন ও ওভারটাইম</CardTitle>
+                <CardDescription>কর্মীদের দৈনিক উৎপাদন এবং ওভারটাইম ঘণ্টা লগ করুন।</CardDescription>
             </CardHeader>
             <CardContent>
-                <p>Loading production data...</p>
+                <p>উৎপাদনের ডেটা লোড হচ্ছে...</p>
             </CardContent>
         </Card>
     );
@@ -93,15 +93,15 @@ export default function ProductionPage() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Production & Overtime</CardTitle>
+        <CardTitle>উৎপাদন ও ওভারটাইম</CardTitle>
         <CardDescription>
-          Log daily production and overtime hours for workers.
+          কর্মীদের দৈনিক উৎপাদন এবং ওভারটাইম ঘণ্টা লগ করুন।
         </CardDescription>
       </CardHeader>
       <CardContent>
         <div className="flex items-center justify-between py-4">
           <Input
-            placeholder="Filter by worker name..."
+            placeholder="কর্মীর নাম দিয়ে ফিল্টার করুন..."
             value={
               (table.getColumn('workerName')?.getFilterValue() as string) ?? ''
             }
@@ -112,7 +112,7 @@ export default function ProductionPage() {
           />
           <Button>
             <PlusCircle className="mr-2 h-4 w-4" />
-            Add New Entry
+            নতুন এন্ট্রি যোগ করুন
           </Button>
         </div>
         <div className="rounded-md border">
@@ -151,7 +151,7 @@ export default function ProductionPage() {
                     colSpan={columns.length}
                     className="h-24 text-center"
                   >
-                    No results.
+                    কোনো ফলাফল পাওয়া যায়নি।
                   </TableCell>
                 </TableRow>
               )}
@@ -165,7 +165,7 @@ export default function ProductionPage() {
             onClick={() => table.previousPage()}
             disabled={!table.getCanPreviousPage()}
           >
-            Previous
+            পূর্ববর্তী
           </Button>
           <Button
             variant="outline"
@@ -173,7 +173,7 @@ export default function ProductionPage() {
             onClick={() => table.nextPage()}
             disabled={!table.getCanNextPage()}
           >
-            Next
+            পরবর্তী
           </Button>
         </div>
       </CardContent>

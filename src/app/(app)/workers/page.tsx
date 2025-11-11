@@ -30,11 +30,11 @@ export default function WorkersPage() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Worker Management</CardTitle>
+        <CardTitle>কর্মী ব্যবস্থাপনা</CardTitle>
       </CardHeader>
       <CardContent>
         {isLoading ? (
-          <p>Loading workers...</p>
+          <p>কর্মী লোড হচ্ছে...</p>
         ) : (
           <DataTable columns={columns} data={workersWithPhoto} />
         )}

@@ -47,20 +47,20 @@ import { useRouter } from 'next/navigation';
 import { BottomNav } from '@/components/BottomNav';
 
 const mainNavItems: NavItem[] = [
-  { title: 'Home', href: '/dashboard', icon: <Home /> },
-  { title: 'Entry', href: '/entry', icon: <PlusSquare /> },
-  { title: 'Chat', href: '/chat', icon: <MessageCircle /> },
-  { title: 'Notification', href: '/notifications', icon: <Bell /> },
-  { title: 'Setting', href: '/settings', icon: <Settings /> },
+  { title: 'হোম', href: '/dashboard', icon: <Home /> },
+  { title: 'এন্ট্রি', href: '/entry', icon: <PlusSquare /> },
+  { title: 'চ্যাট', href: '/chat', icon: <MessageCircle /> },
+  { title: 'নোটিফিকেশন', href: '/notifications', icon: <Bell /> },
+  { title: 'সেটিং', href: '/settings', icon: <Settings /> },
 ];
 
 const secondaryNavItems: NavItem[] = [
-  { title: 'Dashboard', href: '/dashboard', icon: <LayoutDashboard /> },
-  { title: 'Workers', href: '/workers', icon: <Users /> },
-  { title: 'Attendance', href: '/attendance', icon: <CalendarCheck /> },
-  { title: 'Production', href: '/production', icon: <Factory /> },
-  { title: 'Salary', href: '/salary', icon: <Banknote /> },
-  { title: 'Advances & Bonus', href: '/advances', icon: <HandCoins /> },
+  { title: 'ড্যাশবোর্ড', href: '/dashboard', icon: <LayoutDashboard /> },
+  { title: 'কর্মী', href: '/workers', icon: <Users /> },
+  { title: 'উপস্থিতি', href: '/attendance', icon: <CalendarCheck /> },
+  { title: 'উৎপাদন', href: '/production', icon: <Factory /> },
+  { title: 'বেতন', href: '/salary', icon: <Banknote /> },
+  { title: 'অ্যাডভান্স ও বোনাস', href: '/advances', icon: <HandCoins /> },
 ];
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
@@ -83,7 +83,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   if (isUserLoading || !user) {
     return (
       <div className="flex min-h-screen items-center justify-center">
-        <p>Loading...</p>
+        <p>লোড হচ্ছে...</p>
       </div>
     );
   }
@@ -99,7 +99,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
               </Link>
             </Button>
             <h1 className="text-lg font-semibold tracking-tight text-sidebar-foreground">
-              GarmentFlow
+              গার্মেন্টফ্লো
             </h1>
           </div>
         </SidebarHeader>
@@ -124,7 +124,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           </SidebarMenu>
           <SidebarMenu className="mt-4">
              <SidebarMenuItem>
-                <p className="px-2 text-xs font-semibold text-sidebar-foreground/50">Management</p>
+                <p className="px-2 text-xs font-semibold text-sidebar-foreground/50">ব্যবস্থাপনা</p>
              </SidebarMenuItem>
             {secondaryNavItems.map((item) => (
               <SidebarMenuItem key={item.title}>
@@ -149,11 +149,11 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             <SidebarMenuItem>
               <Link href="/settings">
                 <SidebarMenuButton
-                  tooltip="Settings"
+                  tooltip="সেটিংস"
                   className="text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
                 >
                   <Settings className="text-sidebar-foreground" />
-                  <span>Settings</span>
+                  <span>সেটিংস</span>
                 </SidebarMenuButton>
               </Link>
             </SidebarMenuItem>
@@ -169,19 +169,19 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           <Button variant="ghost" size="icon" className="rounded-full text-foreground hover:bg-accent hover:text-accent-foreground" asChild>
             <Link href="/notifications">
               <Bell className="h-5 w-5" />
-              <span className="sr-only">Toggle notifications</span>
+              <span className="sr-only">নোটিফিকেশন দেখান</span>
             </Link>
           </Button>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <div className="flex items-center gap-3 cursor-pointer">
                 <Avatar className="h-9 w-9">
-                  <AvatarImage src={user.photoURL ?? "https://picsum.photos/seed/99/40/40"} alt="User Avatar" />
+                  <AvatarImage src={user.photoURL ?? "https://picsum.photos/seed/99/40/40"} alt="ব্যবহারকারীর ছবি" />
                   <AvatarFallback>{user.email?.charAt(0).toUpperCase()}</AvatarFallback>
                 </Avatar>
                 <div className="hidden md:flex flex-col items-start">
                     <span className="text-sm font-medium text-foreground">{user.displayName ?? user.email}</span>
-                    <span className="text-xs text-muted-foreground/80">Admin</span>
+                    <span className="text-xs text-muted-foreground/80">অ্যাডমিন</span>
                 </div>
               </div>
 
@@ -189,12 +189,12 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             <DropdownMenuContent align="end">
               <DropdownMenuLabel>{user.displayName ?? user.email}</DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem>Profile</DropdownMenuItem>
-              <DropdownMenuItem asChild><Link href="/settings">Settings</Link></DropdownMenuItem>
+              <DropdownMenuItem>প্রোফাইল</DropdownMenuItem>
+              <DropdownMenuItem asChild><Link href="/settings">সেটিংস</Link></DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={handleLogout}>
                 <LogOut className="mr-2 h-4 w-4" />
-                <span>Logout</span>
+                <span>লগআউট</span>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

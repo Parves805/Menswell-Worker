@@ -26,14 +26,14 @@ export const columns: ColumnDef<Worker>[] = [
           (table.getIsSomePageRowsSelected() && 'indeterminate')
         }
         onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-        aria-label="Select all"
+        aria-label="সবাইকে নির্বাচন করুন"
       />
     ),
     cell: ({ row }) => (
       <Checkbox
         checked={row.getIsSelected()}
         onCheckedChange={(value) => row.toggleSelected(!!value)}
-        aria-label="Select row"
+        aria-label="সারি নির্বাচন করুন"
       />
     ),
     enableSorting: false,
@@ -47,7 +47,7 @@ export const columns: ColumnDef<Worker>[] = [
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
         >
-          Name
+          নাম
           <ArrowUpDown className="ml-2 h-4 w-4" />
         </Button>
       );
@@ -73,19 +73,19 @@ export const columns: ColumnDef<Worker>[] = [
   },
   {
     accessorKey: 'designation',
-    header: 'Designation',
+    header: 'পদবি',
     cell: ({ row }) => <Badge variant="outline">{row.original.designation}</Badge>,
   },
   {
     accessorKey: 'department',
-    header: 'Department',
+    header: 'বিভাগ',
   },
   {
     accessorKey: 'basicSalary',
-    header: () => <div className="text-right">Basic Salary</div>,
+    header: () => <div className="text-right">মূল বেতন</div>,
     cell: ({ row }) => {
       const amount = parseFloat(row.getValue('basicSalary'));
-      const formatted = new Intl.NumberFormat('en-IN', {
+      const formatted = new Intl.NumberFormat('bn-BD', {
         style: 'currency',
         currency: 'BDT',
         minimumFractionDigits: 0,
@@ -95,8 +95,8 @@ export const columns: ColumnDef<Worker>[] = [
   },
   {
     accessorKey: 'joinDate',
-    header: 'Joining Date',
-    cell: ({ row }) => new Date(row.original.joinDate).toLocaleDateString(),
+    header: 'যোগদানের তারিখ',
+    cell: ({ row }) => new Date(row.original.joinDate).toLocaleDateString('bn-BD'),
   },
   {
     id: 'actions',
@@ -106,20 +106,20 @@ export const columns: ColumnDef<Worker>[] = [
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="h-8 w-8 p-0">
-              <span className="sr-only">Open menu</span>
+              <span className="sr-only">মেনু খুলুন</span>
               <MoreHorizontal className="h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuLabel>Actions</DropdownMenuLabel>
+            <DropdownMenuLabel>কার্যক্রম</DropdownMenuLabel>
             <DropdownMenuItem onClick={() => navigator.clipboard.writeText(worker.id)}>
-              Copy worker ID
+              কর্মী আইডি কপি করুন
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>Edit Worker</DropdownMenuItem>
-            <DropdownMenuItem>View QR Code</DropdownMenuItem>
+            <DropdownMenuItem>কর্মী সম্পাদনা করুন</DropdownMenuItem>
+            <DropdownMenuItem>কিউআর কোড দেখুন</DropdownMenuItem>
             <DropdownMenuItem className="text-destructive focus:text-destructive focus:bg-destructive/10">
-              Delete Worker
+              কর্মী মুছে ফেলুন
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

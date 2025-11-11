@@ -15,12 +15,12 @@ import Image from 'next/image';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 
 const monthlySalaryData = [
-  { month: "Jan", total: 350000 },
-  { month: "Feb", total: 380000 },
-  { month: "Mar", total: 420000 },
-  { month: "Apr", total: 410000 },
-  { month: "May", total: 450000 },
-  { month: "Jun", total: 430000 },
+  { month: "জানু", total: 350000 },
+  { month: "ফেব্রু", total: 380000 },
+  { month: "মার্চ", total: 420000 },
+  { month: "এপ্রিল", total: 410000 },
+  { month: "মে", total: 450000 },
+  { month: "জুন", total: 430000 },
 ];
 
 const attendanceData = [
@@ -35,14 +35,14 @@ const attendanceData = [
 
 const chartConfig: ChartConfig = {
   total: {
-    label: 'Salary',
+    label: 'বেতন',
     color: 'hsl(var(--primary))',
   },
 };
 
 const attendanceChartConfig: ChartConfig = {
     rate: {
-        label: 'Attendance Rate',
+        label: 'উপস্থিতির হার',
         color: 'hsl(var(--primary))',
     }
 }
@@ -77,44 +77,44 @@ export default function DashboardPage() {
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Workers</CardTitle>
+            <CardTitle className="text-sm font-medium">মোট কর্মী</CardTitle>
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">152</div>
+            <div className="text-2xl font-bold">১৫২</div>
             <p className="text-xs text-muted-foreground flex items-center">
-              <TrendingUp className="mr-1 h-3 w-3 text-green-600" /> +5 from last month
+              <TrendingUp className="mr-1 h-3 w-3 text-green-600" /> গত মাসের থেকে ৫ জন বেশি
             </p>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Monthly Salary Cost</CardTitle>
+            <CardTitle className="text-sm font-medium">মাসিক বেতন খরচ</CardTitle>
             <Banknote className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">BDT 430,000</div>
+            <div className="text-2xl font-bold">৳ ৪৩০,০০০</div>
             <p className="text-xs text-muted-foreground flex items-center">
-                <TrendingDown className="mr-1 h-3 w-3 text-destructive" /> -4.5% from last month
+                <TrendingDown className="mr-1 h-3 w-3 text-destructive" /> গত মাসের থেকে ৪.৫% কম
             </p>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Today's Attendance</CardTitle>
+            <CardTitle className="text-sm font-medium">আজকের উপস্থিতি</CardTitle>
             <CalendarCheck className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">96.1%</div>
-            <p className="text-xs text-muted-foreground">146 of 152 workers present</p>
+            <div className="text-2xl font-bold">৯৬.১%</div>
+            <p className="text-xs text-muted-foreground">১৫২ জনের মধ্যে ১৪৬ জন উপস্থিত</p>
           </CardContent>
         </Card>
       </div>
       <div className="grid gap-6 lg:grid-cols-2">
         <Card>
           <CardHeader>
-            <CardTitle>Monthly Salary Overview</CardTitle>
-            <CardDescription>Total salary disbursed over the last 6 months.</CardDescription>
+            <CardTitle>মাসিক বেতনের সংক্ষিপ্ত বিবরণ</CardTitle>
+            <CardDescription>বিগত ৬ মাসে মোট প্রদত্ত বেতনের হিসাব।</CardDescription>
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={300}>
@@ -132,7 +132,7 @@ export default function DashboardPage() {
                   fontSize={12}
                   tickLine={false}
                   axisLine={false}
-                  tickFormatter={(value) => `BDT ${Number(value) / 1000}k`}
+                  tickFormatter={(value) => `৳ ${Number(value) / 1000}হাজার`}
                 />
                 <Tooltip
                   cursor={{ fill: 'hsl(var(--accent))', opacity: 0.5 }}
@@ -142,13 +142,13 @@ export default function DashboardPage() {
                               <div className="rounded-lg border bg-background p-2 shadow-sm">
                                   <div className="grid grid-cols-2 gap-2">
                                       <div className="flex flex-col">
-                                          <span className="text-[0.70rem] uppercase text-muted-foreground">Month</span>
+                                          <span className="text-[0.70rem] uppercase text-muted-foreground">মাস</span>
                                           <span className="font-bold text-muted-foreground">{payload[0].payload.month}</span>
                                       </div>
                                       <div className="flex flex-col">
-                                          <span className="text-[0.70rem] uppercase text-muted-foreground">Salary</span>
+                                          <span className="text-[0.70rem] uppercase text-muted-foreground">বেতন</span>
                                           <span className="font-bold">
-                                              {new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'BDT' }).format(payload[0].value as number)}
+                                              {new Intl.NumberFormat('bn-BD', { style: 'currency', currency: 'BDT' }).format(payload[0].value as number)}
                                           </span>
                                       </div>
                                   </div>
@@ -165,8 +165,8 @@ export default function DashboardPage() {
         </Card>
         <Card>
           <CardHeader>
-            <CardTitle>Recent Attendance Rate</CardTitle>
-            <CardDescription>Attendance percentage over the last 7 days.</CardDescription>
+            <CardTitle>সাম্প্রতিক উপস্থিতির হার</CardTitle>
+            <CardDescription>বিগত ৭ দিনের উপস্থিতির শতকরা হার।</CardDescription>
           </CardHeader>
           <CardContent>
              <ResponsiveContainer width="100%" height={300}>
@@ -180,7 +180,7 @@ export default function DashboardPage() {
                     <CartesianGrid vertical={false} />
                     <XAxis 
                       dataKey="date" 
-                      tickFormatter={(str) => new Date(str).toLocaleDateString('en-US', { day: 'numeric', month: 'short'})}
+                      tickFormatter={(str) => new Date(str).toLocaleDateString('bn-BD', { day: 'numeric', month: 'short'})}
                       stroke="#888888"
                       fontSize={12}
                       tickLine={false}
@@ -201,11 +201,11 @@ export default function DashboardPage() {
                                     <div className="rounded-lg border bg-background p-2 shadow-sm">
                                         <div className="grid grid-cols-2 gap-2">
                                             <div className="flex flex-col">
-                                                <span className="text-[0.70rem] uppercase text-muted-foreground">Date</span>
-                                                <span className="font-bold text-muted-foreground">{new Date(payload[0].payload.date).toLocaleDateString()}</span>
+                                                <span className="text-[0.70rem] uppercase text-muted-foreground">তারিখ</span>
+                                                <span className="font-bold text-muted-foreground">{new Date(payload[0].payload.date).toLocaleDateString('bn-BD')}</span>
                                             </div>
                                             <div className="flex flex-col">
-                                                <span className="text-[0.70rem] uppercase text-muted-foreground">Rate</span>
+                                                <span className="text-[0.70rem] uppercase text-muted-foreground">হার</span>
                                                 <span className="font-bold">{(payload[0].value as number).toFixed(1)}%</span>
                                             </div>
                                         </div>

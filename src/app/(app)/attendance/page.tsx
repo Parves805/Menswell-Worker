@@ -66,6 +66,16 @@ const getStatusBadgeVariant = (status: AttendanceStatus) => {
   }
 };
 
+const getStatusInBangla = (status: AttendanceStatus) => {
+    switch (status) {
+        case 'Present': return 'উপস্থিত';
+        case 'Absent': return 'অনুপস্থিত';
+        case 'Late': return 'বিলম্ব';
+        case 'On Leave': return 'ছুটিতে';
+        default: return status;
+    }
+}
+
 export const columns: ColumnDef<AttendanceRecord>[] = [
   {
     id: 'select',
@@ -76,14 +86,14 @@ export const columns: ColumnDef<AttendanceRecord>[] = [
           (table.getIsSomePageRowsSelected() && 'indeterminate')
         }
         onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-        aria-label="Select all"
+        aria-label="সবাইকে নির্বাচন করুন"
       />
     ),
     cell: ({ row }) => (
       <Checkbox
         checked={row.getIsSelected()}
         onCheckedChange={(value) => row.toggleSelected(!!value)}
-        aria-label="Select row"
+        aria-label="সারি নির্বাচন করুন"
       />
     ),
     enableSorting: false,
@@ -96,7 +106,7 @@ export const columns: ColumnDef<AttendanceRecord>[] = [
         variant="ghost"
         onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
       >
-        Worker Name
+        কর্মীর নাম
         <CaretSortIcon className="ml-2 h-4 w-4" />
       </Button>
     ),
@@ -104,15 +114,15 @@ export const columns: ColumnDef<AttendanceRecord>[] = [
   },
   {
     accessorKey: 'date',
-    header: 'Date',
-    cell: ({ row }) => new Date(row.original.date).toLocaleDateString(),
+    header: 'তারিখ',
+    cell: ({ row }) => new Date(row.original.date).toLocaleDateString('bn-BD'),
   },
   {
     accessorKey: 'status',
-    header: 'Status',
+    header: 'অবস্থা',
     cell: ({ row }) => (
       <Badge variant={getStatusBadgeVariant(row.getValue('status'))}>
-        {row.getValue('status')}
+        {getStatusInBangla(row.getValue('status'))}
       </Badge>
     ),
   },
@@ -126,20 +136,20 @@ export const columns: ColumnDef<AttendanceRecord>[] = [
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="h-8 w-8 p-0">
-              <span className="sr-only">Open menu</span>
+              <span className="sr-only">মেনু খুলুন</span>
               <DotsHorizontalIcon className="h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuLabel>Actions</DropdownMenuLabel>
+            <DropdownMenuLabel>কার্যক্রম</DropdownMenuLabel>
             <DropdownMenuItem
               onClick={() => navigator.clipboard.writeText(payment.id)}
             >
-              Copy record ID
+              রেকর্ড আইডি কপি করুন
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>Edit Record</DropdownMenuItem>
-            <DropdownMenuItem>View Worker Profile</DropdownMenuItem>
+            <DropdownMenuItem>রেকর্ড সম্পাদনা করুন</DropdownMenuItem>
+            <DropdownMenuItem>কর্মীর প্রোফাইল দেখুন</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       );
@@ -151,8 +161,6 @@ export default function AttendancePage() {
   const firestore = useFirestore();
   const { user } = useUser();
 
-  // Note: This query fetches all attendance records.
-  // In a real app, you'd likely want to filter by the current user's workers or a specific date range.
   const attendanceQuery = useMemoFirebase(() => {
     if (!firestore || !user) return null;
     return query(collection(firestore, 'workers', user.uid, 'attendance'));
@@ -191,13 +199,13 @@ export default function AttendancePage() {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Attendance Tracking</CardTitle>
+          <CardTitle>উপস্থিতি ট্র্যাকিং</CardTitle>
           <CardDescription>
-            View and manage daily attendance records.
+            দৈনিক উপস্থিতির রেকর্ড দেখুন এবং পরিচালনা করুন।
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <p>Loading attendance data...</p>
+          <p>উপস্থিতির ডেটা লোড হচ্ছে...</p>
         </CardContent>
       </Card>
     );
@@ -206,15 +214,15 @@ export default function AttendancePage() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Attendance Tracking</CardTitle>
+        <CardTitle>উপস্থিতি ট্র্যাকিং</CardTitle>
         <CardDescription>
-          View and manage daily attendance records.
+          দৈনিক উপস্থিতির রেকর্ড দেখুন এবং পরিচালনা করুন।
         </CardDescription>
       </CardHeader>
       <CardContent>
         <div className="flex items-center py-4 gap-2">
           <Input
-            placeholder="Filter by worker name..."
+            placeholder="কর্মীর নাম দিয়ে ফিল্টার করুন..."
             value={
               (table.getColumn('workerName')?.getFilterValue() as string) ?? ''
             }
@@ -226,7 +234,7 @@ export default function AttendancePage() {
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="outline" className="ml-auto">
-                Columns <ChevronDownIcon className="ml-2 h-4 w-4" />
+                কলাম <ChevronDownIcon className="ml-2 h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
@@ -243,7 +251,7 @@ export default function AttendancePage() {
                         column.toggleVisibility(!!value)
                       }
                     >
-                      {column.id}
+                      {column.id === 'workerName' ? 'কর্মীর নাম' : column.id === 'date' ? 'তারিখ' : column.id === 'status' ? 'অবস্থা' : column.id}
                     </DropdownMenuCheckboxItem>
                   );
                 })}
@@ -251,7 +259,7 @@ export default function AttendancePage() {
           </DropdownMenu>
           <Button>
             <PlusCircle className="mr-2 h-4 w-4" />
-            Mark Attendance
+            উপস্থিতি চিহ্নিত করুন
           </Button>
         </div>
         <div className="rounded-md border">
@@ -297,7 +305,7 @@ export default function AttendancePage() {
                     colSpan={columns.length}
                     className="h-24 text-center"
                   >
-                    No results.
+                    কোনো ফলাফল পাওয়া যায়নি।
                   </TableCell>
                 </TableRow>
               )}
@@ -306,8 +314,8 @@ export default function AttendancePage() {
         </div>
         <div className="flex items-center justify-end space-x-2 py-4">
           <div className="flex-1 text-sm text-muted-foreground">
-            {table.getFilteredSelectedRowModel().rows.length} of{' '}
-            {table.getFilteredRowModel().rows.length} row(s) selected.
+            {table.getFilteredRowModel().rows.length} টির মধ্যে{' '}
+            {table.getFilteredSelectedRowModel().rows.length} টি নির্বাচিত।
           </div>
           <div className="space-x-2">
             <Button
@@ -316,7 +324,7 @@ export default function AttendancePage() {
               onClick={() => table.previousPage()}
               disabled={!table.getCanPreviousPage()}
             >
-              Previous
+              পূর্ববর্তী
             </Button>
             <Button
               variant="outline"
@@ -324,7 +332,7 @@ export default function AttendancePage() {
               onClick={() => table.nextPage()}
               disabled={!table.getCanNextPage()}
             >
-              Next
+              পরবর্তী
             </Button>
           </div>
         </div>

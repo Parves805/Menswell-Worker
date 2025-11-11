@@ -6,11 +6,11 @@ export default function ChatPage() {
     return (
         <Card>
             <CardHeader>
-                <CardTitle>Chat</CardTitle>
-                <CardDescription>This is the chat page.</CardDescription>
+                <CardTitle>চ্যাট</CardTitle>
+                <CardDescription>এটি চ্যাট পাতা।</CardDescription>
             </CardHeader>
             <CardContent>
-                <p>Content for the chat page goes here.</p>
+                <p>চ্যাট পাতার বিষয়বস্তু এখানে থাকবে।</p>
             </CardContent>
         </Card>
     );

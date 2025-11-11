@@ -6,11 +6,11 @@ export default function EntryPage() {
     return (
         <Card>
             <CardHeader>
-                <CardTitle>Entry</CardTitle>
-                <CardDescription>This is the entry page.</CardDescription>
+                <CardTitle>এন্ট্রি</CardTitle>
+                <CardDescription>এটি এন্ট্রি পাতা।</CardDescription>
             </CardHeader>
             <CardContent>
-                <p>Content for the entry page goes here.</p>
+                <p>এন্ট্রি পাতার বিষয়বস্তু এখানে থাকবে।</p>
             </CardContent>
         </Card>
     );

@@ -8,24 +8,24 @@ export default function NotificationsPage() {
         <Card>
             <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                    <Bell /> Notifications
+                    <Bell /> নোটিফিকেশন
                 </CardTitle>
-                <CardDescription>View your recent notifications here.</CardDescription>
+                <CardDescription>আপনার সাম্প্রতিক নোটিফিকেশনগুলো এখানে দেখুন।</CardDescription>
             </CardHeader>
             <CardContent>
                 <div className="flex flex-col gap-4">
                     <div className="flex items-start gap-4 rounded-lg border p-4">
                         <div className="flex-1">
-                            <p className="font-medium">Salary Processed</p>
-                            <p className="text-sm text-muted-foreground">June 2024 salary has been successfully processed for all workers.</p>
-                            <p className="text-xs text-muted-foreground mt-1">2 days ago</p>
+                            <p className="font-medium">বেতন প্রক্রিয়া সম্পন্ন</p>
+                            <p className="text-sm text-muted-foreground">জুন ২০২৪ এর বেতন সকল কর্মীর জন্য সফলভাবে প্রক্রিয়া করা হয়েছে।</p>
+                            <p className="text-xs text-muted-foreground mt-1">২ দিন আগে</p>
                         </div>
                     </div>
                     <div className="flex items-start gap-4 rounded-lg border p-4">
                          <div className="flex-1">
-                            <p className="font-medium">New Worker Added</p>
-                            <p className="text-sm text-muted-foreground">A new worker, Kamal Hasan, has joined the sewing department.</p>
-                            <p className="text-xs text-muted-foreground mt-1">5 days ago</p>
+                            <p className="font-medium">নতুন কর্মী যোগ হয়েছে</p>
+                            <p className="text-sm text-muted-foreground">একজন নতুন কর্মী, কামাল হাসান, সেলাই বিভাগে যোগ দিয়েছেন।</p>
+                            <p className="text-xs text-muted-foreground mt-1">৫ দিন আগে</p>
                         </div>
                     </div>
                 </div>

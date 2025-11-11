@@ -44,7 +44,7 @@ export default function AdvancesPage() {
     useCollection<Bonus>(bonusesQuery);
 
   const formatCurrency = (amount: number) =>
-    new Intl.NumberFormat('en-IN', {
+    new Intl.NumberFormat('bn-BD', {
       style: 'currency',
       currency: 'BDT',
       minimumFractionDigits: 0,
@@ -53,46 +53,46 @@ export default function AdvancesPage() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Advances & Bonuses</CardTitle>
+        <CardTitle>অ্যাডভান্স ও বোনাস</CardTitle>
         <CardDescription>
-          Manage advance payments and issue bonuses to workers.
+          কর্মীদের জন্য অগ্রিম অর্থ প্রদান এবং বোনাস ইস্যু পরিচালনা করুন।
         </CardDescription>
       </CardHeader>
       <CardContent>
         <Tabs defaultValue="advances">
           <div className="flex justify-between items-center mb-4">
             <TabsList>
-              <TabsTrigger value="advances">Advances</TabsTrigger>
-              <TabsTrigger value="bonuses">Bonuses</TabsTrigger>
+              <TabsTrigger value="advances">অ্যাডভান্স</TabsTrigger>
+              <TabsTrigger value="bonuses">বোনাস</TabsTrigger>
             </TabsList>
             <Button>
               <PlusCircle className="mr-2 h-4 w-4" />
-              Add New Record
+              নতুন রেকর্ড যোগ করুন
             </Button>
           </div>
           <TabsContent value="advances">
-            {isLoadingAdvances ? <p>Loading advances...</p> : (
+            {isLoadingAdvances ? <p>অ্যাডভান্স লোড হচ্ছে...</p> : (
             <div className="rounded-md border">
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Date</TableHead>
-                    <TableHead>Worker Name</TableHead>
-                    <TableHead>Amount</TableHead>
-                    <TableHead>Status</TableHead>
+                    <TableHead>তারিখ</TableHead>
+                    <TableHead>কর্মীর নাম</TableHead>
+                    <TableHead>পরিমাণ</TableHead>
+                    <TableHead>অবস্থা</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {advancePayments?.map((payment) => (
                     <TableRow key={payment.id}>
-                      <TableCell>{new Date(payment.date).toLocaleDateString()}</TableCell>
+                      <TableCell>{new Date(payment.date).toLocaleDateString('bn-BD')}</TableCell>
                       <TableCell>{payment.workerName}</TableCell>
                       <TableCell>{formatCurrency(payment.amount)}</TableCell>
                       <TableCell>
                         <Badge
                           variant={payment.deducted ? 'default' : 'secondary'}
                         >
-                          {payment.deducted ? 'Deducted' : 'Pending'}
+                          {payment.deducted ? 'কর্তন হয়েছে' : 'বিচারাধীন'}
                         </Badge>
                       </TableCell>
                     </TableRow>
@@ -103,21 +103,21 @@ export default function AdvancesPage() {
             )}
           </TabsContent>
           <TabsContent value="bonuses">
-            {isLoadingBonuses ? <p>Loading bonuses...</p> : (
+            {isLoadingBonuses ? <p>বোনাস লোড হচ্ছে...</p> : (
             <div className="rounded-md border">
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Date</TableHead>
-                    <TableHead>Worker Name</TableHead>
-                    <TableHead>Type</TableHead>
-                    <TableHead>Amount</TableHead>
+                    <TableHead>তারিখ</TableHead>
+                    <TableHead>কর্মীর নাম</TableHead>
+                    <TableHead>ধরন</TableHead>
+                    <TableHead>পরিমাণ</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {bonuses?.map((bonus) => (
                     <TableRow key={bonus.id}>
-                      <TableCell>{new Date(bonus.date).toLocaleDateString()}</TableCell>
+                      <TableCell>{new Date(bonus.date).toLocaleDateString('bn-BD')}</TableCell>
                       <TableCell>{bonus.workerName}</TableCell>
                       <TableCell>
                         <Badge variant="outline">{bonus.type}</Badge>
