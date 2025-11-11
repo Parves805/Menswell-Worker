@@ -1,10 +1,10 @@
 'use client';
 
 import {
-  CaretSortIcon,
-  ChevronDownIcon,
-  DotsHorizontalIcon,
-} from '@radix-ui/react-icons';
+  ArrowUpDown,
+  ChevronDown,
+  MoreHorizontal,
+} from 'lucide-react';
 import {
   ColumnDef,
   ColumnFiltersState,
@@ -107,7 +107,7 @@ export const columns: ColumnDef<AttendanceRecord>[] = [
         onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
       >
         কর্মীর নাম
-        <CaretSortIcon className="ml-2 h-4 w-4" />
+        <ArrowUpDown className="ml-2 h-4 w-4" />
       </Button>
     ),
     cell: ({ row }) => <div>{row.getValue('workerName')}</div>,
@@ -137,7 +137,7 @@ export const columns: ColumnDef<AttendanceRecord>[] = [
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="h-8 w-8 p-0">
               <span className="sr-only">মেনু খুলুন</span>
-              <DotsHorizontalIcon className="h-4 w-4" />
+              <MoreHorizontal className="h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
@@ -234,7 +234,7 @@ export default function AttendancePage() {
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="outline" className="ml-auto">
-                কলাম <ChevronDownIcon className="ml-2 h-4 w-4" />
+                কলাম <ChevronDown className="ml-2 h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
