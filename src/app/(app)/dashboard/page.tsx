@@ -19,6 +19,7 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from '@/components/ui/carousel';
+import { RecentProductionTable } from '@/components/RecentProductionTable';
 
 // Dummy data for worker dashboard
 const workerData = {
@@ -133,6 +134,8 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
       </div>
+
+      <RecentProductionTable />
     </div>
   );
 }
