@@ -81,7 +81,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           <div className="flex items-center gap-2">
             <Button variant="ghost" size="icon" className="shrink-0" asChild>
               <Link href="/dashboard">
-                <GarmentFlowIcon className="size-5" />
+                <GarmentFlowIcon className="size-5 text-primary" />
               </Link>
             </Button>
             <h1 className="text-lg font-semibold tracking-tight">GarmentFlow</h1>
