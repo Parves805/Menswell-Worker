@@ -58,21 +58,26 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const [isAdmin, setIsAdmin] = React.useState<boolean | null>(null);
 
   React.useEffect(() => {
-    if (!isUserLoading) {
-      if (!user) {
-        router.push('/admin/login');
-        return;
-      }
-      user.getIdTokenResult().then((idTokenResult) => {
-        const isAdminClaim = !!idTokenResult.claims.isAdmin;
-        if (isAdminClaim) {
-          setIsAdmin(true);
-        } else {
-          // If not an admin, redirect to worker dashboard
-          router.push('/dashboard');
-        }
-      });
+    if (isUserLoading) {
+      return; // Wait until user state is resolved
     }
+    
+    if (!user) {
+      router.push('/admin/login');
+      return;
+    }
+    
+    user.getIdTokenResult().then((idTokenResult) => {
+        const isAdminClaim = !!idTokenResult.claims.isAdmin;
+        setIsAdmin(isAdminClaim);
+        if (!isAdminClaim) {
+            // A non-admin user is trying to access an admin page.
+            // The login page will handle redirecting them to the correct dashboard.
+            // For now, we can redirect them to the main login page which will then route them correctly.
+            router.push('/');
+        }
+    });
+
   }, [user, isUserLoading, router]);
 
   const handleLogout = () => {
@@ -81,12 +86,19 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     }
   };
 
+  // Show a loading state while we verify the user's admin status.
   if (isUserLoading || isAdmin === null) {
     return (
       <div className="flex min-h-screen items-center justify-center admin-panel">
         <p>Loading Admin Panel...</p>
       </div>
     );
+  }
+  
+  // If the user is determined to not be an admin, render nothing,
+  // as the redirect is in progress.
+  if (!isAdmin) {
+    return null;
   }
 
   return (

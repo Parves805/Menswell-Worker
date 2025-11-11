@@ -29,17 +29,17 @@ export default function AdminLoginPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
-    if (!isUserLoading && user) {
-      // Check if user is admin
+    if (isUserLoading) {
+      return; // Wait until user status is determined
+    }
+
+    if (user) {
       user.getIdTokenResult().then((idTokenResult) => {
         if (idTokenResult.claims.isAdmin) {
           router.push('/admin/dashboard');
-        }
-        // If the user is logged in but not an admin, they should not be on this page.
-        // The /admin layout should handle redirecting them away.
-        // We add a fallback here just in case.
-        else {
-            router.push('/dashboard');
+        } else {
+          // If a non-admin user lands here, send them to their own dashboard.
+          router.push('/dashboard');
         }
       });
     }
@@ -75,7 +75,7 @@ export default function AdminLoginPage() {
         title: 'Login Successful',
         description: 'Redirecting to admin dashboard.',
       });
-      // The useEffect hook will handle the redirect
+      // The useEffect hook will handle the redirect upon user state change
     } catch (error: any) {
       console.error('Admin Login Error:', error);
       let description = 'An unknown error occurred.';
@@ -98,6 +98,7 @@ export default function AdminLoginPage() {
     }
   };
 
+  // Render loading state if user status is pending or if a logged-in user is being redirected.
   if (isUserLoading || user) {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center admin-panel">
