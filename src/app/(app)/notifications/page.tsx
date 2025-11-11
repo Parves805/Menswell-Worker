@@ -24,8 +24,7 @@ export default function NotificationsPage() {
                     <div className="flex items-start gap-4 rounded-lg border p-4">
                          <div className="flex-1">
                             <p className="font-medium">নতুন কর্মী যোগ হয়েছে</p>
-                            <p className="text-sm text-muted-foreground">একজন নতুন কর্মী, কামাল হাসান, সেলাই বিভাগে যোগ দিয়েছেন।</p>
-                            <p className="text-xs text-muted-foreground mt-1">৫ দিন আগে</p>
+                            <p className="text-sm text-muted-foreground">একজন নতুন কর্মী, কামাল হাসান, সেলাই বিভাগে যোগ দিয়েছেন।</p>                            <p className="text-xs text-muted-foreground mt-1">৫ দিন আগে</p>
                         </div>
                     </div>
                 </div>
