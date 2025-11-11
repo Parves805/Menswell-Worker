@@ -72,11 +72,20 @@ export type ChatMessage = {
     id: string;
     text: string;
     senderId: string;
-    timestamp: any; // Firestore ServerTimestamp
+    timestamp: any; // Firestore ServerTimestamp or Date
     isRead: boolean;
 };
 
 export type AppSettings = {
     productionCategories: string[];
     allowWorkerProfilePictureChange: boolean;
+};
+
+export type Notification = {
+    id: string;
+    title: string;
+    message: string;
+    sentAt: string; // ISO date string
+    target: 'all' | 'worker' | 'group';
+    targetId?: string; // Worker ID or Group ID
 }

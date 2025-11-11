@@ -1,4 +1,4 @@
-import type { Worker, AttendanceRecord, ProductionEntry, SalaryDetails, AdvancePayment, Bonus } from './types';
+import type { Worker, AttendanceRecord, ProductionEntry, SalaryDetails, AdvancePayment, Bonus, ChatMessage, Notification } from './types';
 
 // This file contains placeholder data. In a real application, this data would
 // be fetched from a database like Firestore.
@@ -43,3 +43,19 @@ export const bonuses: Bonus[] = [
     { id: 'BON-001', workerId: 'WRK-002', workerName: 'Rahim Sheikh', date: '2024-06-28', amount: 1000, type: 'Performance' },
     { id: 'BON-002', workerId: 'WRK-004', workerName: 'Jamal Uddin', date: '2024-04-10', amount: 5000, type: 'Festival' },
 ];
+
+export const notifications: Notification[] = [
+    { id: 'NOTIF-001', title: "ঈদ বোনাস ঘোষণা", message: "সকল কর্মীকে জানানো যাচ্ছে যে, আগামী ৫ জুলাই ঈদ বোনাস প্রদান করা হবে।", sentAt: "2024-07-01", target: 'all' },
+    { id: 'NOTIF-002', title: "জরুরী ফ্যাক্টরি মিটিং", message: "আগামীকাল সকাল ৯টায় সকল সুপারভাইজারদের নিয়ে একটি জরুরী মিটিং অনুষ্ঠিত হবে।", sentAt: "2024-06-28", target: 'group', targetId: 'supervisors' },
+];
+
+export const chatMessages: Record<string, ChatMessage[]> = {
+    'WRK-001': [
+        { id: 'msg1-1', text: 'আমার জুন মাসের বেতন নিয়ে একটি প্রশ্ন ছিল।', senderId: 'WRK-001', timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000), isRead: true },
+        { id: 'msg1-2', text: 'অবশ্যই, বলুন আপনার প্রশ্নটি। আমরা দেখছি।', senderId: 'admin', timestamp: new Date(Date.now() - 1.5 * 60 * 60 * 1000), isRead: true },
+    ],
+    'WRK-003': [
+      { id: 'msg3-1', text: 'আমি কি একটি অগ্রিম পেমেন্টের জন্য অনুরোধ করতে পারি?', senderId: 'WRK-003', timestamp: new Date(Date.now() - 24 * 60 * 60 * 1000), isRead: false },
+    ],
+    'WRK-005': [],
+}

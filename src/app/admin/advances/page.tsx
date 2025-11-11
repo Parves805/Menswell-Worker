@@ -49,7 +49,7 @@ export default function AdvancesPage() {
           </div>
           <Button>
             <PlusCircle className="mr-2 h-4 w-4" />
-            New Advance Request
+            New Advance
           </Button>
         </div>
       </CardHeader>
@@ -91,7 +91,7 @@ export default function AdvancesPage() {
                         <DropdownMenuContent align="end">
                           <DropdownMenuLabel>Actions</DropdownMenuLabel>
                           <DropdownMenuItem>View Details</DropdownMenuItem>
-                          {!payment.deducted && <DropdownMenuItem>Approve & Pay</DropdownMenuItem>}
+                          {!payment.deducted && <DropdownMenuItem>Mark as Deducted</DropdownMenuItem>}
                            <DropdownMenuItem className="text-destructive">
                             Reject Request
                           </DropdownMenuItem>

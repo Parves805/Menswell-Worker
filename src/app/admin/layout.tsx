@@ -13,6 +13,8 @@ import {
   Settings,
   LogOut,
   AreaChart,
+  MessageCircle,
+  Wallet,
 } from 'lucide-react';
 import {
   SidebarProvider,
@@ -48,7 +50,9 @@ const adminNavItems: NavItem[] = [
   { title: 'Attendance', href: '/admin/attendance', icon: <CalendarCheck /> },
   { title: 'Production', href: '/admin/production', icon: <Factory /> },
   { title: 'Salaries', href: '/admin/salaries', icon: <Banknote /> },
-  { title: 'Advances', href: '/admin/advances', icon: <HandCoins /> },
+  { title: 'Transactions', href: '/admin/transactions', icon: <Wallet /> },
+  { title: 'Chat', href: '/admin/chat', icon: <MessageCircle /> },
+  { title: 'Notifications', href: '/admin/notifications', icon: <Bell /> },
   { title: 'Expenses', href: '/admin/expenses', icon: <AreaChart /> },
   { title: 'Settings', href: '/admin/settings', icon: <Settings /> },
 ];
@@ -60,6 +64,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const pathname = usePathname();
 
   React.useEffect(() => {
+    // Only redirect if authentication state is resolved and there is no user.
     if (!isUserLoading && !user) {
       router.push('/admin/login');
     }
@@ -71,13 +76,24 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     }
   };
 
-  if (isUserLoading || !user) {
+  // While loading, show a full-screen loader to prevent layout flashes.
+  if (isUserLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center admin-panel">
         <p>Loading Admin Panel...</p>
       </div>
     );
   }
+  
+  // If not loading and no user, we don't render the layout, as the redirect is in flight.
+  if (!user) {
+     return (
+      <div className="flex min-h-screen items-center justify-center admin-panel">
+        <p>Redirecting to login...</p>
+      </div>
+    );
+  }
+
 
   return (
     <div className="admin-panel">
@@ -103,7 +119,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                     <SidebarMenuButton
                       isActive={pathname.startsWith(item.href)}
                       tooltip={item.title}
-                      className="text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground data-[active=true]:bg-sidebar-accent"
+                      className="text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground data-[active=true]:bg-sidebar-accent data-[active=true]:text-sidebar-primary"
                       asChild
                     >
                       <div className="flex items-center gap-2">
