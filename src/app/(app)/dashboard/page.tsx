@@ -108,7 +108,6 @@ export default function DashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{workerData.todayProduction} পিস</div>
-            <p className="text-xs text-muted-foreground">প্রতি পিস রেট: {formatCurrency(workerData.pieceRate)}</p>
           </CardContent>
         </Card>
         <Card>
