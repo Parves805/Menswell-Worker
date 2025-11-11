@@ -29,31 +29,29 @@ export default function AdminLoginPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
-    // Return early if auth state is still loading
     if (isUserLoading) {
-      return; 
+      return; // Wait until user loading is complete
     }
 
-    // Only proceed if there is a user object
     if (user) {
-      // Force a refresh of the token to get the latest claims.
-      user.getIdTokenResult(true).then((idTokenResult) => {
-        if (idTokenResult.claims.isAdmin) {
-          // If the user is an admin, redirect to the admin dashboard.
-          router.push('/admin/dashboard');
-        } else {
-          // If a logged-in user is not an admin, they should not be here.
-          // Redirect them to the regular user dashboard.
-          router.push('/dashboard');
-        }
-      }).catch((error) => {
-        // Handle cases where getting the token fails
-        console.error("Error getting user token:", error);
-        auth.signOut(); // Sign out the user as a safety measure
-        router.push('/admin/login'); // Keep them on the login page
-      });
+      // User is logged in, now check for claims
+      user.getIdTokenResult(true) // Force refresh to get latest claims
+        .then((idTokenResult) => {
+          if (idTokenResult.claims.isAdmin) {
+            // It's an admin, redirect to admin dashboard
+            router.push('/admin/dashboard');
+          } else {
+            // It's a regular user, redirect to user dashboard
+            router.push('/dashboard');
+          }
+        })
+        .catch((error) => {
+          console.error("Error getting ID token result:", error);
+          // If we can't get the token, sign out and stay on login for safety
+          auth?.signOut();
+        });
     }
-    // This effect depends on the user object, its loading state, and the router.
+    // If no user, do nothing and stay on the login page.
   }, [user, isUserLoading, router, auth]);
 
   const handleLogin = async (e: FormEvent) => {
