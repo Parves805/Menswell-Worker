@@ -48,13 +48,18 @@ import { useAuth, useUser } from '@/firebase';
 import { useRouter } from 'next/navigation';
 import { BottomNav } from '@/components/BottomNav';
 
-const navItems: NavItem[] = [
+const mainNavItems: NavItem[] = [
   { title: 'হোম', href: '/dashboard', icon: <Home /> },
   { title: 'দৈনিক এন্ট্রি', href: '/entry', icon: <PlusSquare /> },
   { title: 'চ্যাট', href: '/chat', icon: <MessageCircle /> },
   { title: 'লেনদেন', href: '/transactions', icon: <Wallet /> },
-  { title: 'প্রোফাইল', href: '/profile', icon: <User /> },
 ];
+
+const bottomNavItems: NavItem[] = [
+    ...mainNavItems,
+    { title: 'নোটিফিকেশন', href: '/notifications', icon: <Bell /> },
+]
+
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const auth = useAuth();
@@ -98,7 +103,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         </SidebarHeader>
         <SidebarContent>
           <SidebarMenu>
-            {navItems.map((item) => (
+            {mainNavItems.map((item) => (
               <SidebarMenuItem key={item.title}>
                 <Link href={item.href} className="w-full">
                   <SidebarMenuButton
@@ -172,7 +177,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           </DropdownMenu>
         </header>
         <main className="flex-1 overflow-auto p-4 sm:p-6 pb-20 md:pb-6">{children}</main>
-        <BottomNav navItems={navItems} />
+        <BottomNav navItems={bottomNavItems} />
       </SidebarInset>
     </SidebarProvider>
   );
