@@ -41,8 +41,14 @@ export default function AdminLoginPage() {
             // It's an admin, redirect to admin dashboard
             router.push('/admin/dashboard');
           } else {
-            // It's a regular user, redirect to user dashboard
-            router.push('/dashboard');
+             // It's a regular user, not an admin. Sign them out.
+            toast({
+              variant: 'destructive',
+              title: 'অ্যাক্সেস ডিনাইড',
+              description: 'আপনার অ্যাডমিন প্যানেল অ্যাক্সেস করার অনুমতি নেই।',
+            });
+            auth?.signOut();
+            router.push('/admin/login');
           }
         })
         .catch((error) => {
@@ -52,7 +58,7 @@ export default function AdminLoginPage() {
         });
     }
     // If no user, do nothing and stay on the login page.
-  }, [user, isUserLoading, router, auth]);
+  }, [user, isUserLoading, router, auth, toast]);
 
   const handleLogin = async (e: FormEvent) => {
     e.preventDefault();
@@ -78,29 +84,29 @@ export default function AdminLoginPage() {
       if (!idTokenResult.claims.isAdmin) {
         // Not an admin, sign them out and show an error
         await auth.signOut();
-        throw new Error('Access denied. Not an administrator.');
+        throw new Error('অ্যাক্সেস ডিনাইড। আপনি অ্যাডমিনিস্ট্রেটর নন।');
       }
 
       toast({
-        title: 'Login Successful',
-        description: 'Redirecting to admin dashboard.',
+        title: 'লগইন সফল',
+        description: 'অ্যাডমিন ড্যাশবোর্ডে আপনাকে স্বাগতম।',
       });
       // The useEffect hook will now handle the redirect reliably upon user state change.
     } catch (error: any) {
       console.error('Admin Login Error:', error);
-      let description = 'An unknown error occurred.';
+      let description = 'একটি অজানা ত্রুটি ঘটেছে।';
       if (
         error.code === 'auth/user-not-found' ||
         error.code === 'auth/wrong-password' ||
         error.code === 'auth/invalid-credential'
       ) {
-        description = 'Invalid email or password.';
-      } else if (error.message === 'Access denied. Not an administrator.') {
-        description = 'You do not have permission to access the admin panel.';
+        description = 'ভুল ইমেইল অথবা পাসওয়ার্ড।';
+      } else if (error.message.includes('অ্যাক্সেস ডিনাইড')) {
+        description = 'আপনার অ্যাডমিন প্যানেল অ্যাক্সেস করার অনুমতি নেই।';
       }
       toast({
         variant: 'destructive',
-        title: 'Login Failed',
+        title: 'লগইন ব্যর্থ হয়েছে',
         description: description,
       });
     } finally {
@@ -112,7 +118,7 @@ export default function AdminLoginPage() {
   if (isUserLoading || user) {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center admin-panel">
-        <p>Loading...</p>
+        <p>লোড হচ্ছে...</p>
       </div>
     );
   }
@@ -124,15 +130,15 @@ export default function AdminLoginPage() {
       <Card className="w-full max-w-md shadow-2xl">
         <CardHeader className="items-center text-center">
           <GarmentFlowIcon className="mb-4 h-12 w-12 text-primary" />
-          <CardTitle className="text-2xl font-bold">Admin Panel Login</CardTitle>
+          <CardTitle className="text-2xl font-bold">অ্যাডমিন প্যানেল লগইন</CardTitle>
           <CardDescription>
-            Enter your credentials to access the dashboard.
+            ড্যাশবোর্ড অ্যাক্সেস করতে আপনার তথ্য দিন।
           </CardDescription>
         </CardHeader>
         <form onSubmit={handleLogin}>
           <CardContent className="space-y-4">
             <div className="grid gap-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email">ইমেইল</Label>
               <Input
                 id="email"
                 type="email"
@@ -143,7 +149,7 @@ export default function AdminLoginPage() {
               />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password">পাসওয়ার্ড</Label>
               <Input
                 id="password"
                 type="password"
@@ -155,7 +161,7 @@ export default function AdminLoginPage() {
           </CardContent>
           <CardFooter className="flex flex-col gap-4">
             <Button type="submit" className="w-full" disabled={isSubmitting}>
-              {isSubmitting ? 'Logging in...' : 'Login'}
+              {isSubmitting ? 'লগইন করা হচ্ছে...' : 'লগইন'}
             </Button>
           </CardFooter>
         </form>
