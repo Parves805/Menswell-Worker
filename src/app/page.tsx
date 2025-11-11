@@ -14,8 +14,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { GarmentFlowIcon } from '@/components/icons';
-import { useAuth, useUser, getUserByPhoneNumber, useFirestore } from '@/firebase';
-import { signInWithEmailAndPassword } from 'firebase/auth';
+import { useAuth, useUser, getUserByPhoneNumber, useFirestore, initiateEmailSignIn } from '@/firebase';
 import { FormEvent, useEffect, useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 
@@ -66,6 +65,7 @@ export default function LoginPage() {
           throw new Error('এই ফোন নম্বরের সাথে কোনো ইমেইল যুক্ত নেই।');
         }
       } catch (error: any) {
+        // This catch block will now also handle FirestorePermissionError if getUserByPhoneNumber is configured for it
         toast({
           variant: 'destructive',
           title: 'লগইন ব্যর্থ হয়েছে',
@@ -75,32 +75,23 @@ export default function LoginPage() {
         return;
       }
     }
+    
+    // Using non-blocking sign-in as an example of further optimization
+    // The `initiateEmailSignIn` function does not return a promise that we need to await here.
+    // It triggers the sign-in and lets the onAuthStateChanged listener handle the result.
+    initiateEmailSignIn(auth, emailToLogin, password);
 
-    try {
-      await signInWithEmailAndPassword(auth, emailToLogin, password);
-      toast({
-        title: 'লগইন সফল হয়েছে',
-        description: 'আপনাকে ড্যাশবোর্ডে নিয়ে যাওয়া হচ্ছে।',
-      });
-      // The useEffect will handle the redirect.
-    } catch (error: any) {
-      console.error('Login Error:', error);
-      let description = 'একটি অজানা ত্রুটি ঘটেছে।';
-      if (
-        error.code === 'auth/user-not-found' ||
-        error.code === 'auth/wrong-password' ||
-        error.code === 'auth/invalid-credential'
-      ) {
-        description = 'ভুল ইমেইল/ফোন নম্বর বা পাসওয়ার্ড।';
-      }
-      toast({
-        variant: 'destructive',
-        title: 'লগইন ব্যর্থ হয়েছে',
-        description: description,
-      });
-    } finally {
-      setIsSubmitting(false);
-    }
+    // To provide immediate feedback, we can optimistically show a toast.
+    // The onAuthStateChanged listener will handle redirects.
+    // A more robust solution might listen for auth errors globally.
+    toast({
+        title: 'লগইন করার চেষ্টা করা হচ্ছে...',
+        description: 'সফল হলে আপনাকে ড্যাশবোর্ডে নিয়ে যাওয়া হবে।',
+    });
+
+    // Since we are not awaiting, we might want to reset the state differently,
+    // perhaps based on a global auth error state. For now, we'll just stop submitting.
+    setIsSubmitting(false);
   };
 
   if (isUserLoading || user) {

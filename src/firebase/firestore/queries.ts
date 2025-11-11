@@ -8,6 +8,8 @@ import {
   getDocs,
   limit,
 } from 'firebase/firestore';
+import { errorEmitter } from '../error-emitter';
+import { FirestorePermissionError } from '../errors';
 
 /**
  * Finds a worker document by their phone number.
@@ -30,9 +32,16 @@ export async function getUserByPhoneNumber(
       return { id: userDoc.id, ...userDoc.data() };
     }
     return null;
-  } catch (error) {
-    console.error('Error getting user by phone number:', error);
-    // Depending on requirements, you might want to re-throw or handle differently
-    throw error;
+  } catch (error: any) {
+    const permissionError = new FirestorePermissionError({
+        path: workersRef.path,
+        operation: 'list' // getDocs is a 'list' operation
+    });
+
+    errorEmitter.emit('permission-error', permissionError);
+
+    // Re-throw the original or a more specific error if needed,
+    // but the global handler will catch the emitted one.
+    throw permissionError;
   }
 }

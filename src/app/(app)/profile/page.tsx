@@ -11,14 +11,14 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { useUser, useFirestore, useAuth, useDoc, useMemoFirebase } from '@/firebase';
+import { useUser, useFirestore, useAuth, useDoc, useMemoFirebase, updateDocumentNonBlocking } from '@/firebase';
 import { Camera } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import { useRef, useState, ChangeEvent } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { updateProfile } from 'firebase/auth';
-import { doc, updateDoc } from 'firebase/firestore';
+import { doc } from 'firebase/firestore';
 
 export default function ProfilePage() {
   const { user } = useUser();
@@ -34,7 +34,7 @@ export default function ProfilePage() {
     return doc(firestore, 'workers', user.uid);
   }, [firestore, user]);
 
-  const { data: workerData, isLoading: isLoadingWorker } = useDoc<{ contact: string }>(workerDocRef);
+  const { data: workerData, isLoading: isLoadingWorker } = useDoc<{ contact: string, photo: string }>(workerDocRef);
 
   if (!user || isLoadingWorker) {
     return <p>লোড হচ্ছে...</p>;
@@ -62,10 +62,9 @@ export default function ProfilePage() {
       // Update Firebase Auth profile
       await updateProfile(user, { photoURL });
 
-      // Update Firestore document
-      if (firestore) {
-        const userDocRef = doc(firestore, 'workers', user.uid);
-        await updateDoc(userDocRef, { photo: photoURL });
+      // Update Firestore document using non-blocking update
+      if (workerDocRef) {
+        updateDocumentNonBlocking(workerDocRef, { photo: photoURL });
       }
 
       setNewPhotoURL(photoURL); // Update local state to re-render avatar
@@ -86,7 +85,7 @@ export default function ProfilePage() {
     }
   };
   
-  const currentUserPhoto = newPhotoURL || user.photoURL;
+  const currentUserPhoto = newPhotoURL || workerData?.photo || user.photoURL;
 
   return (
     <div className="space-y-6">
