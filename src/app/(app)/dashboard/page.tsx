@@ -8,8 +8,17 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, SewingPin, CircleDollarSign, Hourglass } from 'lucide-react';
+import { ArrowRight, Scissors, CircleDollarSign, Hourglass } from 'lucide-react';
 import Link from 'next/link';
+import Image from 'next/image';
+import { PlaceHolderImages } from '@/lib/placeholder-images';
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from '@/components/ui/carousel';
 
 // Dummy data for worker dashboard
 const workerData = {
@@ -33,9 +42,42 @@ const formatCurrency = (amount: number) =>
     minimumFractionDigits: 2,
   }).format(amount);
 
+const sliderImages = PlaceHolderImages.filter(img => img.id.startsWith('hero-slider'));
+
+
 export default function DashboardPage() {
   return (
     <div className="flex flex-col gap-6">
+       <Carousel
+        opts={{
+          loop: true,
+        }}
+        className="w-full"
+      >
+        <CarouselContent>
+          {sliderImages.map((image) => (
+            <CarouselItem key={image.id}>
+              <Card className="overflow-hidden border-none">
+                <CardContent className="p-0">
+                  <div className="relative aspect-[16/7] w-full">
+                    <Image
+                      src={image.imageUrl}
+                      alt={image.description}
+                      fill
+                      className="object-cover"
+                      data-ai-hint={image.imageHint}
+                    />
+                     <div className="absolute inset-0 bg-black/40" />
+                  </div>
+                </CardContent>
+              </Card>
+            </CarouselItem>
+          ))}
+        </CarouselContent>
+        <CarouselPrevious className="absolute left-4 top-1/2 -translate-y-1/2 text-white bg-black/30 hover:bg-black/50 border-none" />
+        <CarouselNext className="absolute right-4 top-1/2 -translate-y-1/2 text-white bg-black/30 hover:bg-black/50 border-none" />
+      </Carousel>
+      
       <Card className="w-full bg-primary text-primary-foreground border-none">
         <CardHeader>
           <CardTitle>স্বাগতম, {workerData.name}!</CardTitle>
@@ -62,7 +104,7 @@ export default function DashboardPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">আজকের উৎপাদন</CardTitle>
-            <SewingPin className="h-4 w-4 text-muted-foreground" />
+            <Scissors className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{workerData.todayProduction} পিস</div>
