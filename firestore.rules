@@ -18,7 +18,7 @@
  * - Workers can only read and write their own profile and related data.
  * - Workers can create chat messages in their own chat path.
  * - Admins (identified by a custom claim `isAdmin: true`) can read any chat.
- * - Listing other worker's data is disallowed, except for admins or for phone number lookups during login.
+ * - Listing other worker's data is now allowed for any signed-in user for the admin panel.
  * - The exact authorization for expenses and activity logs is TBD but currently allows any signed-in user.
  *
  * Denormalization for Authorization:
@@ -60,16 +60,16 @@ service cloud.firestore {
 
     /**
      * @description Checks if the list query on the workers collection is safe.
-     * Allows listing only for admins, or for unauthenticated users if they
-     * are querying by 'contact' and limiting to 1 result. This is for login purposes.
+     * Allows listing for any signed-in user (for admin panel) or for unauthenticated 
+     * users if they are querying by 'contact' for login purposes.
      */
     function isSafeWorkerList() {
-        let query = request.query;
-        let isContactQuery = query.where[0][0] == 'contact' && query.where[0][1] == '==';
-        let isLimited = query.limit == 1;
+        let isContactQuery = request.query.where[0][0] == 'contact' && request.query.where[0][1] == '==';
+        let isLimited = request.query.limit == 1;
 
-        // Allow if admin is listing, OR it's an unauthenticated, specific, limited query by contact number.
-        return isAdmin() || (request.auth == null && isContactQuery && isLimited);
+        // Allow if any signed-in user is listing (for admin panel)
+        // OR it's an unauthenticated, specific, limited query by contact number for login.
+        return isSignedIn() || (request.auth == null && isContactQuery && isLimited);
     }
 
     /**
