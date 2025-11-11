@@ -13,6 +13,7 @@
  * - /chats/{workerId}/messages/{messageId}: Chat messages between a worker and an admin.
  * - /expenses/{expenseId}: Expense records (potentially admin-only).
  * - /activityLogs/{activityLogId}: Activity log entries (potentially restricted access).
+ * - /categories/{categoryId}: Stores production categories for items.
  *
  * Key Security Decisions:
  * - Workers can only read and write their own profile and related data.
@@ -20,6 +21,7 @@
  * - Admins (identified by a custom claim `isAdmin: true`) can read any chat.
  * - Listing other worker's data is now allowed for any signed-in user for the admin panel.
  * - The exact authorization for expenses and activity logs is TBD but currently allows any signed-in user.
+ * - Categories are readable by any signed-in user, but only writable by admins.
  *
  * Denormalization for Authorization:
  * - Worker subcollections include `workerId` field to allow authorization without `get()` calls.
@@ -78,7 +80,7 @@ service cloud.firestore {
      */
     match /workers/{workerId} {
       allow get: if isOwner(workerId) || isAdmin();
-      allow list: if isSafeWorkerList();
+      allow list: if isSignedIn();
       allow create: if isOwner(workerId) && request.resource.data.id == workerId;
       allow update: if isExistingOwner(workerId) && request.resource.data.id == resource.data.id;
       allow delete: if isExistingOwner(workerId);
@@ -109,6 +111,16 @@ service cloud.firestore {
 
         // Messages are immutable once created.
         allow update, delete: if false;
+    }
+
+    /**
+     * @description Rules for the /categories/{categoryId} collection.
+     * @path /categories/{categoryId}
+     * @principle Allows any signed-in user to read, but only admins to write.
+     */
+    match /categories/{categoryId} {
+      allow read: if isSignedIn();
+      allow write: if isAdmin();
     }
 
     /**
