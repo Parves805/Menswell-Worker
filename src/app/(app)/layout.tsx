@@ -41,6 +41,7 @@ import { GarmentFlowIcon } from '@/components/icons';
 import type { NavItem } from '@/lib/types';
 import { useAuth, useUser } from '@/firebase';
 import { useRouter } from 'next/navigation';
+import { BottomNav } from '@/components/BottomNav';
 
 const navItems: NavItem[] = [
   { title: 'Dashboard', href: '/dashboard', icon: <LayoutDashboard /> },
@@ -63,7 +64,9 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   }, [user, isUserLoading, router]);
 
   const handleLogout = () => {
-    auth.signOut();
+    if (auth) {
+      auth.signOut();
+    }
   };
 
   if (isUserLoading || !user) {
@@ -162,7 +165,8 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             </DropdownMenuContent>
           </DropdownMenu>
         </header>
-        <main className="flex-1 overflow-auto p-4 sm:p-6">{children}</main>
+        <main className="flex-1 overflow-auto p-4 sm:p-6 pb-20 md:pb-6">{children}</main>
+        <BottomNav navItems={navItems} />
       </SidebarInset>
     </SidebarProvider>
   );
