@@ -32,7 +32,7 @@ export default function ProfilePage() {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
-          <div className="flex items-center gap-4">
+          <div className="flex flex-col sm:flex-row items-center gap-4">
             <div className="relative">
               <Avatar className="h-24 w-24 border">
                 <AvatarImage
@@ -51,7 +51,7 @@ export default function ProfilePage() {
                 <span className="sr-only">ছবি পরিবর্তন করুন</span>
               </Button>
             </div>
-            <div>
+            <div className="text-center sm:text-left">
               <h2 className="text-2xl font-bold">{user.displayName ?? "আয়েশা খানম"}</h2>
               <p className="text-muted-foreground">সুইং অপারেটর</p>
             </div>
