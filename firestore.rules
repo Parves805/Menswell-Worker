@@ -3,30 +3,26 @@
  *
  * Core Philosophy:
  * This ruleset enforces a strict user-ownership model for worker-related data
- * (attendance, overtime, production, salary, advance payments, and bonus payments).
- * Workers can only access their own data. Expenses and activity logs might have different authorization
- * schemes (e.g., admin-only access), which should be clarified.
+ * (attendance, overtime, production, salary, advance payments, bonus payments, and chats).
+ * Workers can only access their own data. An admin role is assumed for reading any worker's
+ * chat messages for support purposes.
  *
  * Data Structure:
  * - /workers/{workerId}: Stores worker profile information. The document ID is the worker's UID.
- * - /workers/{workerId}/attendance/{attendanceId}: Attendance records for a specific worker.
- * - /workers/{workerId}/overtimeEntries/{overtimeEntryId}: Overtime entries for a specific worker.
- * - /workers/{workerId}/productionEntries/{productionEntryId}: Production entries for a specific worker.
- * - /workers/{workerId}/salaries/{salaryId}: Salary information for a specific worker.
- * - /workers/{workerId}/advancePayments/{advancePaymentId}: Advance payment information for a specific worker.
- * - /workers/{workerId}/bonusPayments/{bonusPaymentId}: Bonus payment information for a specific worker.
+ * - /workers/{workerId}/...: Various subcollections for worker-specific data.
+ * - /chats/{workerId}/messages/{messageId}: Chat messages between a worker and an admin.
  * - /expenses/{expenseId}: Expense records (potentially admin-only).
  * - /activityLogs/{activityLogId}: Activity log entries (potentially restricted access).
  *
  * Key Security Decisions:
- * - Workers can only read and write their own profile data.
- * - Workers can only read and write their own attendance, overtime, production, salary, advance payments, and bonus payments data.
+ * - Workers can only read and write their own profile and related data.
+ * - Workers can create chat messages in their own chat path.
+ * - Admins (identified by a custom claim `isAdmin: true`) can read any chat.
  * - Listing other worker's data is disallowed.
- * - The exact authorization scheme for expenses and activity logs is TBD, but currently allows any signed in user to create, update, and delete.
+ * - The exact authorization for expenses and activity logs is TBD but currently allows any signed-in user.
  *
  * Denormalization for Authorization:
- * - Worker subcollections (attendance, overtime, etc.) include the `workerId` field to allow for
- *   authorization without needing to `get()` the parent worker document.
+ * - Worker subcollections include `workerId` field to allow authorization without `get()` calls.
  */
 rules_version = '2';
 service cloud.firestore {
@@ -37,6 +33,13 @@ service cloud.firestore {
      */
     function isSignedIn() {
       return request.auth != null;
+    }
+    
+    /**
+     * @description Checks if the user has an 'isAdmin' custom claim.
+     */
+    function isAdmin() {
+      return isSignedIn() && request.auth.token.isAdmin == true;
     }
 
     /**
@@ -58,154 +61,58 @@ service cloud.firestore {
     /**
      * @description Rules for the /workers/{workerId} collection.
      * @path /workers/{workerId}
-     * @allow (create) User with UID 'user_abc' can create a worker document with ID 'user_abc'.
-     * @allow (get) User with UID 'user_abc' can get worker document with ID 'user_abc'.
-     * @deny (create) User with UID 'user_xyz' cannot create a worker document with ID 'user_abc'.
-     * @deny (update) User with UID 'user_xyz' cannot update worker document with ID 'user_abc'.
-     * @principle Enforces document ownership for writes.
      */
     match /workers/{workerId} {
-      allow get: if isOwner(workerId);
-      allow list: if false; // Listing workers is not permitted.
+      allow get: if isOwner(workerId) || isAdmin();
+      allow list: if isAdmin();
       allow create: if isOwner(workerId) && request.resource.data.id == workerId;
       allow update: if isExistingOwner(workerId) && request.resource.data.id == resource.data.id;
       allow delete: if isExistingOwner(workerId);
     }
 
     /**
-     * @description Rules for the /workers/{workerId}/attendance/{attendanceId} collection.
-     * @path /workers/{workerId}/attendance/{attendanceId}
-     * @allow (create) User with UID 'user_abc' can create an attendance document under /workers/user_abc.
-     * @allow (get) User with UID 'user_abc' can get an attendance document under /workers/user_abc.
-     * @deny (create) User with UID 'user_xyz' cannot create an attendance document under /workers/user_abc.
-     * @deny (update) User with UID 'user_xyz' cannot update an attendance document under /workers/user_abc.
-     * @principle Enforces document ownership and validates relational integrity on create.
+     * @description Rules for worker-specific subcollections.
      */
-    match /workers/{workerId}/attendance/{attendanceId} {
-      allow get: if isOwner(workerId);
-      allow list: if isOwner(workerId);
+    match /workers/{workerId}/{subcollection}/{docId} {
+      allow get, list: if isOwner(workerId) || isAdmin();
       allow create: if isOwner(workerId) && request.resource.data.workerId == workerId;
       allow update: if isExistingOwner(workerId) && request.resource.data.workerId == resource.data.workerId;
       allow delete: if isExistingOwner(workerId);
     }
-
+    
     /**
-     * @description Rules for the /workers/{workerId}/overtimeEntries/{overtimeEntryId} collection.
-     * @path /workers/{workerId}/overtimeEntries/{overtimeEntryId}
-     * @allow (create) User with UID 'user_abc' can create an overtime entry under /workers/user_abc.
-     * @allow (get) User with UID 'user_abc' can get an overtime entry under /workers/user_abc.
-     * @deny (create) User with UID 'user_xyz' cannot create an overtime entry under /workers/user_abc.
-     * @deny (update) User with UID 'user_xyz' cannot update an overtime entry under /workers/user_abc.
-     * @principle Enforces document ownership and validates relational integrity on create.
+     * @description Rules for the /chats/{workerId}/messages/{messageId} collection.
+     * @path /chats/{workerId}/messages/{messageId}
      */
-    match /workers/{workerId}/overtimeEntries/{overtimeEntryId} {
-      allow get: if isOwner(workerId);
-      allow list: if isOwner(workerId);
-      allow create: if isOwner(workerId) && request.resource.data.workerId == workerId;
-      allow update: if isExistingOwner(workerId) && request.resource.data.workerId == resource.data.workerId;
-      allow delete: if isExistingOwner(workerId);
-    }
+    match /chats/{workerId}/messages/{messageId} {
+        // Worker can read their own chat messages. Admin can read any chat message.
+        allow get, list: if isOwner(workerId) || isAdmin();
+        
+        // Worker can create messages in their own chat.
+        // Admin can create messages in any worker's chat (e.g. to reply).
+        allow create: if (isOwner(workerId) && request.resource.data.senderId == workerId)
+                      || (isAdmin() && request.resource.data.senderId == 'admin');
 
-    /**
-     * @description Rules for the /workers/{workerId}/productionEntries/{productionEntryId} collection.
-     * @path /workers/{workerId}/productionEntries/{productionEntryId}
-     * @allow (create) User with UID 'user_abc' can create a production entry under /workers/user_abc.
-     * @allow (get) User with UID 'user_abc' can get a production entry under /workers/user_abc.
-     * @deny (create) User with UID 'user_xyz' cannot create a production entry under /workers/user_abc.
-     * @deny (update) User with UID 'user_xyz' cannot update a production entry under /workers/user_abc.
-     * @principle Enforces document ownership and validates relational integrity on create.
-     */
-    match /workers/{workerId}/productionEntries/{productionEntryId} {
-      allow get: if isOwner(workerId);
-      allow list: if isOwner(workerId);
-      allow create: if isOwner(workerId) && request.resource.data.workerId == workerId;
-      allow update: if isExistingOwner(workerId) && request.resource.data.workerId == resource.data.workerId;
-      allow delete: if isExistingOwner(workerId);
-    }
-
-    /**
-     * @description Rules for the /workers/{workerId}/salaries/{salaryId} collection.
-     * @path /workers/{workerId}/salaries/{salaryId}
-     * @allow (create) User with UID 'user_abc' can create a salary document under /workers/user_abc.
-     * @allow (get) User with UID 'user_abc' can get a salary document under /workers/user_abc.
-     * @deny (create) User with UID 'user_xyz' cannot create a salary document under /workers/user_abc.
-     * @deny (update) User with UID 'user_xyz' cannot update a salary document under /workers/user_abc.
-     * @principle Enforces document ownership and validates relational integrity on create.
-     */
-    match /workers/{workerId}/salaries/{salaryId} {
-      allow get: if isOwner(workerId);
-      allow list: if isOwner(workerId);
-      allow create: if isOwner(workerId) && request.resource.data.workerId == workerId;
-      allow update: if isExistingOwner(workerId) && request.resource.data.workerId == resource.data.workerId;
-      allow delete: if isExistingOwner(workerId);
-    }
-
-    /**
-     * @description Rules for the /workers/{workerId}/advancePayments/{advancePaymentId} collection.
-     * @path /workers/{workerId}/advancePayments/{advancePaymentId}
-     * @allow (create) User with UID 'user_abc' can create an advance payment document under /workers/user_abc.
-     * @allow (get) User with UID 'user_abc' can get an advance payment document under /workers/user_abc.
-     * @deny (create) User with UID 'user_xyz' cannot create an advance payment document under /workers/user_abc.
-     * @deny (update) User with UID 'user_xyz' cannot update an advance payment document under /workers/user_abc.
-     * @principle Enforces document ownership and validates relational integrity on create.
-     */
-    match /workers/{workerId}/advancePayments/{advancePaymentId} {
-      allow get: if isOwner(workerId);
-      allow list: if isOwner(workerId);
-      allow create: if isOwner(workerId) && request.resource.data.workerId == workerId;
-      allow update: if isExistingOwner(workerId) && request.resource.data.workerId == resource.data.workerId;
-      allow delete: if isExistingOwner(workerId);
-    }
-
-    /**
-     * @description Rules for the /workers/{workerId}/bonusPayments/{bonusPaymentId} collection.
-     * @path /workers/{workerId}/bonusPayments/{bonusPaymentId}
-     * @allow (create) User with UID 'user_abc' can create a bonus payment document under /workers/user_abc.
-     * @allow (get) User with UID 'user_abc' can get a bonus payment document under /workers/user_abc.
-     * @deny (create) User with UID 'user_xyz' cannot create a bonus payment document under /workers/user_abc.
-     * @deny (update) User with UID 'user_xyz' cannot update a bonus payment document under /workers/user_abc.
-     * @principle Enforces document ownership and validates relational integrity on create.
-     */
-    match /workers/{workerId}/bonusPayments/{bonusPaymentId} {
-      allow get: if isOwner(workerId);
-      allow list: if isOwner(workerId);
-      allow create: if isOwner(workerId) && request.resource.data.workerId == workerId;
-      allow update: if isExistingOwner(workerId) && request.resource.data.workerId == resource.data.workerId;
-      allow delete: if isExistingOwner(workerId);
+        // Messages are immutable once created.
+        allow update, delete: if false;
     }
 
     /**
      * @description Rules for the /expenses/{expenseId} collection.
      * @path /expenses/{expenseId}
-     * @allow (create) Any signed-in user can create an expense document.
-     * @allow (get) Any signed-in user can get an expense document.
-     * @deny (update) An unsigned user cannot update an expense document.
-     * @deny (delete) An unsigned user cannot delete an expense document.
-     * @principle Allows any signed in user to create, update, and delete Expense documents. This should be reviewed and restricted.
+     * @principle Allows any signed in user to CUD. Should be restricted to admins.
      */
     match /expenses/{expenseId} {
-      allow get: if isSignedIn();
-      allow list: if isSignedIn();
-      allow create: if isSignedIn();
-      allow update: if isSignedIn() && resource != null;
-      allow delete: if isSignedIn() && resource != null;
+      allow read, write: if isSignedIn();
     }
 
     /**
      * @description Rules for the /activityLogs/{activityLogId} collection.
      * @path /activityLogs/{activityLogId}
-     * @allow (create) Any signed-in user can create an activity log document.
-     * @allow (get) Any signed-in user can get an activity log document.
-     * @deny (update) An unsigned user cannot update an activity log document.
-     * @deny (delete) An unsigned user cannot delete an activity log document.
-     * @principle Allows any signed in user to create, update, and delete ActivityLog documents. This should be reviewed and restricted.
+     * @principle Allows any signed in user to CUD. Should be restricted.
      */
     match /activityLogs/{activityLogId} {
-      allow get: if isSignedIn();
-      allow list: if isSignedIn();
-      allow create: if isSignedIn();
-      allow update: if isSignedIn() && resource != null;
-      allow delete: if isSignedIn() && resource != null;
+      allow read, write: if isSignedIn();
     }
   }
 }

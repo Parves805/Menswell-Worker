@@ -356,6 +356,36 @@
         "activityType",
         "description"
       ]
+    },
+    "ChatMessage": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "ChatMessage",
+      "type": "object",
+      "description": "Represents a single message in a chat.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the ChatMessage entity."
+        },
+        "text": {
+          "type": "string",
+          "description": "The content of the message."
+        },
+        "senderId": {
+          "type": "string",
+          "description": "The ID of the user who sent the message."
+        },
+        "timestamp": {
+          "type": "string",
+          "description": "The timestamp when the message was sent.",
+          "format": "date-time"
+        },
+        "isRead": {
+          "type": "boolean",
+          "description": "Indicates whether the message has been read by the recipient."
+        }
+      },
+      "required": ["id", "text", "senderId", "timestamp"]
     }
   },
   "auth": {
@@ -503,6 +533,26 @@
         }
       },
       {
+        "path": "/chats/{workerId}/messages/{messageId}",
+        "definition": {
+          "entityName": "ChatMessage",
+          "schema": {
+            "$ref": "#/backend/entities/ChatMessage"
+          },
+          "description": "Stores chat messages for a conversation between a worker and an admin.",
+          "params": [
+            {
+              "name": "workerId",
+              "description": "The unique identifier of the worker initiating the chat."
+            },
+            {
+              "name": "messageId",
+              "description": "The unique identifier of the chat message."
+            }
+          ]
+        }
+      },
+      {
         "path": "/expenses/{expenseId}",
         "definition": {
           "entityName": "Expense",
@@ -535,6 +585,6 @@
         }
       }
     ],
-    "reasoning": "This Firestore structure is designed to support the GarmentFlow application's features while adhering to the principles of Authorization Independence, Structural Segregation, Access Modeling, and Data Clarity. The design uses path-based ownership for user-related data and prioritizes denormalization to avoid `get()` calls in security rules.\n\n**Authorization Independence (CRITICAL):**\n\n*   User-owned data (Attendance, OvertimeEntry, ProductionEntry, Salary, AdvancePayment, BonusPayment) is nested under `/workers/{workerId}`. This enables simple security rules based on `request.auth.uid == workerId` without needing to read parent documents. The `workerId` is stored within each document, fully decoupling authorization from parent documents.\n*   The `ActivityLog` collection stores the `userId`, enabling authorization based on the requesting user matching the logged user.\n\n**Structural Segregation:**\n\n*   Each entity type (Worker, Attendance, etc.) resides in its dedicated collection or subcollection. This ensures that all documents within a collection share the same security requirements.\n\n**Access Modeling:**\n\n*   Private data is modeled using path-based ownership (`/workers/{workerId}/...`).\n\n**QAPs (Rules are not Filters):**\n\nThe structure facilitates secure `list` operations because:\n\n*   All documents within a collection share the same security requirements, so listing is always secure.\n*   Path-based ownership ensures that only the owner (or an admin) can list data within their paths.\n\n**Invariants:**\n\n*   The structure supports ownership invariants via path-based ownership enforced by security rules.\n\nThis design avoids hierarchical authorization dependencies and enables atomic operations (transactions/batches). The consistent naming conventions and explicit state modeling enhance debuggability."
+    "reasoning": "This Firestore structure is designed to support the GarmentFlow application's features while adhering to the principles of Authorization Independence, Structural Segregation, Access Modeling, and Data Clarity. The design uses path-based ownership for user-related data and prioritizes denormalization to avoid `get()` calls in security rules.\n\n**Authorization Independence (CRITICAL):**\n\n*   User-owned data (Attendance, OvertimeEntry, ProductionEntry, Salary, AdvancePayment, BonusPayment, Chat Messages) is nested under `/workers/{workerId}` or `/chats/{workerId}`. This enables simple security rules based on `request.auth.uid == workerId` without needing to read parent documents. The `workerId` is stored within each document where necessary, fully decoupling authorization from parent documents.\n*   The `ActivityLog` collection stores the `userId`, enabling authorization based on the requesting user matching the logged user.\n\n**Structural Segregation:**\n\n*   Each entity type (Worker, Attendance, etc.) resides in its dedicated collection or subcollection. This ensures that all documents within a collection share the same security requirements.\n\n**Access Modeling:**\n\n*   Private data is modeled using path-based ownership (`/workers/{workerId}/...`, `/chats/{workerId}/...`).\n\n**QAPs (Rules are not Filters):**\n\nThe structure facilitates secure `list` operations because:\n\n*   All documents within a collection share the same security requirements, so listing is always secure.\n*   Path-based ownership ensures that only the owner (or an admin) can list data within their paths.\n\n**Invariants:**\n\n*   The structure supports ownership invariants via path-based ownership enforced by security rules.\n\nThis design avoids hierarchical authorization dependencies and enables atomic operations (transactions/batches). The consistent naming conventions and explicit state modeling enhance debuggability."
   }
 }

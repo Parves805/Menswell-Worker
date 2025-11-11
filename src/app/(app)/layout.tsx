@@ -51,6 +51,7 @@ import { BottomNav } from '@/components/BottomNav';
 const navItems: NavItem[] = [
   { title: 'হোম', href: '/dashboard', icon: <Home /> },
   { title: 'দৈনিক এন্ট্রি', href: '/entry', icon: <PlusSquare /> },
+  { title: 'চ্যাট', href: '/chat', icon: <MessageCircle /> },
   { title: 'লেনদেন', href: '/transactions', icon: <Wallet /> },
   { title: 'প্রোফাইল', href: '/profile', icon: <User /> },
 ];

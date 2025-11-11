@@ -67,3 +67,11 @@ export type Bonus = {
   amount: number;
   type: string;
 };
+
+export type ChatMessage = {
+    id: string;
+    text: string;
+    senderId: string;
+    timestamp: any; // Firestore ServerTimestamp
+    isRead: boolean;
+};
