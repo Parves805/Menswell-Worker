@@ -35,6 +35,12 @@ export default function AdminLoginPage() {
         if (idTokenResult.claims.isAdmin) {
           router.push('/admin/dashboard');
         }
+        // If the user is logged in but not an admin, they should not be on this page.
+        // The /admin layout should handle redirecting them away.
+        // We add a fallback here just in case.
+        else {
+            router.push('/dashboard');
+        }
       });
     }
   }, [user, isUserLoading, router]);
