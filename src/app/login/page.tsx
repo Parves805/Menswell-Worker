@@ -14,18 +14,23 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { GarmentFlowIcon } from '@/components/icons';
-import { useAuth, useUser } from '@/firebase';
+import { useAuth, useUser, useFirestore } from '@/firebase';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { FormEvent, useEffect, useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
+import { getUserByPhoneNumber } from '@/firebase/firestore/queries';
+
+// Simple regex to check for email format
+const isEmail = (str: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(str);
 
 export default function LoginPage() {
   const auth = useAuth();
+  const firestore = useFirestore();
   const { user, isUserLoading } = useUser();
   const router = useRouter();
   const { toast } = useToast();
 
-  const [email, setEmail] = useState('');
+  const [identifier, setIdentifier] = useState(''); // Can be email or phone
   const [password, setPassword] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -37,18 +42,34 @@ export default function LoginPage() {
 
   const handleLogin = async (e: FormEvent) => {
     e.preventDefault();
-    if (!auth || !email || !password) {
+    if (!auth || !firestore || !identifier || !password) {
       toast({
         variant: 'destructive',
         title: 'ফর্ম পূরণ করুন',
-        description: 'অনুগ্রহ করে আপনার ইমেইল এবং পাসওয়ার্ড দিন।',
+        description: 'অনুগ্রহ করে আপনার ইমেইল/মোবাইল এবং পাসওয়ার্ড দিন।',
       });
       return;
     }
     setIsSubmitting(true);
 
     try {
-      await signInWithEmailAndPassword(auth, email, password);
+      let emailToLogin;
+      
+      if (isEmail(identifier)) {
+        // User provided an email
+        emailToLogin = identifier;
+      } else {
+        // User might have provided a phone number
+        const worker = await getUserByPhoneNumber(firestore, identifier);
+        if (worker && worker.email) {
+          emailToLogin = worker.email;
+        } else {
+          throw new Error('User not found with this phone number.');
+        }
+      }
+
+      await signInWithEmailAndPassword(auth, emailToLogin, password);
+      
       toast({
         title: 'লগইন সফল হয়েছে',
         description: 'আপনাকে ড্যাশবোর্ডে নিয়ে যাওয়া হচ্ছে।',
@@ -60,9 +81,10 @@ export default function LoginPage() {
       if (
         error.code === 'auth/user-not-found' ||
         error.code === 'auth/wrong-password' ||
-        error.code === 'auth/invalid-credential'
+        error.code === 'auth/invalid-credential' ||
+        error.message === 'User not found with this phone number.'
       ) {
-        description = 'আপনার দেওয়া ইমেইল বা পাসওয়ার্ডটি সঠিক নয়।';
+        description = 'আপনার দেওয়া ইমেইল/মোবাইল বা পাসওয়ার্ডটি সঠিক নয়।';
       } else if (error.code === 'auth/invalid-email') {
         description = 'ইমেইল ঠিকানাটি সঠিক নয়।';
       }
@@ -98,14 +120,14 @@ export default function LoginPage() {
         <form onSubmit={handleLogin}>
           <CardContent className="space-y-4">
             <div className="grid gap-2">
-              <Label htmlFor="email">ইমেইল</Label>
+              <Label htmlFor="identifier">ইমেইল অথবা মোবাইল নম্বর</Label>
               <Input
-                id="email"
-                type="email"
-                placeholder="worker@example.com"
+                id="identifier"
+                type="text"
+                placeholder="worker@example.com অথবা +8801..."
                 required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                value={identifier}
+                onChange={(e) => setIdentifier(e.target.value)}
               />
             </div>
             <div className="grid gap-2">
