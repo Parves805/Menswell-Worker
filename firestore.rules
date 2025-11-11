@@ -68,8 +68,8 @@ service cloud.firestore {
         let isContactQuery = query.where[0][0] == 'contact' && query.where[0][1] == '==';
         let isLimited = query.limit == 1;
 
-        // Allow if admin is listing, OR it's a specific, limited query by contact number.
-        return isAdmin() || (isContactQuery && isLimited);
+        // Allow if admin is listing, OR it's an unauthenticated, specific, limited query by contact number.
+        return isAdmin() || (request.auth == null && isContactQuery && isLimited);
     }
 
     /**
