@@ -29,21 +29,32 @@ export default function AdminLoginPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
+    // Return early if auth state is still loading
     if (isUserLoading) {
-      return; // Wait until user status is determined
+      return; 
     }
 
+    // Only proceed if there is a user object
     if (user) {
-      user.getIdTokenResult().then((idTokenResult) => {
+      // Force a refresh of the token to get the latest claims.
+      user.getIdTokenResult(true).then((idTokenResult) => {
         if (idTokenResult.claims.isAdmin) {
+          // If the user is an admin, redirect to the admin dashboard.
           router.push('/admin/dashboard');
         } else {
-          // If a non-admin user lands here, send them to their own dashboard.
+          // If a logged-in user is not an admin, they should not be here.
+          // Redirect them to the regular user dashboard.
           router.push('/dashboard');
         }
+      }).catch((error) => {
+        // Handle cases where getting the token fails
+        console.error("Error getting user token:", error);
+        auth.signOut(); // Sign out the user as a safety measure
+        router.push('/admin/login'); // Keep them on the login page
       });
     }
-  }, [user, isUserLoading, router]);
+    // This effect depends on the user object, its loading state, and the router.
+  }, [user, isUserLoading, router, auth]);
 
   const handleLogin = async (e: FormEvent) => {
     e.preventDefault();
@@ -63,7 +74,8 @@ export default function AdminLoginPage() {
         email,
         password
       );
-      const idTokenResult = await userCredential.user.getIdTokenResult();
+      // Force token refresh to get latest custom claims immediately after login.
+      const idTokenResult = await userCredential.user.getIdTokenResult(true);
 
       if (!idTokenResult.claims.isAdmin) {
         // Not an admin, sign them out and show an error
@@ -75,7 +87,7 @@ export default function AdminLoginPage() {
         title: 'Login Successful',
         description: 'Redirecting to admin dashboard.',
       });
-      // The useEffect hook will handle the redirect upon user state change
+      // The useEffect hook will now handle the redirect reliably upon user state change.
     } catch (error: any) {
       console.error('Admin Login Error:', error);
       let description = 'An unknown error occurred.';
@@ -98,7 +110,7 @@ export default function AdminLoginPage() {
     }
   };
 
-  // Render loading state if user status is pending or if a logged-in user is being redirected.
+  // Render a loading state while checking auth status or if a redirect is in progress.
   if (isUserLoading || user) {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center admin-panel">
@@ -107,6 +119,7 @@ export default function AdminLoginPage() {
     );
   }
 
+  // Render the login form if no user is logged in.
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-background p-4 admin-panel">
       <div className="absolute inset-0 -z-10 h-full w-full bg-background bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-[size:14px_24px]"></div>
