@@ -13,39 +13,15 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Separator } from '@/components/ui/separator';
-import { X, PlusCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-
-// Mock data, in a real app this would come from Firestore
-const initialCategories = ['টি-শার্ট', 'পোলো শার্ট', 'প্যান্ট', 'শার্ট'];
 
 export default function AdminSettingsPage() {
   const { toast } = useToast();
-  const [categories, setCategories] = useState(initialCategories);
-  const [newCategory, setNewCategory] = useState('');
   const [allowProfilePictureChange, setAllowProfilePictureChange] = useState(true);
-
-  const handleAddCategory = () => {
-    if (newCategory && !categories.includes(newCategory)) {
-      setCategories([...categories, newCategory]);
-      setNewCategory('');
-      toast({ title: 'ক্যাটাগরি যোগ হয়েছে', description: `"${newCategory}" সফলভাবে যোগ করা হয়েছে।` });
-    }
-  };
-
-  const handleRemoveCategory = (categoryToRemove: string) => {
-    setCategories(categories.filter((cat) => cat !== categoryToRemove));
-    toast({
-      variant: 'destructive',
-      title: 'ক্যাটাগরি মুছে ফেলা হয়েছে',
-      description: `"${categoryToRemove}" তালিকা থেকে মুছে ফেলা হয়েছে।`,
-    });
-  };
 
   const handleSaveChanges = () => {
     // In a real app, you would save all these settings to Firestore
     console.log({
-      categories,
       allowProfilePictureChange,
     });
     toast({
@@ -60,42 +36,6 @@ export default function AdminSettingsPage() {
         <h1 className="text-2xl font-bold tracking-tight">সেটিংস</h1>
         <p className="text-muted-foreground">আপনার ফ্যাক্টরি এবং অ্যাপ্লিকেশন সেটিংস পরিচালনা করুন।</p>
       </div>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>উৎপাদন ক্যাটাগরি</CardTitle>
-          <CardDescription>
-            কর্মীদের জন্য উপলব্ধ উৎপাদন আইটেম ক্যাটাগরি তালিকা পরিচালনা করুন।
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-2">
-            {categories.map((cat) => (
-              <div key={cat} className="flex items-center justify-between gap-2 rounded-md border p-2 pl-4">
-                <span className="font-medium">{cat}</span>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-8 w-8 text-muted-foreground hover:text-destructive"
-                  onClick={() => handleRemoveCategory(cat)}
-                >
-                  <X className="h-4 w-4" />
-                </Button>
-              </div>
-            ))}
-          </div>
-          <div className="flex items-center gap-2">
-            <Input
-              value={newCategory}
-              onChange={(e) => setNewCategory(e.target.value)}
-              placeholder="নতুন ক্যাটাগরির নাম"
-            />
-            <Button onClick={handleAddCategory} size="icon">
-              <PlusCircle className="h-4 w-4" />
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
       
       <Card>
         <CardHeader>

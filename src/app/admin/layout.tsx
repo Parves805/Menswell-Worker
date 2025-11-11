@@ -11,6 +11,7 @@ import {
   LogOut,
   MessageCircle,
   Wallet,
+  Shapes,
 } from 'lucide-react';
 import {
   SidebarProvider,
@@ -44,6 +45,7 @@ const adminNavItems: NavItem[] = [
   { title: 'ড্যাশবোর্ড', href: '/admin/dashboard', icon: <LayoutDashboard /> },
   { title: 'কর্মী', href: '/admin/workers', icon: <Users /> },
   { title: 'উৎপাদন', href: '/admin/production', icon: <Factory /> },
+  { title: 'ক্যাটাগরি', href: '/admin/categories', icon: <Shapes /> },
   { title: 'লেনদেন', href: '/admin/transactions', icon: <Wallet /> },
   { title: 'চ্যাট', href: '/admin/chat', icon: <MessageCircle /> },
   { title: 'নোটিফিকেশন', href: '/admin/notifications', icon: <Bell /> },
