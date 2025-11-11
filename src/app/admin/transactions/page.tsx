@@ -1,5 +1,6 @@
 'use client';
 
+import React, { useState, useEffect } from 'react';
 import {
   Table,
   TableBody,
@@ -26,6 +27,9 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
+import { collection, query } from 'firebase/firestore';
+import type { Worker, AdvancePayment, Bonus } from '@/lib/types';
 
 
 const formatCurrency = (amount: number) =>
@@ -35,11 +39,79 @@ const formatCurrency = (amount: number) =>
     minimumFractionDigits: 0,
   }).format(amount);
 
+// Helper component to fetch data for a single worker
+const WorkerTransactions: React.FC<{ 
+    worker: Worker; 
+    onAdvancesLoad: (entries: (AdvancePayment & { workerName: string })[]) => void;
+    onBonusesLoad: (entries: (Bonus & { workerName: string })[]) => void;
+}> = ({ worker, onAdvancesLoad, onBonusesLoad }) => {
+  const firestore = useFirestore();
+
+  const advancesQuery = useMemoFirebase(
+    () => (firestore ? collection(firestore, `workers/${worker.id}/advancePayments`) : null),
+    [firestore, worker.id]
+  );
+  const { data: advances } = useCollection<AdvancePayment>(advancesQuery);
+
+  const bonusesQuery = useMemoFirebase(
+    () => (firestore ? collection(firestore, `workers/${worker.id}/bonusPayments`) : null),
+    [firestore, worker.id]
+  );
+  const { data: bonuses } = useCollection<Bonus>(bonusesQuery);
+
+  useEffect(() => {
+    if (advances) {
+      onAdvancesLoad(advances.map(a => ({ ...a, workerName: worker.name })));
+    }
+  }, [advances, onAdvancesLoad, worker.name]);
+
+  useEffect(() => {
+    if (bonuses) {
+      onBonusesLoad(bonuses.map(b => ({ ...b, workerName: worker.name })));
+    }
+  }, [bonuses, onBonusesLoad, worker.name]);
+
+  return null;
+};
+
+
 export default function AdminTransactionsPage() {
-  const advancePayments: any[] = [];
-  const bonuses: any[] = [];
+    const firestore = useFirestore();
+    const [allAdvances, setAllAdvances] = useState<(AdvancePayment & { workerName: string })[]>([]);
+    const [allBonuses, setAllBonuses] = useState<(Bonus & { workerName: string })[]>([]);
+
+    const workersQuery = useMemoFirebase(
+        () => (firestore ? query(collection(firestore, 'workers')) : null),
+        [firestore]
+    );
+    const { data: workers, isLoading: isLoadingWorkers } = useCollection<Worker>(workersQuery);
+
+    const handleAdvancesLoad = React.useCallback((newEntries: (AdvancePayment & { workerName: string })[]) => {
+        setAllAdvances(prev => {
+            const newEntriesMap = new Map(newEntries.map(e => [e.id, e]));
+            const filteredPrev = prev.filter(p => p.workerId !== newEntries[0]?.workerId);
+            return [...filteredPrev, ...Array.from(newEntriesMap.values())].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+        });
+    }, []);
+
+    const handleBonusesLoad = React.useCallback((newEntries: (Bonus & { workerName: string })[]) => {
+        setAllBonuses(prev => {
+            const newEntriesMap = new Map(newEntries.map(e => [e.id, e]));
+            const filteredPrev = prev.filter(p => p.workerId !== newEntries[0]?.workerId);
+            return [...filteredPrev, ...Array.from(newEntriesMap.values())].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+        });
+    }, []);
   
   return (
+    <>
+      {!isLoadingWorkers && workers?.map(worker => (
+          <WorkerTransactions 
+            key={worker.id} 
+            worker={worker} 
+            onAdvancesLoad={handleAdvancesLoad}
+            onBonusesLoad={handleBonusesLoad}
+            />
+      ))}
     <Card className="font-sans">
       <CardHeader>
         <div className="flex justify-between items-center">
@@ -81,8 +153,14 @@ export default function AdminTransactionsPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {advancePayments && advancePayments.length > 0 ? (
-                    advancePayments.map((payment) => (
+                  {isLoadingWorkers ? (
+                     <TableRow>
+                      <TableCell colSpan={5} className="h-24 text-center">
+                        লোড হচ্ছে...
+                      </TableCell>
+                    </TableRow>
+                  ) : allAdvances.length > 0 ? (
+                    allAdvances.map((payment) => (
                       <TableRow key={payment.id}>
                         <TableCell className="font-medium">
                           <div className="font-semibold">{payment.workerName}</div>
@@ -139,8 +217,14 @@ export default function AdminTransactionsPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {bonuses && bonuses.length > 0 ? (
-                    bonuses.map((bonus) => (
+                  {isLoadingWorkers ? (
+                    <TableRow>
+                        <TableCell colSpan={4} className="h-24 text-center">
+                            লোড হচ্ছে...
+                        </TableCell>
+                    </TableRow>
+                  ) : allBonuses.length > 0 ? (
+                    allBonuses.map((bonus) => (
                       <TableRow key={bonus.id}>
                          <TableCell className="font-medium">
                           <div className="font-semibold">{bonus.workerName}</div>
@@ -167,5 +251,6 @@ export default function AdminTransactionsPage() {
         </Tabs>
       </CardContent>
     </Card>
+    </>
   );
 }
