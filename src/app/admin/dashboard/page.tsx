@@ -9,6 +9,8 @@ import {
 } from '@/components/ui/card';
 import { Users, Factory, Banknote, AreaChart } from 'lucide-react';
 import React from 'react';
+import { ActivityFeed } from '@/components/admin/ActivityFeed';
+import { ProductionChart } from '@/components/admin/ProductionChart';
 
 // Dummy data for admin dashboard
 const summaryData = {
@@ -31,14 +33,6 @@ const formatCurrency = (amount: number) =>
 export default function AdminDashboardPage() {
   return (
     <div className="flex flex-col gap-6">
-      <Card>
-        <CardHeader>
-          <CardTitle>Welcome, Admin!</CardTitle>
-          <CardDescription>
-            Here's a summary of your factory's current status.
-          </CardDescription>
-        </CardHeader>
-      </Card>
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -69,7 +63,7 @@ export default function AdminDashboardPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
-              Total Salary Paid (This Month)
+              Salary Paid (This Month)
             </CardTitle>
             <Banknote className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
@@ -77,7 +71,7 @@ export default function AdminDashboardPage() {
             <div className="text-2xl font-bold">
               {formatCurrency(summaryData.totalSalaryPaid)}
             </div>
-            <p className="text-xs text-muted-foreground">For June 2024</p>
+            <p className="text-xs text-muted-foreground">For July 2024</p>
           </CardContent>
         </Card>
         <Card>
@@ -99,26 +93,8 @@ export default function AdminDashboardPage() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card>
-          <CardHeader>
-            <CardTitle>Recent Activity</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-muted-foreground">
-              Activity feed will be displayed here.
-            </p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle>Production Overview</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-muted-foreground">
-              Production chart will be displayed here.
-            </p>
-          </CardContent>
-        </Card>
+        <ProductionChart />
+        <ActivityFeed />
       </div>
     </div>
   );

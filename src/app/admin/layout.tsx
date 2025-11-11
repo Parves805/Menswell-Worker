@@ -40,6 +40,7 @@ import { GarmentFlowIcon } from '@/components/icons';
 import type { NavItem } from '@/lib/types';
 import { useAuth, useUser } from '@/firebase';
 import { useRouter } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 
 const adminNavItems: NavItem[] = [
   { title: 'Dashboard', href: '/admin/dashboard', icon: <LayoutDashboard /> },
@@ -55,11 +56,14 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const auth = useAuth();
   const { user, isUserLoading } = useUser();
   const router = useRouter();
+  const pathname = usePathname();
 
   React.useEffect(() => {
     if (!isUserLoading && !user) {
       router.push('/admin/login');
     }
+    // No need to check for isAdmin here. Let the login page handle redirection.
+    // If a non-admin tries to access, the login page will redirect them away.
   }, [user, isUserLoading, router]);
 
   const handleLogout = () => {
@@ -84,10 +88,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             <div className="flex items-center gap-2">
               <Button variant="ghost" size="icon" className="shrink-0" asChild>
                 <Link href="/admin/dashboard">
-                  <GarmentFlowIcon className="size-5 text-sidebar-primary" />
+                  <GarmentFlowIcon className="size-5 text-primary" />
                 </Link>
               </Button>
-              <h1 className="text-lg font-semibold tracking-tight text-sidebar-foreground">
+              <h1 className="text-lg font-semibold tracking-tight text-foreground">
                 Admin Panel
               </h1>
             </div>
@@ -98,13 +102,14 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 <SidebarMenuItem key={item.title}>
                   <Link href={item.href} className="w-full">
                     <SidebarMenuButton
+                      isActive={pathname === item.href}
                       tooltip={item.title}
                       className="text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground data-[active=true]:bg-sidebar-accent"
                       asChild
                     >
                       <div className="flex items-center gap-2">
                         {React.cloneElement(item.icon, {
-                          className: 'text-sidebar-foreground',
+                          className: 'text-sidebar-foreground/80 group-data-[active=true]:text-primary',
                         })}
                         <span>{item.title}</span>
                       </div>
@@ -120,9 +125,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 <Link href="/admin/settings">
                   <SidebarMenuButton
                     tooltip="Settings"
+                    isActive={pathname === '/admin/settings'}
                     className="text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
                   >
-                    <Settings className="text-sidebar-foreground" />
+                    <Settings className="text-sidebar-foreground/80 group-data-[active=true]:text-primary" />
                     <span>Settings</span>
                   </SidebarMenuButton>
                 </Link>
