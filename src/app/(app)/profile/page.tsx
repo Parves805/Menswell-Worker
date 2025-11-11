@@ -11,7 +11,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { useUser, useFirestore, useAuth } from '@/firebase';
+import { useUser, useFirestore, useAuth, useDoc, useMemoFirebase } from '@/firebase';
 import { Camera } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import { useRef, useState, ChangeEvent } from 'react';
@@ -29,7 +29,14 @@ export default function ProfilePage() {
   const [isUploading, setIsUploading] = useState(false);
   const [newPhotoURL, setNewPhotoURL] = useState<string | null>(null);
 
-  if (!user) {
+  const workerDocRef = useMemoFirebase(() => {
+    if (!firestore || !user) return null;
+    return doc(firestore, 'workers', user.uid);
+  }, [firestore, user]);
+
+  const { data: workerData, isLoading: isLoadingWorker } = useDoc<{ contact: string }>(workerDocRef);
+
+  if (!user || isLoadingWorker) {
     return <p>লোড হচ্ছে...</p>;
   }
 
@@ -145,7 +152,7 @@ export default function ProfilePage() {
               </div>
                <div className="space-y-2">
                 <Label htmlFor="phone">মোবাইল নম্বর</Label>
-                <Input id="phone" type="tel" defaultValue={user.phoneNumber ?? "+8801712345678"} />
+                <Input id="phone" type="tel" defaultValue={workerData?.contact ?? user.phoneNumber ?? ""} />
               </div>
                <div className="space-y-2">
                 <Label htmlFor="department">বিভাগ</Label>
