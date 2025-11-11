@@ -4,20 +4,12 @@ import * as React from 'react';
 import Link from 'next/link';
 import {
   Bell,
-  LayoutDashboard,
-  Users,
-  CalendarCheck,
-  Factory,
-  Banknote,
-  HandCoins,
-  Settings,
-  Search,
-  LogOut,
   Home,
   PlusSquare,
   MessageCircle,
   User,
   Wallet,
+  LogOut,
 } from 'lucide-react';
 import {
   SidebarProvider,
@@ -40,7 +32,6 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { GarmentFlowIcon } from '@/components/icons';
 import type { NavItem } from '@/lib/types';
@@ -56,7 +47,10 @@ const mainNavItems: NavItem[] = [
 ];
 
 const bottomNavItems: NavItem[] = [
-    ...mainNavItems,
+    { title: 'হোম', href: '/dashboard', icon: <Home /> },
+    { title: 'এন্ট্রি', href: '/entry', icon: <PlusSquare /> },
+    { title: 'চ্যাট', href: '/chat', icon: <MessageCircle /> },
+    { title: 'লেনদেন', href: '/transactions', icon: <Wallet /> },
     { title: 'নোটিফিকেশন', href: '/notifications', icon: <Bell /> },
 ]
 
@@ -68,7 +62,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
   React.useEffect(() => {
     if (!isUserLoading && !user) {
-      router.push('/');
+      router.push('/login');
     }
   }, [user, isUserLoading, router]);
 
@@ -88,15 +82,15 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
   return (
     <SidebarProvider>
-      <Sidebar side="left" collapsible="icon" className="bg-sidebar data-[mobile=true]:bg-primary data-[mobile=true]:text-primary-foreground">
+      <Sidebar side="left" collapsible="icon" className="bg-primary text-primary-foreground data-[mobile=true]:bg-primary data-[mobile=true]:text-primary-foreground">
         <SidebarHeader>
           <div className="flex items-center gap-2">
             <Button variant="ghost" size="icon" className="shrink-0" asChild>
               <Link href="/dashboard">
-                <GarmentFlowIcon className="size-5 text-sidebar-primary" />
+                <GarmentFlowIcon className="size-5 text-primary-foreground" />
               </Link>
             </Button>
-            <h1 className="text-lg font-semibold tracking-tight text-sidebar-foreground">
+            <h1 className="text-lg font-semibold tracking-tight text-primary-foreground">
               গার্মেন্টফ্লো
             </h1>
           </div>
@@ -108,11 +102,11 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                 <Link href={item.href} className="w-full">
                   <SidebarMenuButton
                     tooltip={item.title}
-                    className="text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground data-[active=true]:bg-sidebar-accent"
+                    className="text-primary-foreground hover:bg-white/20 hover:text-primary-foreground data-[active=true]:bg-white/25"
                     asChild
                   >
                     <div className="flex items-center gap-2">
-                        {React.cloneElement(item.icon, { className: "text-sidebar-foreground"})}
+                        {React.cloneElement(item.icon, { className: "text-primary-foreground"})}
                         <span>{item.title}</span>
                     </div>
                   </SidebarMenuButton>
@@ -127,9 +121,9 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
               <Link href="/profile">
                 <SidebarMenuButton
                   tooltip="প্রোফাইল"
-                  className="text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+                  className="text-primary-foreground hover:bg-white/20 hover:text-primary-foreground"
                 >
-                  <User className="text-sidebar-foreground" />
+                  <User className="text-primary-foreground" />
                   <span>প্রোফাইল</span>
                 </SidebarMenuButton>
               </Link>
@@ -138,12 +132,12 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         </SidebarFooter>
       </Sidebar>
       <SidebarInset className="flex flex-col">
-        <header className="sticky top-0 z-10 flex h-16 items-center gap-4 border-b bg-background px-4 sm:px-6">
-          <SidebarTrigger className="flex text-foreground hover:text-foreground md:hidden" />
+        <header className="sticky top-0 z-10 flex h-16 items-center gap-4 border-b bg-primary text-primary-foreground px-4 sm:px-6">
+          <SidebarTrigger className="flex text-primary-foreground hover:text-primary-foreground md:hidden" />
           <div className="relative flex-1">
             {/* Search can be added back if needed */}
           </div>
-          <Button variant="ghost" size="icon" className="rounded-full text-foreground hover:bg-accent hover:text-accent-foreground" asChild>
+          <Button variant="ghost" size="icon" className="rounded-full text-primary-foreground hover:bg-white/20 hover:text-primary-foreground" asChild>
             <Link href="/notifications">
               <Bell className="h-5 w-5" />
               <span className="sr-only">নোটিফিকেশন দেখান</span>
@@ -151,16 +145,16 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           </Button>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <div className="flex items-center gap-3 cursor-pointer">
+              <Button variant="ghost" className="flex items-center gap-3 cursor-pointer p-1 h-auto rounded-full hover:bg-white/20">
                 <Avatar className="h-9 w-9">
                   <AvatarImage src={user.photoURL ?? "https://picsum.photos/seed/99/40/40"} alt="ব্যবহারকারীর ছবি" />
                   <AvatarFallback>{user.email?.charAt(0).toUpperCase()}</AvatarFallback>
                 </Avatar>
                 <div className="hidden md:flex flex-col items-start">
-                    <span className="text-sm font-medium text-foreground">{user.displayName ?? "আয়েশা খানম"}</span>
-                    <span className="text-xs text-muted-foreground/80">সুইং অপারেটর</span>
+                    <span className="text-sm font-medium text-primary-foreground">{user.displayName ?? "আয়েশা খানম"}</span>
+                    <span className="text-xs text-primary-foreground/80">সুইং অপারেটর</span>
                 </div>
-              </div>
+              </Button>
 
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
