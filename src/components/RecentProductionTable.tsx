@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import Link from 'next/link';
 import {
   Card,
   CardContent,
@@ -17,6 +18,9 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { ArrowRight } from 'lucide-react';
+
 
 // Dummy data for recent production entries
 const recentEntries = [
@@ -64,11 +68,19 @@ const formatCurrency = (amount: number) =>
 export function RecentProductionTable() {
   return (
     <Card>
-      <CardHeader>
-        <CardTitle>সাম্প্রতিক কাজের এন্ট্রি</CardTitle>
-        <CardDescription>
-          আপনার সাম্প্রতিক কাজ এবং আয়ের হিসাব দেখুন।
-        </CardDescription>
+      <CardHeader className="flex flex-row items-center justify-between">
+        <div>
+            <CardTitle>সাম্প্রতিক কাজের এন্ট্রি</CardTitle>
+            <CardDescription>
+            আপনার সাম্প্রতিক কাজ এবং আয়ের হিসাব দেখুন।
+            </CardDescription>
+        </div>
+        <Button asChild variant="outline" size="sm">
+            <Link href="/all-entries">
+                সব দেখুন
+                <ArrowRight className="ml-2 h-4 w-4" />
+            </Link>
+        </Button>
       </CardHeader>
       <CardContent>
         <div className="rounded-md border">
