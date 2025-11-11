@@ -18,7 +18,7 @@
  * - Workers can only read and write their own profile and related data.
  * - Workers can create chat messages in their own chat path.
  * - Admins (identified by a custom claim `isAdmin: true`) can read any chat.
- * - Listing other worker's data is disallowed.
+ * - Listing other worker's data is disallowed, except for admins or for phone number lookups during login.
  * - The exact authorization for expenses and activity logs is TBD but currently allows any signed-in user.
  *
  * Denormalization for Authorization:
@@ -59,12 +59,26 @@ service cloud.firestore {
     }
 
     /**
+     * @description Checks if the list query on the workers collection is safe.
+     * Allows listing only for admins, or for unauthenticated users if they
+     * are querying by 'contact' and limiting to 1 result. This is for login purposes.
+     */
+    function isSafeWorkerList() {
+        let query = request.query;
+        let isContactQuery = query.where[0][0] == 'contact' && query.where[0][1] == '==';
+        let isLimited = query.limit == 1;
+
+        // Allow if admin is listing, OR it's a specific, limited query by contact number.
+        return isAdmin() || (isContactQuery && isLimited);
+    }
+
+    /**
      * @description Rules for the /workers/{workerId} collection.
      * @path /workers/{workerId}
      */
     match /workers/{workerId} {
       allow get: if isOwner(workerId) || isAdmin();
-      allow list: if isAdmin();
+      allow list: if isSafeWorkerList();
       allow create: if isOwner(workerId) && request.resource.data.id == workerId;
       allow update: if isExistingOwner(workerId) && request.resource.data.id == resource.data.id;
       allow delete: if isExistingOwner(workerId);
