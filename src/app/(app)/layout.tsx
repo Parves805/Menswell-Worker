@@ -16,6 +16,8 @@ import {
   Home,
   PlusSquare,
   MessageCircle,
+  User,
+  Wallet,
 } from 'lucide-react';
 import {
   SidebarProvider,
@@ -46,21 +48,11 @@ import { useAuth, useUser } from '@/firebase';
 import { useRouter } from 'next/navigation';
 import { BottomNav } from '@/components/BottomNav';
 
-const mainNavItems: NavItem[] = [
+const navItems: NavItem[] = [
   { title: 'হোম', href: '/dashboard', icon: <Home /> },
-  { title: 'এন্ট্রি', href: '/entry', icon: <PlusSquare /> },
-  { title: 'চ্যাট', href: '/chat', icon: <MessageCircle /> },
-  { title: 'নোটিফিকেশন', href: '/notifications', icon: <Bell /> },
-  { title: 'সেটিং', href: '/settings', icon: <Settings /> },
-];
-
-const secondaryNavItems: NavItem[] = [
-  { title: 'ড্যাশবোর্ড', href: '/dashboard', icon: <LayoutDashboard /> },
-  { title: 'কর্মী', href: '/workers', icon: <Users /> },
-  { title: 'উপস্থিতি', href: '/attendance', icon: <CalendarCheck /> },
-  { title: 'উৎপাদন', href: '/production', icon: <Factory /> },
-  { title: 'বেতন', href: '/salary', icon: <Banknote /> },
-  { title: 'অ্যাডভান্স ও বোনাস', href: '/advances', icon: <HandCoins /> },
+  { title: 'দৈনিক এন্ট্রি', href: '/entry', icon: <PlusSquare /> },
+  { title: 'লেনদেন', href: '/transactions', icon: <Wallet /> },
+  { title: 'প্রোফাইল', href: '/profile', icon: <User /> },
 ];
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
@@ -105,28 +97,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         </SidebarHeader>
         <SidebarContent>
           <SidebarMenu>
-            {mainNavItems.map((item) => (
-              <SidebarMenuItem key={item.title}>
-                <Link href={item.href} className="w-full">
-                  <SidebarMenuButton
-                    tooltip={item.title}
-                    className="text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground data-[active=true]:bg-sidebar-accent"
-                    asChild
-                  >
-                    <div className="flex items-center gap-2">
-                        {React.cloneElement(item.icon, { className: "text-sidebar-foreground"})}
-                        <span>{item.title}</span>
-                    </div>
-                  </SidebarMenuButton>
-                </Link>
-              </SidebarMenuItem>
-            ))}
-          </SidebarMenu>
-          <SidebarMenu className="mt-4">
-             <SidebarMenuItem>
-                <p className="px-2 text-xs font-semibold text-sidebar-foreground/50">ব্যবস্থাপনা</p>
-             </SidebarMenuItem>
-            {secondaryNavItems.map((item) => (
+            {navItems.map((item) => (
               <SidebarMenuItem key={item.title}>
                 <Link href={item.href} className="w-full">
                   <SidebarMenuButton
@@ -147,13 +118,13 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         <SidebarFooter>
           <SidebarMenu>
             <SidebarMenuItem>
-              <Link href="/settings">
+              <Link href="/profile">
                 <SidebarMenuButton
-                  tooltip="সেটিংস"
+                  tooltip="প্রোফাইল"
                   className="text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
                 >
-                  <Settings className="text-sidebar-foreground" />
-                  <span>সেটিংস</span>
+                  <User className="text-sidebar-foreground" />
+                  <span>প্রোফাইল</span>
                 </SidebarMenuButton>
               </Link>
             </SidebarMenuItem>
@@ -180,8 +151,8 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                   <AvatarFallback>{user.email?.charAt(0).toUpperCase()}</AvatarFallback>
                 </Avatar>
                 <div className="hidden md:flex flex-col items-start">
-                    <span className="text-sm font-medium text-foreground">{user.displayName ?? user.email}</span>
-                    <span className="text-xs text-muted-foreground/80">অ্যাডমিন</span>
+                    <span className="text-sm font-medium text-foreground">{user.displayName ?? "আয়েশা খানম"}</span>
+                    <span className="text-xs text-muted-foreground/80">সুইং অপারেটর</span>
                 </div>
               </div>
 
@@ -189,7 +160,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             <DropdownMenuContent align="end">
               <DropdownMenuLabel>{user.displayName ?? user.email}</DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem>প্রোফাইল</DropdownMenuItem>
+              <DropdownMenuItem asChild><Link href="/profile">প্রোফাইল</Link></DropdownMenuItem>
               <DropdownMenuItem asChild><Link href="/settings">সেটিংস</Link></DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={handleLogout}>
@@ -200,7 +171,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           </DropdownMenu>
         </header>
         <main className="flex-1 overflow-auto p-4 sm:p-6 pb-20 md:pb-6">{children}</main>
-        <BottomNav navItems={mainNavItems} />
+        <BottomNav navItems={navItems} />
       </SidebarInset>
     </SidebarProvider>
   );

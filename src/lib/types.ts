@@ -10,8 +10,8 @@ export type Worker = {
   name: string;
   photoUrl: string;
   photo?: string;
-  designation: 'Operator' | 'Supervisor' | 'Manager' | 'Cutter' | 'Helper';
-  department: 'Sewing' | 'Cutting' | 'Finishing' | 'Packing';
+  designation: string;
+  department: string;
   joinDate: string;
   basicSalary: number;
   contact: string;
@@ -53,7 +53,7 @@ export type SalaryDetails = {
 export type AdvancePayment = {
   id: string;
   workerId: string;
-  workerName: string;
+  workerName?: string; // Made optional as it might not be needed for worker view
   date: string;
   amount: number;
   deducted: boolean;
@@ -62,8 +62,8 @@ export type AdvancePayment = {
 export type Bonus = {
   id: string;
   workerId: string;
-  workerName: string;
+  workerName?: string; // Made optional as it might not be needed for worker view
   date: string;
   amount: number;
-  type: 'Festival' | 'Performance' | 'Annual';
+  type: string;
 };
