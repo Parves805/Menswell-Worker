@@ -13,6 +13,9 @@ import {
   Settings,
   Search,
   LogOut,
+  Home,
+  PlusSquare,
+  MessageCircle,
 } from 'lucide-react';
 import {
   SidebarProvider,
@@ -43,7 +46,15 @@ import { useAuth, useUser } from '@/firebase';
 import { useRouter } from 'next/navigation';
 import { BottomNav } from '@/components/BottomNav';
 
-const navItems: NavItem[] = [
+const mainNavItems: NavItem[] = [
+  { title: 'Home', href: '/dashboard', icon: <Home /> },
+  { title: 'Entry', href: '/entry', icon: <PlusSquare /> },
+  { title: 'Chat', href: '/chat', icon: <MessageCircle /> },
+  { title: 'Notification', href: '/notifications', icon: <Bell /> },
+  { title: 'Setting', href: '/settings', icon: <Settings /> },
+];
+
+const secondaryNavItems: NavItem[] = [
   { title: 'Dashboard', href: '/dashboard', icon: <LayoutDashboard /> },
   { title: 'Workers', href: '/workers', icon: <Users /> },
   { title: 'Attendance', href: '/attendance', icon: <CalendarCheck /> },
@@ -94,7 +105,28 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         </SidebarHeader>
         <SidebarContent>
           <SidebarMenu>
-            {navItems.map((item) => (
+            {mainNavItems.map((item) => (
+              <SidebarMenuItem key={item.title}>
+                <Link href={item.href} className="w-full">
+                  <SidebarMenuButton
+                    tooltip={item.title}
+                    className="text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground data-[active=true]:bg-sidebar-accent"
+                    asChild
+                  >
+                    <div className="flex items-center gap-2">
+                        {React.cloneElement(item.icon, { className: "text-sidebar-foreground"})}
+                        <span>{item.title}</span>
+                    </div>
+                  </SidebarMenuButton>
+                </Link>
+              </SidebarMenuItem>
+            ))}
+          </SidebarMenu>
+          <SidebarMenu className="mt-4">
+             <SidebarMenuItem>
+                <p className="px-2 text-xs font-semibold text-sidebar-foreground/50">Management</p>
+             </SidebarMenuItem>
+            {secondaryNavItems.map((item) => (
               <SidebarMenuItem key={item.title}>
                 <Link href={item.href} className="w-full">
                   <SidebarMenuButton
@@ -134,9 +166,11 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           <div className="relative flex-1">
             {/* Search can be added back if needed */}
           </div>
-          <Button variant="ghost" size="icon" className="rounded-full text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground">
-            <Bell className="h-5 w-5" />
-            <span className="sr-only">Toggle notifications</span>
+          <Button variant="ghost" size="icon" className="rounded-full text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground" asChild>
+            <Link href="/notifications">
+              <Bell className="h-5 w-5" />
+              <span className="sr-only">Toggle notifications</span>
+            </Link>
           </Button>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -166,7 +200,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           </DropdownMenu>
         </header>
         <main className="flex-1 overflow-auto p-4 sm:p-6 pb-20 md:pb-6">{children}</main>
-        <BottomNav navItems={navItems} />
+        <BottomNav navItems={mainNavItems} />
       </SidebarInset>
     </SidebarProvider>
   );
