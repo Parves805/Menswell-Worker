@@ -76,8 +76,16 @@ export type ChatMessage = {
     isRead: boolean;
 };
 
+export type Category = {
+  id: string;
+  name: string;
+  rate: number;
+  imageUrl?: string;
+};
+
+
 export type AppSettings = {
-    productionCategories: string[];
+    productionCategories: Category[];
     allowWorkerProfilePictureChange: boolean;
 };
 
