@@ -88,7 +88,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
   return (
     <SidebarProvider>
-      <Sidebar side="left" collapsible="icon" className="bg-sidebar">
+      <Sidebar side="left" collapsible="icon" className="bg-sidebar data-[mobile=true]:bg-primary data-[mobile=true]:text-primary-foreground">
         <SidebarHeader>
           <div className="flex items-center gap-2">
             <Button variant="ghost" size="icon" className="shrink-0" asChild>
