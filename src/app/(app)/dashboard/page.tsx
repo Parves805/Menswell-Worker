@@ -8,7 +8,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, Scissors, CircleDollarSign, Hourglass } from 'lucide-react';
+import { Scissors, CircleDollarSign, Hourglass } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
@@ -134,26 +134,6 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
       </div>
-
-       <Card>
-        <CardHeader>
-          <CardTitle>দ্রুত অ্যাক্সেস</CardTitle>
-        </CardHeader>
-        <CardContent className="grid gap-4 sm:grid-cols-2">
-           <Link href="/transactions">
-              <div className="flex items-center justify-between rounded-lg border p-4 hover:bg-accent">
-                <p className="font-medium">লেনদেন দেখুন</p>
-                <ArrowRight className="h-4 w-4 text-muted-foreground" />
-              </div>
-           </Link>
-           <Link href="/salary">
-              <div className="flex items-center justify-between rounded-lg border p-4 hover:bg-accent">
-                <p className="font-medium">বেতন স্লিপ দেখুন</p>
-                <ArrowRight className="h-4 w-4 text-muted-foreground" />
-              </div>
-           </Link>
-        </CardContent>
-      </Card>
     </div>
   );
 }
