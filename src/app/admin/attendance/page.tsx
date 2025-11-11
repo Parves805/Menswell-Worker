@@ -1,96 +1,189 @@
 'use client';
 
-import React from 'react';
+import * as React from 'react';
+import Link from 'next/link';
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+  Bell,
+  LayoutDashboard,
+  Users,
+  Factory,
+  Settings,
+  LogOut,
+  MessageCircle,
+  Wallet,
+} from 'lucide-react';
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
+  SidebarProvider,
+  Sidebar,
+  SidebarHeader,
+  SidebarContent,
+  SidebarMenu,
+  SidebarMenuItem,
+  SidebarMenuButton,
+  SidebarFooter,
+  SidebarTrigger,
+  SidebarInset,
+} from '@/components/ui/sidebar';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
-import { Download, Calendar as CalendarIcon } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
-import { attendanceRecords } from '@/lib/data';
-import { DatePicker } from '@/components/DatePicker';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { GarmentFlowIcon } from '@/components/icons';
+import type { NavItem } from '@/lib/types';
+import { useAuth, useUser } from '@/firebase';
+import { useRouter } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 
-export default function AttendancePage() {
+const adminNavItems: NavItem[] = [
+  { title: 'Dashboard', href: '/admin/dashboard', icon: <LayoutDashboard /> },
+  { title: 'Workers', href: '/admin/workers', icon: <Users /> },
+  { title: 'Production', href: '/admin/production', icon: <Factory /> },
+  { title: 'Transactions', href: '/admin/transactions', icon: <Wallet /> },
+  { title: 'Chat', href: '/admin/chat', icon: <MessageCircle /> },
+  { title: 'Notifications', href: '/admin/notifications', icon: <Bell /> },
+  { title: 'Settings', href: '/admin/settings', icon: <Settings /> },
+];
 
-    const getStatusVariant = (status: string) => {
-        switch (status) {
-            case 'Present': return 'default';
-            case 'Absent': return 'destructive';
-            case 'Late': return 'secondary';
-            case 'On Leave': return 'outline';
-            default: return 'secondary';
-        }
+export default function AdminLayout({ children }: { children: React.ReactNode }) {
+  const auth = useAuth();
+  const { user, isUserLoading } = useUser();
+  const router = useRouter();
+  const pathname = usePathname();
+
+  React.useEffect(() => {
+    if (!isUserLoading && !user) {
+      router.push('/admin/login');
     }
+  }, [user, isUserLoading, router]);
+
+  const handleLogout = () => {
+    if (auth) {
+      auth.signOut();
+    }
+  };
+
+  if (isUserLoading || !user) {
+    return (
+      <div className="flex min-h-screen items-center justify-center admin-panel">
+        <p>Loading Admin Panel...</p>
+      </div>
+    );
+  }
+
 
   return (
-    <Card>
-      <CardHeader>
-        <div className="flex justify-between items-center">
-          <div>
-            <CardTitle>Daily Attendance</CardTitle>
-            <CardDescription>
-              View and manage daily attendance records for all workers.
-            </CardDescription>
-          </div>
-          <div className='flex items-center gap-2'>
-            <div className='w-full max-w-sm'>
-              <DatePicker />
+    <div className="admin-panel">
+      <SidebarProvider>
+        <Sidebar side="left" collapsible="icon">
+          <SidebarHeader>
+            <div className="flex items-center gap-2">
+              <Button variant="ghost" size="icon" className="shrink-0" asChild>
+                <Link href="/admin/dashboard">
+                  <GarmentFlowIcon className="size-5 text-primary" />
+                </Link>
+              </Button>
+              <h1 className="text-lg font-semibold tracking-tight text-foreground">
+                Admin Panel
+              </h1>
             </div>
-            <Button variant="outline">
-              <Download className="mr-2 h-4 w-4" />
-              Export Report
+          </SidebarHeader>
+          <SidebarContent>
+            <SidebarMenu>
+              {adminNavItems.map((item) => (
+                <SidebarMenuItem key={item.title}>
+                  <Link href={item.href} className="w-full">
+                    <SidebarMenuButton
+                      isActive={pathname.startsWith(item.href)}
+                      tooltip={item.title}
+                      className="text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground data-[active=true]:bg-sidebar-accent data-[active=true]:text-sidebar-primary"
+                      asChild
+                    >
+                      <div className="flex items-center gap-2">
+                        {React.cloneElement(item.icon, {
+                          className: 'text-sidebar-foreground/80 group-data-[active=true]:text-primary',
+                        })}
+                        <span>{item.title}</span>
+                      </div>
+                    </SidebarMenuButton>
+                  </Link>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarContent>
+          <SidebarFooter>
+            <SidebarMenu>
+              <SidebarMenuItem>
+                 <SidebarMenuButton
+                    onClick={handleLogout}
+                    tooltip="Logout"
+                    className="text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+                  >
+                    <LogOut className="text-sidebar-foreground/80" />
+                    <span>Logout</span>
+                  </SidebarMenuButton>
+              </SidebarMenuItem>
+            </SidebarMenu>
+          </SidebarFooter>
+        </Sidebar>
+        <SidebarInset className="flex flex-col">
+          <header className="sticky top-0 z-10 flex h-16 items-center gap-4 border-b bg-background px-4 sm:px-6">
+            <SidebarTrigger className="flex text-foreground hover:text-foreground md:hidden" />
+            <div className="relative flex-1">
+              {/* Search can be added back if needed */}
+            </div>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="rounded-full text-foreground hover:bg-accent hover:text-accent-foreground"
+            >
+              <Bell className="h-5 w-5" />
+              <span className="sr-only">Toggle notifications</span>
             </Button>
-          </div>
-        </div>
-      </CardHeader>
-      <CardContent>
-        <div className="rounded-md border">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Worker Name</TableHead>
-                <TableHead>Worker ID</TableHead>
-                <TableHead>Date</TableHead>
-                <TableHead className="text-center">Status</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {attendanceRecords.length > 0 ? (
-                attendanceRecords.map((record) => (
-                  <TableRow key={record.id}>
-                    <TableCell className="font-medium">
-                      {record.workerName}
-                    </TableCell>
-                    <TableCell>{record.workerId}</TableCell>
-                    <TableCell>{new Date(record.date).toLocaleDateString()}</TableCell>
-                    <TableCell className="text-center">
-                        <Badge variant={getStatusVariant(record.status) as any}>{record.status}</Badge>
-                    </TableCell>
-                  </TableRow>
-                ))
-              ) : (
-                <TableRow>
-                  <TableCell colSpan={4} className="h-24 text-center">
-                    No attendance records found for this date.
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </div>
-      </CardContent>
-    </Card>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <div className="flex items-center gap-3 cursor-pointer">
+                  <Avatar className="h-9 w-9">
+                    <AvatarImage
+                      src={user?.photoURL ?? `https://i.pravatar.cc/40?u=admin`}
+                      alt="Admin photo"
+                    />
+                    <AvatarFallback>
+                      {user?.email?.charAt(0).toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="hidden md:flex flex-col items-start">
+                    <span className="text-sm font-medium text-foreground">
+                      {user?.displayName ?? 'Admin User'}
+                    </span>
+                    <span className="text-xs text-muted-foreground/80">
+                      Administrator
+                    </span>
+                  </div>
+                </div>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuLabel>{user?.displayName ?? user?.email}</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem asChild>
+                  <Link href="/admin/settings">Settings</Link>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={handleLogout}>
+                  <LogOut className="mr-2 h-4 w-4" />
+                  <span>Logout</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </header>
+          <main className="flex-1 overflow-auto p-4 sm:p-6">{children}</main>
+        </SidebarInset>
+      </SidebarProvider>
+    </div>
   );
 }

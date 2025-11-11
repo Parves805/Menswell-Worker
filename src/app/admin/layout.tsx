@@ -6,13 +6,9 @@ import {
   Bell,
   LayoutDashboard,
   Users,
-  CalendarCheck,
   Factory,
-  Banknote,
-  HandCoins,
   Settings,
   LogOut,
-  AreaChart,
   MessageCircle,
   Wallet,
 } from 'lucide-react';
@@ -47,13 +43,10 @@ import { usePathname } from 'next/navigation';
 const adminNavItems: NavItem[] = [
   { title: 'Dashboard', href: '/admin/dashboard', icon: <LayoutDashboard /> },
   { title: 'Workers', href: '/admin/workers', icon: <Users /> },
-  { title: 'Attendance', href: '/admin/attendance', icon: <CalendarCheck /> },
   { title: 'Production', href: '/admin/production', icon: <Factory /> },
-  { title: 'Salaries', href: '/admin/salaries', icon: <Banknote /> },
   { title: 'Transactions', href: '/admin/transactions', icon: <Wallet /> },
   { title: 'Chat', href: '/admin/chat', icon: <MessageCircle /> },
   { title: 'Notifications', href: '/admin/notifications', icon: <Bell /> },
-  { title: 'Expenses', href: '/admin/expenses', icon: <AreaChart /> },
   { title: 'Settings', href: '/admin/settings', icon: <Settings /> },
 ];
 
@@ -64,7 +57,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const pathname = usePathname();
 
   React.useEffect(() => {
-    // Only redirect if authentication state is resolved and there is no user.
     if (!isUserLoading && !user) {
       router.push('/admin/login');
     }
@@ -76,20 +68,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     }
   };
 
-  // While loading, show a full-screen loader to prevent layout flashes.
-  if (isUserLoading) {
+  if (isUserLoading || !user) {
     return (
       <div className="flex min-h-screen items-center justify-center admin-panel">
         <p>Loading Admin Panel...</p>
-      </div>
-    );
-  }
-  
-  // If not loading and no user, we don't render the layout, as the redirect is in flight.
-  if (!user) {
-     return (
-      <div className="flex min-h-screen items-center justify-center admin-panel">
-        <p>Redirecting to login...</p>
       </div>
     );
   }

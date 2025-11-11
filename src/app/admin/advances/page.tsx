@@ -1,116 +1,189 @@
 'use client';
 
-import React from 'react';
+import * as React from 'react';
+import Link from 'next/link';
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+  Bell,
+  LayoutDashboard,
+  Users,
+  Factory,
+  Settings,
+  LogOut,
+  MessageCircle,
+  Wallet,
+} from 'lucide-react';
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
+  SidebarProvider,
+  Sidebar,
+  SidebarHeader,
+  SidebarContent,
+  SidebarMenu,
+  SidebarMenuItem,
+  SidebarMenuButton,
+  SidebarFooter,
+  SidebarTrigger,
+  SidebarInset,
+} from '@/components/ui/sidebar';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
-import { MoreHorizontal, PlusCircle } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
-import { advancePayments } from '@/lib/data';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { GarmentFlowIcon } from '@/components/icons';
+import type { NavItem } from '@/lib/types';
+import { useAuth, useUser } from '@/firebase';
+import { useRouter } from 'next/navigation';
+import { usePathname } from 'next/navigation';
+
+const adminNavItems: NavItem[] = [
+  { title: 'Dashboard', href: '/admin/dashboard', icon: <LayoutDashboard /> },
+  { title: 'Workers', href: '/admin/workers', icon: <Users /> },
+  { title: 'Production', href: '/admin/production', icon: <Factory /> },
+  { title: 'Transactions', href: '/admin/transactions', icon: <Wallet /> },
+  { title: 'Chat', href: '/admin/chat', icon: <MessageCircle /> },
+  { title: 'Notifications', href: '/admin/notifications', icon: <Bell /> },
+  { title: 'Settings', href: '/admin/settings', icon: <Settings /> },
+];
+
+export default function AdminLayout({ children }: { children: React.ReactNode }) {
+  const auth = useAuth();
+  const { user, isUserLoading } = useUser();
+  const router = useRouter();
+  const pathname = usePathname();
+
+  React.useEffect(() => {
+    if (!isUserLoading && !user) {
+      router.push('/admin/login');
+    }
+  }, [user, isUserLoading, router]);
+
+  const handleLogout = () => {
+    if (auth) {
+      auth.signOut();
+    }
+  };
+
+  if (isUserLoading || !user) {
+    return (
+      <div className="flex min-h-screen items-center justify-center admin-panel">
+        <p>Loading Admin Panel...</p>
+      </div>
+    );
+  }
 
 
-const formatCurrency = (amount: number) =>
-  new Intl.NumberFormat('en-IN', {
-    style: 'currency',
-    currency: 'BDT',
-    minimumFractionDigits: 0,
-  }).format(amount);
-
-export default function AdvancesPage() {
   return (
-    <Card>
-      <CardHeader>
-        <div className="flex justify-between items-center">
-          <div>
-            <CardTitle>Manage Advance Payments</CardTitle>
-            <CardDescription>
-              Approve, track, and manage all worker advance payments.
-            </CardDescription>
-          </div>
-          <Button>
-            <PlusCircle className="mr-2 h-4 w-4" />
-            New Advance
-          </Button>
-        </div>
-      </CardHeader>
-      <CardContent>
-        <div className="rounded-md border">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Worker</TableHead>
-                <TableHead>Date</TableHead>
-                <TableHead className="text-right">Amount</TableHead>
-                <TableHead className="text-center">Status</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {advancePayments.length > 0 ? (
-                advancePayments.map((payment) => (
-                  <TableRow key={payment.id}>
-                    <TableCell className="font-medium">
-                      <div className="font-semibold">{payment.workerName}</div>
-                      <div className="text-xs text-muted-foreground">{payment.workerId}</div>
-                    </TableCell>
-                    <TableCell>{new Date(payment.date).toLocaleDateString()}</TableCell>
-                    <TableCell className="text-right">{formatCurrency(payment.amount)}</TableCell>
-                    <TableCell className="text-center">
-                      <Badge variant={payment.deducted ? 'default' : 'secondary'}>
-                        {payment.deducted ? 'Deducted' : 'Pending'}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" className="h-8 w-8 p-0">
-                            <span className="sr-only">Open menu</span>
-                            <MoreHorizontal className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                          <DropdownMenuItem>View Details</DropdownMenuItem>
-                          {!payment.deducted && <DropdownMenuItem>Mark as Deducted</DropdownMenuItem>}
-                           <DropdownMenuItem className="text-destructive">
-                            Reject Request
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </TableCell>
-                  </TableRow>
-                ))
-              ) : (
-                <TableRow>
-                  <TableCell colSpan={5} className="h-24 text-center">
-                    No advance payments found.
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </div>
-      </CardContent>
-    </Card>
+    <div className="admin-panel">
+      <SidebarProvider>
+        <Sidebar side="left" collapsible="icon">
+          <SidebarHeader>
+            <div className="flex items-center gap-2">
+              <Button variant="ghost" size="icon" className="shrink-0" asChild>
+                <Link href="/admin/dashboard">
+                  <GarmentFlowIcon className="size-5 text-primary" />
+                </Link>
+              </Button>
+              <h1 className="text-lg font-semibold tracking-tight text-foreground">
+                Admin Panel
+              </h1>
+            </div>
+          </SidebarHeader>
+          <SidebarContent>
+            <SidebarMenu>
+              {adminNavItems.map((item) => (
+                <SidebarMenuItem key={item.title}>
+                  <Link href={item.href} className="w-full">
+                    <SidebarMenuButton
+                      isActive={pathname.startsWith(item.href)}
+                      tooltip={item.title}
+                      className="text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground data-[active=true]:bg-sidebar-accent data-[active=true]:text-sidebar-primary"
+                      asChild
+                    >
+                      <div className="flex items-center gap-2">
+                        {React.cloneElement(item.icon, {
+                          className: 'text-sidebar-foreground/80 group-data-[active=true]:text-primary',
+                        })}
+                        <span>{item.title}</span>
+                      </div>
+                    </SidebarMenuButton>
+                  </Link>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarContent>
+          <SidebarFooter>
+            <SidebarMenu>
+              <SidebarMenuItem>
+                 <SidebarMenuButton
+                    onClick={handleLogout}
+                    tooltip="Logout"
+                    className="text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+                  >
+                    <LogOut className="text-sidebar-foreground/80" />
+                    <span>Logout</span>
+                  </SidebarMenuButton>
+              </SidebarMenuItem>
+            </SidebarMenu>
+          </SidebarFooter>
+        </Sidebar>
+        <SidebarInset className="flex flex-col">
+          <header className="sticky top-0 z-10 flex h-16 items-center gap-4 border-b bg-background px-4 sm:px-6">
+            <SidebarTrigger className="flex text-foreground hover:text-foreground md:hidden" />
+            <div className="relative flex-1">
+              {/* Search can be added back if needed */}
+            </div>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="rounded-full text-foreground hover:bg-accent hover:text-accent-foreground"
+            >
+              <Bell className="h-5 w-5" />
+              <span className="sr-only">Toggle notifications</span>
+            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <div className="flex items-center gap-3 cursor-pointer">
+                  <Avatar className="h-9 w-9">
+                    <AvatarImage
+                      src={user?.photoURL ?? `https://i.pravatar.cc/40?u=admin`}
+                      alt="Admin photo"
+                    />
+                    <AvatarFallback>
+                      {user?.email?.charAt(0).toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="hidden md:flex flex-col items-start">
+                    <span className="text-sm font-medium text-foreground">
+                      {user?.displayName ?? 'Admin User'}
+                    </span>
+                    <span className="text-xs text-muted-foreground/80">
+                      Administrator
+                    </span>
+                  </div>
+                </div>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuLabel>{user?.displayName ?? user?.email}</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem asChild>
+                  <Link href="/admin/settings">Settings</Link>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={handleLogout}>
+                  <LogOut className="mr-2 h-4 w-4" />
+                  <span>Logout</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </header>
+          <main className="flex-1 overflow-auto p-4 sm:p-6">{children}</main>
+        </SidebarInset>
+      </SidebarProvider>
+    </div>
   );
 }
