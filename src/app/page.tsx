@@ -15,8 +15,9 @@ import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { GarmentFlowIcon } from '@/components/icons';
 import { useAuth, useUser } from '@/firebase';
-import { initiateEmailSignIn } from '@/firebase/non-blocking-login';
+import { initiateEmailSignIn, initiateEmailSignUp } from '@/firebase/non-blocking-login';
 import { FormEvent, useEffect, useState } from 'react';
+import { onAuthStateChanged, signInWithEmailAndPassword } from 'firebase/auth';
 
 export default function LoginPage() {
   const auth = useAuth();
@@ -31,9 +32,24 @@ export default function LoginPage() {
     }
   }, [user, router]);
 
-  const handleLogin = (e: FormEvent) => {
+  const handleLogin = async (e: FormEvent) => {
     e.preventDefault();
-    initiateEmailSignIn(auth, email, password);
+    if (!auth) return;
+
+    try {
+      // First, try to sign in.
+      await signInWithEmailAndPassword(auth, email, password);
+      // The onAuthStateChanged listener in the provider will handle the redirect.
+    } catch (error: any) {
+      // If sign-in fails because the user doesn't exist, create the user.
+      if (error.code === 'auth/user-not-found' || error.code === 'auth/invalid-credential') {
+        initiateEmailSignUp(auth, email, password);
+      } else {
+        // Handle other errors (e.g., wrong password, network issues)
+        console.error('Login Error:', error);
+        // Optionally, show a toast notification to the user about the error.
+      }
+    }
   };
 
   if (isUserLoading || user) {
