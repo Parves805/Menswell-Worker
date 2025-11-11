@@ -1,0 +1,68 @@
+export type NavItem = {
+  title: string;
+  href: string;
+  icon: React.ReactNode;
+  label?: string;
+};
+
+export type Worker = {
+  id: string;
+  name: string;
+  photoUrl: string;
+  designation: 'Operator' | 'Supervisor' | 'Manager' | 'Cutter' | 'Helper';
+  department: 'Sewing' | 'Cutting' | 'Finishing' | 'Packing';
+  joinDate: string;
+  basicSalary: number;
+  contact: string;
+};
+
+export type AttendanceStatus = 'Present' | 'Absent' | 'Late' | 'On Leave';
+
+export type AttendanceRecord = {
+  id: string;
+  workerId: string;
+  workerName: string;
+  date: string;
+  status: AttendanceStatus;
+};
+
+export type ProductionEntry = {
+  id: string;
+  date: string;
+  workerId: string;
+  workerName: string;
+  pieceCount: number;
+  overtimeHours: number;
+};
+
+export type SalaryDetails = {
+  id: string;
+  workerId: string;
+  workerName: string;
+  month: string;
+  basicSalary: number;
+  productionPay: number;
+  overtimePay: number;
+  bonus: number;
+  advanceDeduction: number;
+  absenceDeduction: number;
+  netSalary: number;
+};
+
+export type AdvancePayment = {
+  id: string;
+  workerId: string;
+  workerName: string;
+  date: string;
+  amount: number;
+  deducted: boolean;
+};
+
+export type Bonus = {
+  id: string;
+  workerId: string;
+  workerName: string;
+  date: string;
+  amount: number;
+  type: 'Festival' | 'Performance' | 'Annual';
+};
