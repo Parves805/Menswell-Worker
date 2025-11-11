@@ -1,0 +1,540 @@
+{
+  "entities": {
+    "Worker": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Worker",
+      "type": "object",
+      "description": "Represents an employee in the garment factory.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Worker entity."
+        },
+        "name": {
+          "type": "string",
+          "description": "The name of the worker."
+        },
+        "designation": {
+          "type": "string",
+          "description": "The worker's job title or position."
+        },
+        "department": {
+          "type": "string",
+          "description": "The department the worker belongs to."
+        },
+        "joinDate": {
+          "type": "string",
+          "description": "The date the worker joined the company.",
+          "format": "date-time"
+        },
+        "basicSalary": {
+          "type": "number",
+          "description": "The worker's base salary."
+        },
+        "contact": {
+          "type": "string",
+          "description": "The worker's contact information (e.g., phone number, email)."
+        },
+        "photo": {
+          "type": "string",
+          "description": "URL or path to the worker's photo."
+        },
+        "qrCode": {
+          "type": "string",
+          "description": "The QR code generated for the worker (e.g., URL or encoded data)."
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "designation",
+        "department",
+        "joinDate",
+        "basicSalary",
+        "contact"
+      ]
+    },
+    "Attendance": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Attendance",
+      "type": "object",
+      "description": "Represents a worker's daily attendance record.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Attendance entity."
+        },
+        "workerId": {
+          "type": "string",
+          "description": "Reference to Worker. (Relationship: Worker 1:N Attendance)"
+        },
+        "date": {
+          "type": "string",
+          "description": "The date of the attendance record.",
+          "format": "date-time"
+        },
+        "status": {
+          "type": "string",
+          "description": "The attendance status (e.g., present, absent, late)."
+        },
+        "entryTime": {
+          "type": "string",
+          "description": "The time the worker entered (if applicable).",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "workerId",
+        "date",
+        "status"
+      ]
+    },
+    "OvertimeEntry": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "OvertimeEntry",
+      "type": "object",
+      "description": "Represents a worker's overtime hours for a specific date.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the OvertimeEntry entity."
+        },
+        "workerId": {
+          "type": "string",
+          "description": "Reference to Worker. (Relationship: Worker 1:N OvertimeEntry)"
+        },
+        "date": {
+          "type": "string",
+          "description": "The date of the overtime entry.",
+          "format": "date-time"
+        },
+        "hours": {
+          "type": "number",
+          "description": "The number of overtime hours worked."
+        }
+      },
+      "required": [
+        "id",
+        "workerId",
+        "date",
+        "hours"
+      ]
+    },
+    "ProductionEntry": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "ProductionEntry",
+      "type": "object",
+      "description": "Represents a worker's piece count for a specific date.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the ProductionEntry entity."
+        },
+        "workerId": {
+          "type": "string",
+          "description": "Reference to Worker. (Relationship: Worker 1:N ProductionEntry)"
+        },
+        "date": {
+          "type": "string",
+          "description": "The date of the production entry.",
+          "format": "date-time"
+        },
+        "pieceCount": {
+          "type": "number",
+          "description": "The number of pieces produced by the worker."
+        }
+      },
+      "required": [
+        "id",
+        "workerId",
+        "date",
+        "pieceCount"
+      ]
+    },
+    "Salary": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Salary",
+      "type": "object",
+      "description": "Represents a worker's salary for a specific month.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Salary entity."
+        },
+        "workerId": {
+          "type": "string",
+          "description": "Reference to Worker. (Relationship: Worker 1:N Salary)"
+        },
+        "month": {
+          "type": "string",
+          "description": "The month the salary is for.",
+          "format": "date-time"
+        },
+        "basicSalary": {
+          "type": "number",
+          "description": "The worker's base salary for the month."
+        },
+        "overtimePay": {
+          "type": "number",
+          "description": "The worker's overtime pay for the month."
+        },
+        "bonus": {
+          "type": "number",
+          "description": "Any bonus received by the worker for the month."
+        },
+        "productionPay": {
+          "type": "number",
+          "description": "The worker's production pay for the month."
+        },
+        "advanceDeduction": {
+          "type": "number",
+          "description": "Any advance payment deducted from the worker's salary."
+        },
+        "absenceDeduction": {
+          "type": "number",
+          "description": "Any deduction due to absences."
+        },
+        "totalSalary": {
+          "type": "number",
+          "description": "The total salary paid to the worker for the month."
+        }
+      },
+      "required": [
+        "id",
+        "workerId",
+        "month",
+        "basicSalary",
+        "overtimePay",
+        "bonus",
+        "productionPay",
+        "advanceDeduction",
+        "absenceDeduction",
+        "totalSalary"
+      ]
+    },
+    "AdvancePayment": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "AdvancePayment",
+      "type": "object",
+      "description": "Represents an advance payment made to a worker.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the AdvancePayment entity."
+        },
+        "workerId": {
+          "type": "string",
+          "description": "Reference to Worker. (Relationship: Worker 1:N AdvancePayment)"
+        },
+        "date": {
+          "type": "string",
+          "description": "The date the advance payment was made.",
+          "format": "date-time"
+        },
+        "amount": {
+          "type": "number",
+          "description": "The amount of the advance payment."
+        },
+        "deductFromSalary": {
+          "type": "boolean",
+          "description": "Indicates whether the advance payment should be deducted from the next salary."
+        }
+      },
+      "required": [
+        "id",
+        "workerId",
+        "date",
+        "amount",
+        "deductFromSalary"
+      ]
+    },
+    "BonusPayment": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "BonusPayment",
+      "type": "object",
+      "description": "Represents a bonus payment made to a worker.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the BonusPayment entity."
+        },
+        "workerId": {
+          "type": "string",
+          "description": "Reference to Worker. (Relationship: Worker 1:N BonusPayment)"
+        },
+        "date": {
+          "type": "string",
+          "description": "The date the bonus payment was made.",
+          "format": "date-time"
+        },
+        "amount": {
+          "type": "number",
+          "description": "The amount of the bonus payment."
+        },
+        "type": {
+          "type": "string",
+          "description": "The type of bonus (e.g., festival, performance)."
+        }
+      },
+      "required": [
+        "id",
+        "workerId",
+        "date",
+        "amount",
+        "type"
+      ]
+    },
+    "Expense": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Expense",
+      "type": "object",
+      "description": "Represents an expense incurred by the company.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Expense entity."
+        },
+        "date": {
+          "type": "string",
+          "description": "The date the expense was incurred.",
+          "format": "date-time"
+        },
+        "description": {
+          "type": "string",
+          "description": "A description of the expense."
+        },
+        "amount": {
+          "type": "number",
+          "description": "The amount of the expense."
+        },
+        "category": {
+          "type": "string",
+          "description": "The category of the expense (e.g., raw materials, utilities)."
+        }
+      },
+      "required": [
+        "id",
+        "date",
+        "description",
+        "amount",
+        "category"
+      ]
+    },
+    "ActivityLog": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "ActivityLog",
+      "type": "object",
+      "description": "Represents an activity log entry.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the ActivityLog entity."
+        },
+        "userId": {
+          "type": "string",
+          "description": "The id of the user who performed the activity."
+        },
+        "timestamp": {
+          "type": "string",
+          "description": "The timestamp of the activity.",
+          "format": "date-time"
+        },
+        "activityType": {
+          "type": "string",
+          "description": "The type of activity performed (e.g., login, create, update, delete)."
+        },
+        "description": {
+          "type": "string",
+          "description": "A description of the activity performed."
+        }
+      },
+      "required": [
+        "id",
+        "userId",
+        "timestamp",
+        "activityType",
+        "description"
+      ]
+    }
+  },
+  "auth": {
+    "providers": [
+      "password",
+      "anonymous"
+    ]
+  },
+  "firestore": {
+    "structure": [
+      {
+        "path": "/workers/{workerId}",
+        "definition": {
+          "entityName": "Worker",
+          "schema": {
+            "$ref": "#/backend/entities/Worker"
+          },
+          "description": "Stores worker information.  The document ID is the workerId.",
+          "params": [
+            {
+              "name": "workerId",
+              "description": "The unique identifier of the worker."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/workers/{workerId}/attendance/{attendanceId}",
+        "definition": {
+          "entityName": "Attendance",
+          "schema": {
+            "$ref": "#/backend/entities/Attendance"
+          },
+          "description": "Stores attendance records for a specific worker. Includes denormalized 'workerId' for authorization independence.",
+          "params": [
+            {
+              "name": "workerId",
+              "description": "The unique identifier of the worker."
+            },
+            {
+              "name": "attendanceId",
+              "description": "The unique identifier of the attendance record."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/workers/{workerId}/overtimeEntries/{overtimeEntryId}",
+        "definition": {
+          "entityName": "OvertimeEntry",
+          "schema": {
+            "$ref": "#/backend/entities/OvertimeEntry"
+          },
+          "description": "Stores overtime entries for a specific worker. Includes denormalized 'workerId' for authorization independence.",
+          "params": [
+            {
+              "name": "workerId",
+              "description": "The unique identifier of the worker."
+            },
+            {
+              "name": "overtimeEntryId",
+              "description": "The unique identifier of the overtime entry."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/workers/{workerId}/productionEntries/{productionEntryId}",
+        "definition": {
+          "entityName": "ProductionEntry",
+          "schema": {
+            "$ref": "#/backend/entities/ProductionEntry"
+          },
+          "description": "Stores production entries for a specific worker. Includes denormalized 'workerId' for authorization independence.",
+          "params": [
+            {
+              "name": "workerId",
+              "description": "The unique identifier of the worker."
+            },
+            {
+              "name": "productionEntryId",
+              "description": "The unique identifier of the production entry."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/workers/{workerId}/salaries/{salaryId}",
+        "definition": {
+          "entityName": "Salary",
+          "schema": {
+            "$ref": "#/backend/entities/Salary"
+          },
+          "description": "Stores salary information for a specific worker. Includes denormalized 'workerId' for authorization independence.",
+          "params": [
+            {
+              "name": "workerId",
+              "description": "The unique identifier of the worker."
+            },
+            {
+              "name": "salaryId",
+              "description": "The unique identifier of the salary record."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/workers/{workerId}/advancePayments/{advancePaymentId}",
+        "definition": {
+          "entityName": "AdvancePayment",
+          "schema": {
+            "$ref": "#/backend/entities/AdvancePayment"
+          },
+          "description": "Stores advance payment information for a specific worker. Includes denormalized 'workerId' for authorization independence.",
+          "params": [
+            {
+              "name": "workerId",
+              "description": "The unique identifier of the worker."
+            },
+            {
+              "name": "advancePaymentId",
+              "description": "The unique identifier of the advance payment record."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/workers/{workerId}/bonusPayments/{bonusPaymentId}",
+        "definition": {
+          "entityName": "BonusPayment",
+          "schema": {
+            "$ref": "#/backend/entities/BonusPayment"
+          },
+          "description": "Stores bonus payment information for a specific worker. Includes denormalized 'workerId' for authorization independence.",
+          "params": [
+            {
+              "name": "workerId",
+              "description": "The unique identifier of the worker."
+            },
+            {
+              "name": "bonusPaymentId",
+              "description": "The unique identifier of the bonus payment record."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/expenses/{expenseId}",
+        "definition": {
+          "entityName": "Expense",
+          "schema": {
+            "$ref": "#/backend/entities/Expense"
+          },
+          "description": "Stores expense records.  Accessible by admins.",
+          "params": [
+            {
+              "name": "expenseId",
+              "description": "The unique identifier of the expense record."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/activityLogs/{activityLogId}",
+        "definition": {
+          "entityName": "ActivityLog",
+          "schema": {
+            "$ref": "#/backend/entities/ActivityLog"
+          },
+          "description": "Stores activity log entries.",
+          "params": [
+            {
+              "name": "activityLogId",
+              "description": "The unique identifier of the activity log entry."
+            }
+          ]
+        }
+      }
+    ],
+    "reasoning": "This Firestore structure is designed to support the GarmentFlow application's features while adhering to the principles of Authorization Independence, Structural Segregation, Access Modeling, and Data Clarity. The design uses path-based ownership for user-related data and prioritizes denormalization to avoid `get()` calls in security rules.\n\n**Authorization Independence (CRITICAL):**\n\n*   User-owned data (Attendance, OvertimeEntry, ProductionEntry, Salary, AdvancePayment, BonusPayment) is nested under `/workers/{workerId}`. This enables simple security rules based on `request.auth.uid == workerId` without needing to read parent documents. The `workerId` is stored within each document, fully decoupling authorization from parent documents.\n*   The `ActivityLog` collection stores the `userId`, enabling authorization based on the requesting user matching the logged user.\n\n**Structural Segregation:**\n\n*   Each entity type (Worker, Attendance, etc.) resides in its dedicated collection or subcollection. This ensures that all documents within a collection share the same security requirements.\n\n**Access Modeling:**\n\n*   Private data is modeled using path-based ownership (`/workers/{workerId}/...`).\n\n**QAPs (Rules are not Filters):**\n\nThe structure facilitates secure `list` operations because:\n\n*   All documents within a collection share the same security requirements, so listing is always secure.\n*   Path-based ownership ensures that only the owner (or an admin) can list data within their paths.\n\n**Invariants:**\n\n*   The structure supports ownership invariants via path-based ownership enforced by security rules.\n\nThis design avoids hierarchical authorization dependencies and enables atomic operations (transactions/batches). The consistent naming conventions and explicit state modeling enhance debuggability."
+  }
+}
