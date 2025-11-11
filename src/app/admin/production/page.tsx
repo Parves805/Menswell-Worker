@@ -22,6 +22,7 @@ import { DatePicker } from '@/components/DatePicker';
 import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
 import { collection, query } from 'firebase/firestore';
 import type { Worker, ProductionEntry } from '@/lib/types';
+import { AddProductionEntryDialog } from '@/components/admin/AddProductionEntryDialog';
 
 // This component fetches production entries for a single worker
 const WorkerProductionEntries: React.FC<{ worker: Worker, onEntriesLoad: (entries: (ProductionEntry & { workerName: string })[]) => void }> = ({ worker, onEntriesLoad }) => {
@@ -30,7 +31,7 @@ const WorkerProductionEntries: React.FC<{ worker: Worker, onEntriesLoad: (entrie
     () => (firestore ? collection(firestore, `workers/${worker.id}/productionEntries`) : null),
     [firestore, worker.id]
   );
-  const { data: entries, isLoading } = useCollection<ProductionEntry>(entriesQuery);
+  const { data: entries } = useCollection<ProductionEntry>(entriesQuery);
 
   useEffect(() => {
     if (entries) {
@@ -46,8 +47,7 @@ const WorkerProductionEntries: React.FC<{ worker: Worker, onEntriesLoad: (entrie
 export default function ProductionPage() {
     const firestore = useFirestore();
     const [allProductionEntries, setAllProductionEntries] = useState<(ProductionEntry & { workerName: string })[]>([]);
-    const [loadingStates, setLoadingStates] = useState<Record<string, boolean>>({});
-
+    
     const workersQuery = useMemoFirebase(
         () => (firestore ? query(collection(firestore, 'workers')) : null),
         [firestore]
@@ -55,12 +55,24 @@ export default function ProductionPage() {
     const { data: workers, isLoading: isLoadingWorkers } = useCollection<Worker>(workersQuery);
 
     const handleEntriesLoad = React.useCallback((newEntries: (ProductionEntry & { workerName: string })[]) => {
+        if (newEntries.length === 0) return;
+
         setAllProductionEntries(prevEntries => {
             const newEntriesMap = new Map(newEntries.map(e => [e.id, e]));
+            // Filter out old entries for the specific worker to prevent duplicates
             const filteredPrev = prevEntries.filter(pe => pe.workerId !== newEntries[0]?.workerId);
-            return [...filteredPrev, ...Array.from(newEntriesMap.values())].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+            const combined = [...filteredPrev, ...Array.from(newEntriesMap.values())];
+            // Sort by date after combining
+            return combined.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
         });
     }, []);
+
+    const handleNewEntryAdded = (newEntry: ProductionEntry & { workerName: string }) => {
+        setAllProductionEntries(prev => {
+            const updatedEntries = [newEntry, ...prev];
+            return updatedEntries.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+        });
+    };
 
   return (
     <>
@@ -81,10 +93,12 @@ export default function ProductionPage() {
             <div className='w-full max-w-sm'>
               <DatePicker />
             </div>
-            <Button>
-              <PlusCircle className="mr-2 h-4 w-4" />
-              এন্ট্রি যোগ করুন
-            </Button>
+            <AddProductionEntryDialog workers={workers || []} onEntryAdded={handleNewEntryAdded}>
+              <Button>
+                <PlusCircle className="mr-2 h-4 w-4" />
+                এন্ট্রি যোগ করুন
+              </Button>
+            </AddProductionEntryDialog>
             <Button variant="outline">
               <Download className="mr-2 h-4 w-4" />
               রিপোর্ট এক্সপোর্ট
