@@ -50,6 +50,7 @@ const adminNavItems: NavItem[] = [
   { title: 'Salaries', href: '/admin/salaries', icon: <Banknote /> },
   { title: 'Advances', href: '/admin/advances', icon: <HandCoins /> },
   { title: 'Expenses', href: '/admin/expenses', icon: <AreaChart /> },
+  { title: 'Settings', href: '/admin/settings', icon: <Settings /> },
 ];
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -62,8 +63,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     if (!isUserLoading && !user) {
       router.push('/admin/login');
     }
-    // No need to check for isAdmin here. Let the login page handle redirection.
-    // If a non-admin tries to access, the login page will redirect them away.
   }, [user, isUserLoading, router]);
 
   const handleLogout = () => {
@@ -102,7 +101,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 <SidebarMenuItem key={item.title}>
                   <Link href={item.href} className="w-full">
                     <SidebarMenuButton
-                      isActive={pathname === item.href}
+                      isActive={pathname.startsWith(item.href)}
                       tooltip={item.title}
                       className="text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground data-[active=true]:bg-sidebar-accent"
                       asChild
@@ -122,16 +121,14 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           <SidebarFooter>
             <SidebarMenu>
               <SidebarMenuItem>
-                <Link href="/admin/settings">
-                  <SidebarMenuButton
-                    tooltip="Settings"
-                    isActive={pathname === '/admin/settings'}
+                 <SidebarMenuButton
+                    onClick={handleLogout}
+                    tooltip="Logout"
                     className="text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
                   >
-                    <Settings className="text-sidebar-foreground/80 group-data-[active=true]:text-primary" />
-                    <span>Settings</span>
+                    <LogOut className="text-sidebar-foreground/80" />
+                    <span>Logout</span>
                   </SidebarMenuButton>
-                </Link>
               </SidebarMenuItem>
             </SidebarMenu>
           </SidebarFooter>

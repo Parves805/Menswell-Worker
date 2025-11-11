@@ -75,3 +75,8 @@ export type ChatMessage = {
     timestamp: any; // Firestore ServerTimestamp
     isRead: boolean;
 };
+
+export type AppSettings = {
+    productionCategories: string[];
+    allowWorkerProfilePictureChange: boolean;
+}
