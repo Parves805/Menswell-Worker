@@ -62,7 +62,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
   React.useEffect(() => {
     if (!isUserLoading && !user) {
-      router.push('/login');
+      router.push('/');
     }
   }, [user, isUserLoading, router]);
 
@@ -82,7 +82,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
   return (
     <SidebarProvider>
-      <Sidebar side="left" collapsible="icon" className="bg-primary text-primary-foreground data-[mobile=true]:bg-primary data-[mobile=true]:text-primary-foreground">
+      <Sidebar side="left" collapsible="icon" className="data-[mobile=true]:bg-primary data-[mobile=true]:text-primary-foreground">
         <SidebarHeader>
           <div className="flex items-center gap-2">
             <Button variant="ghost" size="icon" className="shrink-0" asChild>
