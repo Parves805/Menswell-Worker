@@ -4,6 +4,15 @@ import { Bar, BarChart, CartesianGrid, ResponsiveContainer, XAxis, YAxis, AreaCh
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Users, Banknote, CalendarCheck, TrendingUp, TrendingDown } from 'lucide-react';
 import type { ChartConfig } from '@/components/ui/chart';
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel"
+import Image from 'next/image';
+import { PlaceHolderImages } from '@/lib/placeholder-images';
 
 const monthlySalaryData = [
   { month: "Jan", total: 350000 },
@@ -38,9 +47,33 @@ const attendanceChartConfig: ChartConfig = {
     }
 }
 
+const sliderImages = PlaceHolderImages.filter(img => img.id.startsWith('hero-slider-'));
+
 export default function DashboardPage() {
   return (
     <div className="grid gap-6">
+      <div className="w-full">
+        <Carousel className="w-full" opts={{ loop: true }}>
+          <CarouselContent>
+            {sliderImages.map((image) => (
+              <CarouselItem key={image.id}>
+                <div className="relative h-64 md:h-96 w-full">
+                  <Image
+                    src={image.imageUrl}
+                    alt={image.description}
+                    fill
+                    className="object-cover rounded-lg"
+                    data-ai-hint={image.imageHint}
+                  />
+                </div>
+              </CarouselItem>
+            ))}
+          </CarouselContent>
+          <CarouselPrevious className="absolute left-4 top-1/2 -translate-y-1/2" />
+          <CarouselNext className="absolute right-4 top-1/2 -translate-y-1/2" />
+        </Carousel>
+      </div>
+
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">

@@ -41,6 +41,24 @@
       "description": "Avatar for the logged-in user.",
       "imageUrl": "https://images.unsplash.com/photo-1630910561339-4e22c7150093?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxwZXJzb24lMjBhdmF0YXJ8ZW58MHx8fHwxNzYyODQ2MTgwfDA&ixlib=rb-4.1.0&q=80&w=1080",
       "imageHint": "person avatar"
+    },
+    {
+      "id": "hero-slider-1",
+      "description": "A vibrant image of colorful fabrics in a garment factory.",
+      "imageUrl": "https://images.unsplash.com/photo-1762111908673-4c0f4643baa9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw4fHxmYWJyaWMlMjB0ZXh0aWxlc3xlbnwwfHx8fDE3NjI4NzU2Njl8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "fabric textiles"
+    },
+    {
+      "id": "hero-slider-2",
+      "description": "A modern sewing machine in action.",
+      "imageUrl": "https://images.unsplash.com/photo-1578353022142-09264fd64295?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwzfHxzZXdpbmclMjBtYWNoaW5lfGVufDB8fHx8MTc2Mjg0NDA0MHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "sewing machine"
+    },
+    {
+      "id": "hero-slider-3",
+      "description": "An overview of a busy factory floor.",
+      "imageUrl": "https://images.unsplash.com/photo-1654703680722-f80754f1cae1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw4fHxmYWN0b3J5JTIwZmxvb3J8ZW58MHx8fHwxNzYyODc1NjY5fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "factory floor"
     }
   ]
 }
