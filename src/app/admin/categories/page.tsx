@@ -58,7 +58,7 @@ function AddCategoryDialog({ onCategoryAdded }: { onCategoryAdded: (cat: Categor
     const [rate, setRate] = useState('');
     const [imageUrl, setImageUrl] = useState('');
 
-    const handleSubmit = async (e: React.FormEvent) => {
+    const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         if (!name || !rate || !firestore) {
             toast({ variant: 'destructive', title: 'ফর্ম অসম্পূর্ণ', description: 'অনুগ্রহ করে নাম এবং দর পূরণ করুন।' });
@@ -71,18 +71,21 @@ function AddCategoryDialog({ onCategoryAdded }: { onCategoryAdded: (cat: Categor
             imageUrl: imageUrl || `https://picsum.photos/seed/${name}/100/100`,
         };
         
-        try {
-            const docRef = await addDocumentNonBlocking(collection(firestore, 'categories'), newCategory);
-            onCategoryAdded({ id: docRef.id, ...newCategory });
-            toast({ title: 'ক্যাটাগরি যোগ হয়েছে', description: `"${name}" সফলভাবে যোগ করা হয়েছে।` });
-            setOpen(false);
-            setName('');
-            setRate('');
-            setImageUrl('');
-        } catch (error) {
+        addDocumentNonBlocking(collection(firestore, 'categories'), newCategory)
+        .then((docRef) => {
+            if (docRef) {
+                onCategoryAdded({ id: docRef.id, ...newCategory });
+                toast({ title: 'ক্যাটাগরি যোগ হয়েছে', description: `"${name}" সফলভাবে যোগ করা হয়েছে।` });
+                setOpen(false);
+                setName('');
+                setRate('');
+                setImageUrl('');
+            }
+        })
+        .catch((error) => {
             console.error("Error adding category:", error);
             toast({ variant: 'destructive', title: 'ত্রুটি', description: 'ক্যাটাগরি যোগ করার সময় একটি সমস্যা হয়েছে।' });
-        }
+        });
     };
 
     return (
