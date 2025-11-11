@@ -50,7 +50,7 @@ export default function DashboardPage() {
           <CardContent>
             <div className="text-2xl font-bold">152</div>
             <p className="text-xs text-muted-foreground flex items-center">
-              <TrendingUp className="mr-1 h-3 w-3 text-primary" /> +5 from last month
+              <TrendingUp className="mr-1 h-3 w-3 text-green-600" /> +5 from last month
             </p>
           </CardContent>
         </Card>
@@ -125,7 +125,7 @@ export default function DashboardPage() {
                       return null
                   }}
                 />
-                <Bar dataKey="total" fill="var(--color-total)" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="total" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </CardContent>

@@ -76,15 +76,17 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
   return (
     <SidebarProvider>
-      <Sidebar side="left" collapsible="icon">
+      <Sidebar side="left" collapsible="icon" className="bg-sidebar">
         <SidebarHeader>
           <div className="flex items-center gap-2">
             <Button variant="ghost" size="icon" className="shrink-0" asChild>
               <Link href="/dashboard">
-                <GarmentFlowIcon className="size-5 text-primary" />
+                <GarmentFlowIcon className="size-5 text-sidebar-primary" />
               </Link>
             </Button>
-            <h1 className="text-lg font-semibold tracking-tight">GarmentFlow</h1>
+            <h1 className="text-lg font-semibold tracking-tight text-sidebar-foreground">
+              GarmentFlow
+            </h1>
           </div>
         </SidebarHeader>
         <SidebarContent>
@@ -92,9 +94,13 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             {navItems.map((item) => (
               <SidebarMenuItem key={item.title}>
                 <Link href={item.href} className="w-full">
-                  <SidebarMenuButton tooltip={item.title} asChild>
+                  <SidebarMenuButton
+                    tooltip={item.title}
+                    className="text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground data-[active=true]:bg-sidebar-accent"
+                    asChild
+                  >
                     <div className="flex items-center gap-2">
-                        {item.icon}
+                        {React.cloneElement(item.icon, { className: "text-sidebar-foreground"})}
                         <span>{item.title}</span>
                     </div>
                   </SidebarMenuButton>
@@ -107,8 +113,11 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           <SidebarMenu>
             <SidebarMenuItem>
               <Link href="/settings">
-                <SidebarMenuButton tooltip="Settings">
-                  <Settings />
+                <SidebarMenuButton
+                  tooltip="Settings"
+                  className="text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+                >
+                  <Settings className="text-sidebar-foreground" />
                   <span>Settings</span>
                 </SidebarMenuButton>
               </Link>
@@ -117,28 +126,28 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         </SidebarFooter>
       </Sidebar>
       <SidebarInset className="flex flex-col">
-        <header className="sticky top-0 z-10 flex h-14 items-center gap-4 border-b bg-background/80 px-4 backdrop-blur-sm sm:px-6">
-          <SidebarTrigger className="flex md:hidden" />
+        <header className="sticky top-0 z-10 flex h-16 items-center gap-4 border-b bg-primary px-4 sm:px-6">
+          <SidebarTrigger className="flex text-primary-foreground hover:text-primary-foreground md:hidden" />
           <div className="relative flex-1">
-            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input
-              type="search"
-              placeholder="Search workers, reports..."
-              className="w-full rounded-lg bg-muted pl-8 md:w-[200px] lg:w-[320px]"
-            />
+            {/* Search can be added back if needed */}
           </div>
-          <Button variant="ghost" size="icon" className="rounded-full">
+          <Button variant="ghost" size="icon" className="rounded-full text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground">
             <Bell className="h-5 w-5" />
             <span className="sr-only">Toggle notifications</span>
           </Button>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="relative h-10 w-10 rounded-full">
-                <Avatar>
+              <div className="flex items-center gap-3 cursor-pointer">
+                <Avatar className="h-9 w-9">
                   <AvatarImage src={user.photoURL ?? "https://picsum.photos/seed/99/40/40"} alt="User Avatar" />
                   <AvatarFallback>{user.email?.charAt(0).toUpperCase()}</AvatarFallback>
                 </Avatar>
-              </Button>
+                <div className="hidden md:flex flex-col items-start">
+                    <span className="text-sm font-medium text-primary-foreground">{user.displayName ?? user.email}</span>
+                    <span className="text-xs text-primary-foreground/80">Admin</span>
+                </div>
+              </div>
+
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuLabel>{user.displayName ?? user.email}</DropdownMenuLabel>
