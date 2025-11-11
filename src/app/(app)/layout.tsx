@@ -1,9 +1,9 @@
+'use client';
+
 import * as React from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 import {
   Bell,
-  ChevronDown,
   LayoutDashboard,
   Users,
   CalendarCheck,
@@ -12,6 +12,7 @@ import {
   HandCoins,
   Settings,
   Search,
+  LogOut,
 } from 'lucide-react';
 import {
   SidebarProvider,
@@ -38,6 +39,8 @@ import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { GarmentFlowIcon } from '@/components/icons';
 import type { NavItem } from '@/lib/types';
+import { useAuth, useUser } from '@/firebase';
+import { useRouter } from 'next/navigation';
 
 const navItems: NavItem[] = [
   { title: 'Dashboard', href: '/dashboard', icon: <LayoutDashboard /> },
@@ -49,6 +52,28 @@ const navItems: NavItem[] = [
 ];
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
+  const auth = useAuth();
+  const { user, isUserLoading } = useUser();
+  const router = useRouter();
+
+  React.useEffect(() => {
+    if (!isUserLoading && !user) {
+      router.push('/');
+    }
+  }, [user, isUserLoading, router]);
+
+  const handleLogout = () => {
+    auth.signOut();
+  };
+
+  if (isUserLoading || !user) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <p>Loading...</p>
+      </div>
+    );
+  }
+
   return (
     <SidebarProvider>
       <Sidebar side="left" collapsible="icon">
@@ -110,19 +135,20 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="relative h-10 w-10 rounded-full">
                 <Avatar>
-                  <AvatarImage src="https://picsum.photos/seed/99/40/40" alt="User Avatar" />
-                  <AvatarFallback>JD</AvatarFallback>
+                  <AvatarImage src={user.photoURL ?? "https://picsum.photos/seed/99/40/40"} alt="User Avatar" />
+                  <AvatarFallback>{user.email?.charAt(0).toUpperCase()}</AvatarFallback>
                 </Avatar>
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuLabel>Jamal Uddin</DropdownMenuLabel>
+              <DropdownMenuLabel>{user.displayName ?? user.email}</DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuItem>Profile</DropdownMenuItem>
-              <DropdownMenuItem>Settings</DropdownMenuItem>
+              <DropdownMenuItem asChild><Link href="/settings">Settings</Link></DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem asChild>
-                <Link href="/">Logout</Link>
+              <DropdownMenuItem onClick={handleLogout}>
+                <LogOut className="mr-2 h-4 w-4" />
+                <span>Logout</span>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

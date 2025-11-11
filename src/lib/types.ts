@@ -9,6 +9,7 @@ export type Worker = {
   id: string;
   name: string;
   photoUrl: string;
+  photo?: string;
   designation: 'Operator' | 'Supervisor' | 'Manager' | 'Cutter' | 'Helper';
   department: 'Sewing' | 'Cutting' | 'Finishing' | 'Packing';
   joinDate: string;
