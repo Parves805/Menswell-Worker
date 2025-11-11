@@ -19,6 +19,7 @@ import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
 import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { FormEvent, useEffect, useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
+import { addDocumentNonBlocking } from '@/firebase/non-blocking-updates';
 
 export default function SignUpPage() {
   const auth = useAuth();
@@ -63,7 +64,7 @@ export default function SignUpPage() {
 
       // Save additional worker info to Firestore
       const workerDocRef = doc(firestore, 'workers', newUser.uid);
-      await setDoc(workerDocRef, {
+      const workerData = {
         id: newUser.uid,
         name: name,
         contact: phone,
@@ -73,7 +74,10 @@ export default function SignUpPage() {
         designation: 'Worker',
         department: 'N/A',
         basicSalary: 0,
-      });
+      };
+      // Use non-blocking write
+      setDoc(workerDocRef, workerData);
+
 
       toast({
         title: "নিবন্ধন সফল হয়েছে",
@@ -175,7 +179,7 @@ export default function SignUpPage() {
             </Button>
             <p className="text-center text-sm text-muted-foreground">
               ইতিমধ্যে একটি অ্যাকাউন্ট আছে?{' '}
-              <Link href="#" className="underline">
+              <Link href="/login" className="underline">
                 লগইন করুন
               </Link>
             </p>
