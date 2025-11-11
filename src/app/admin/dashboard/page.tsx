@@ -14,10 +14,10 @@ import { ProductionChart } from '@/components/admin/ProductionChart';
 
 // Dummy data for admin dashboard
 const summaryData = {
-  totalWorkers: 152,
-  totalProductionToday: 18560, // pieces
-  totalSalaryPaid: 2850000, // BDT for the month
-  totalExpenses: 450000, // BDT for the month
+  totalWorkers: 0,
+  totalProductionToday: 0, // pieces
+  totalSalaryPaid: 0, // BDT for the month
+  totalExpenses: 0, // BDT for the month
 };
 
 const formatNumber = (num: number) => {
@@ -43,7 +43,7 @@ export default function AdminDashboardPage() {
             <div className="text-2xl font-bold">
               {formatNumber(summaryData.totalWorkers)}
             </div>
-            <p className="text-xs text-muted-foreground">গত মাসের থেকে ২ জন বেশি</p>
+            <p className="text-xs text-muted-foreground">এখন পর্যন্ত</p>
           </CardContent>
         </Card>
         <Card>
@@ -57,7 +57,7 @@ export default function AdminDashboardPage() {
             <div className="text-2xl font-bold">
               {formatNumber(summaryData.totalProductionToday)} পিস
             </div>
-            <p className="text-xs text-muted-foreground">গতকালের থেকে ৫% বেশি</p>
+            <p className="text-xs text-muted-foreground">আজ</p>
           </CardContent>
         </Card>
         <Card>
@@ -71,7 +71,7 @@ export default function AdminDashboardPage() {
             <div className="text-2xl font-bold">
               {formatCurrency(summaryData.totalSalaryPaid)}
             </div>
-            <p className="text-xs text-muted-foreground">জুলাই ২০২৪ এর জন্য</p>
+            <p className="text-xs text-muted-foreground">চলতি মাসের হিসাব</p>
           </CardContent>
         </Card>
         <Card>
@@ -86,7 +86,7 @@ export default function AdminDashboardPage() {
               {formatCurrency(summaryData.totalExpenses)}
             </div>
             <p className="text-xs text-muted-foreground">
-              গত মাসের থেকে ১০% কম
+              চলতি মাসের হিসাব
             </p>
           </CardContent>
         </Card>

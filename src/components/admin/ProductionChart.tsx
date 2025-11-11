@@ -16,15 +16,7 @@ import {
 } from '@/components/ui/chart';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip } from 'recharts';
 
-const chartData = [
-  { date: 'জুলাই ২২', tshirts: 1250, polos: 800, pants: 450 },
-  { date: 'জুলাই ২৩', tshirts: 1300, polos: 850, pants: 470 },
-  { date: 'জুলাই ২৪', tshirts: 1100, polos: 780, pants: 420 },
-  { date: 'জুলাই ২৫', tshirts: 1400, polos: 920, pants: 500 },
-  { date: 'জুলাই ২৬', tshirts: 1350, polos: 880, pants: 480 },
-  { date: 'জুলাই ২৭', tshirts: 1500, polos: 950, pants: 520 },
-  { date: 'জুলাই ২৮', tshirts: 1450, polos: 900, pants: 490 },
-];
+const chartData: any[] = [];
 
 const chartConfig: ChartConfig = {
   tshirts: {
@@ -50,6 +42,7 @@ export function ProductionChart() {
       </CardHeader>
       <CardContent>
         <ChartContainer config={chartConfig} className="h-64 w-full">
+            {chartData.length > 0 ? (
           <LineChart data={chartData} margin={{ top: 5, right: 20, left: -10, bottom: 0 }}>
             <CartesianGrid strokeDasharray="3 3" vertical={false} />
             <XAxis dataKey="date" tickLine={false} axisLine={false} tickMargin={8} />
@@ -85,6 +78,11 @@ export function ProductionChart() {
               dot={false}
             />
           </LineChart>
+            ) : (
+                <div className="flex h-full w-full items-center justify-center text-muted-foreground">
+                    <p>উৎপাদনের কোনো ডেটা পাওয়া যায়নি।</p>
+                </div>
+            )}
         </ChartContainer>
       </CardContent>
     </Card>

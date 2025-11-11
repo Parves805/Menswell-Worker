@@ -19,7 +19,6 @@ import {
 import { Button } from '@/components/ui/button';
 import { PlusCircle, MoreHorizontal } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
-import { advancePayments, bonuses } from '@/lib/data';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -37,6 +36,8 @@ const formatCurrency = (amount: number) =>
   }).format(amount);
 
 export default function AdminTransactionsPage() {
+  const advancePayments: any[] = [];
+  const bonuses: any[] = [];
   
   return (
     <Card className="font-sans">
@@ -80,7 +81,7 @@ export default function AdminTransactionsPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {advancePayments.length > 0 ? (
+                  {advancePayments && advancePayments.length > 0 ? (
                     advancePayments.map((payment) => (
                       <TableRow key={payment.id}>
                         <TableCell className="font-medium">
@@ -138,7 +139,7 @@ export default function AdminTransactionsPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {bonuses.length > 0 ? (
+                  {bonuses && bonuses.length > 0 ? (
                     bonuses.map((bonus) => (
                       <TableRow key={bonus.id}>
                          <TableCell className="font-medium">

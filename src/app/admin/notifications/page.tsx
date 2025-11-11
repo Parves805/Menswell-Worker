@@ -15,12 +15,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useState } from 'react';
 import { Input } from '@/components/ui/input';
 
-// Dummy data for past notifications
-const pastNotifications = [
-    { id: 1, title: "ঈদ বোনাস ঘোষণা", message: "সকল কর্মীকে জানানো যাচ্ছে যে, আগামী ৫ জুলাই ঈদ বোনাস প্রদান করা হবে।", sentAt: "2024-07-01" },
-    { id: 2, title: "জরুরী ফ্যাক্টরি মিটিং", message: "আগামীকাল সকাল ৯টায় সকল সুপারভাইজারদের নিয়ে একটি জরুরী মিটিং অনুষ্ঠিত হবে।", sentAt: "2024-06-28" },
-    { id: 3, title: "ওভারটাইম সংক্রান্ত নোটিশ", message: "এই সপ্তাহে ওভারটাইম শনিবার এবং রবিবার চালু থাকবে।", sentAt: "2024-06-25" },
-];
+const pastNotifications: any[] = [];
 
 export default function AdminNotificationsPage() {
     const { toast } = useToast();

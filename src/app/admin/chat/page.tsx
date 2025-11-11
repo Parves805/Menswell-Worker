@@ -13,31 +13,33 @@ import { Send } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { cn } from '@/lib/utils';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { workers } from '@/lib/data'; // Assuming you have worker data
 import { Separator } from '@/components/ui/separator';
-
-// Dummy chat data for demonstration
-const dummyMessages = {
-  'WRK-001': [
-    { id: 'msg1', text: 'আমার জুন মাসের বেতন নিয়ে একটি প্রশ্ন ছিল।', senderId: 'WRK-001', timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000) },
-    { id: 'msg2', text: 'অবশ্যই, বলুন আপনার প্রশ্নটি। আমরা দেখছি।', senderId: 'admin', timestamp: new Date(Date.now() - 1.5 * 60 * 60 * 1000) },
-  ],
-  'WRK-003': [
-      { id: 'msg3', text: 'আমি কি একটি অগ্রিম পেমেন্টের জন্য অনুরোধ করতে পারি?', senderId: 'WRK-003', timestamp: new Date(Date.now() - 24 * 60 * 60 * 1000) },
-  ],
-   'WRK-005': [],
-};
-
-type Message = { id: string; text: string; senderId: string; timestamp: Date };
-
+import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
+import { collection, query, orderBy, addDoc, serverTimestamp } from 'firebase/firestore';
+import type { Worker, ChatMessage } from '@/lib/types';
 
 export default function AdminChatPage() {
-  const [selectedWorkerId, setSelectedWorkerId] = useState<string | null>('WRK-001');
-  const [messages, setMessages] = useState<Record<string, Message[]>>(dummyMessages);
+  const firestore = useFirestore();
+  const [selectedWorkerId, setSelectedWorkerId] = useState<string | null>(null);
   const [newMessage, setNewMessage] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  const selectedWorker = workers.find(w => w.id === selectedWorkerId);
+  const workersQuery = useMemoFirebase(() => {
+    if (!firestore) return null;
+    return query(collection(firestore, 'workers'), orderBy('name', 'asc'));
+  }, [firestore]);
+  const { data: workers, isLoading: isLoadingWorkers } = useCollection<Worker>(workersQuery);
+
+  const messagesQuery = useMemoFirebase(() => {
+    if (!firestore || !selectedWorkerId) return null;
+    return query(
+      collection(firestore, 'chats', selectedWorkerId, 'messages'),
+      orderBy('timestamp', 'asc')
+    );
+  }, [firestore, selectedWorkerId]);
+  const { data: messages, isLoading: isLoadingMessages } = useCollection<ChatMessage>(messagesQuery);
+  
+  const selectedWorker = workers?.find(w => w.id === selectedWorkerId);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -45,35 +47,41 @@ export default function AdminChatPage() {
 
   useEffect(() => {
     scrollToBottom();
-  }, [selectedWorkerId, messages]);
+  }, [messages]);
+  
+  useEffect(() => {
+    // Select the first worker by default if not already selected
+    if (!selectedWorkerId && workers && workers.length > 0) {
+      setSelectedWorkerId(workers[0].id);
+    }
+  }, [workers, selectedWorkerId]);
 
-  const handleSendMessage = (e: React.FormEvent) => {
+  const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (newMessage.trim() === '' || !selectedWorkerId) return;
+    if (newMessage.trim() === '' || !selectedWorkerId || !firestore) return;
 
-    const messageData: Message = {
-      id: `msg-${Date.now()}`,
+    const messageData = {
       text: newMessage,
-      senderId: 'admin',
-      timestamp: new Date(),
+      senderId: 'admin', // Admin's ID
+      timestamp: serverTimestamp(),
+      isRead: false,
     };
-
-    setMessages(prev => ({
-        ...prev,
-        [selectedWorkerId]: [...(prev[selectedWorkerId] || []), messageData]
-    }));
+    
+    const messagesCol = collection(firestore, 'chats', selectedWorkerId, 'messages');
+    await addDoc(messagesCol, messageData);
     setNewMessage('');
   };
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4 h-[calc(100vh-8rem)]">
+    <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4 h-[calc(100vh-8rem)] font-sans">
         {/* Worker List */}
         <Card className="col-span-1 flex flex-col">
             <CardHeader>
                 <CardTitle>কথোপকথন</CardTitle>
             </CardHeader>
             <ScrollArea className="flex-1">
-                {workers.map(worker => (
+                {isLoadingWorkers && <p className="p-4 text-sm text-muted-foreground">কর্মী লোড হচ্ছে...</p>}
+                {workers?.map(worker => (
                     <React.Fragment key={worker.id}>
                         <div 
                             className={cn(
@@ -89,13 +97,14 @@ export default function AdminChatPage() {
                             <div className='flex-1 truncate'>
                                 <p className="font-semibold truncate">{worker.name}</p>
                                 <p className="text-xs text-muted-foreground truncate">
-                                    {messages[worker.id]?.slice(-1)[0]?.text || 'কোনো বার্তা নেই'}
+                                    {/* Placeholder for last message */}
                                 </p>
                             </div>
                         </div>
                         <Separator />
                     </React.Fragment>
                 ))}
+                 {!isLoadingWorkers && workers?.length === 0 && <p className="p-4 text-sm text-muted-foreground">কোনো কর্মী পাওয়া যায়নি।</p>}
             </ScrollArea>
         </Card>
 
@@ -103,7 +112,7 @@ export default function AdminChatPage() {
         <Card className="col-span-1 md:col-span-2 lg:col-span-3 flex flex-col">
             {!selectedWorker ? (
                 <div className='flex-1 flex items-center justify-center text-muted-foreground'>
-                    <p>চ্যাট শুরু করতে একটি কথোপকথন নির্বাচন করুন।</p>
+                    {isLoadingWorkers ? <p>লোড হচ্ছে...</p> : <p>চ্যাট শুরু করতে একটি কথোপকথন নির্বাচন করুন।</p>}
                 </div>
             ) : (
                 <>
@@ -120,7 +129,8 @@ export default function AdminChatPage() {
                         </div>
                     </CardHeader>
                     <CardContent className="flex-1 overflow-y-auto p-4 space-y-4">
-                        {(messages[selectedWorkerId] || []).map((msg) => (
+                        {isLoadingMessages && <p className="text-center text-muted-foreground">বার্তা লোড হচ্ছে...</p>}
+                        {messages?.map((msg) => (
                         <div
                             key={msg.id}
                             className={cn(
@@ -143,10 +153,11 @@ export default function AdminChatPage() {
                             )}
                             >
                             <p>{msg.text}</p>
-                            <p className={cn(
+                            {msg.timestamp && <p className={cn(
                                 "text-xs mt-1 opacity-70",
                                 msg.senderId === 'admin' ? 'text-right' : 'text-left'
-                            )}>{new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
+                                // @ts-ignore
+                            )}>{new Date(msg.timestamp?.toDate()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>}
                             </div>
                             {msg.senderId === 'admin' && (
                             <Avatar className="h-8 w-8">
@@ -157,7 +168,7 @@ export default function AdminChatPage() {
                         </div>
                         ))}
                         <div ref={messagesEndRef} />
-                        {(messages[selectedWorkerId] || []).length === 0 && (
+                        {!isLoadingMessages && messages?.length === 0 && (
                             <div className="flex flex-col items-center justify-center h-full text-center text-muted-foreground">
                                 <p>এই কথোপকথনে এখনো কোনো বার্তা নেই।</p>
                             </div>

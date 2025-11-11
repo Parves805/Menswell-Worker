@@ -18,11 +18,11 @@ import {
 } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { PlusCircle, Download } from 'lucide-react';
-import { productionEntries } from '@/lib/data';
 import { DatePicker } from '@/components/DatePicker';
 
 
 export default function ProductionPage() {
+  const productionEntries: any[] = [];
   return (
     <Card className="font-sans">
       <CardHeader>
@@ -61,7 +61,7 @@ export default function ProductionPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {productionEntries.length > 0 ? (
+              {productionEntries && productionEntries.length > 0 ? (
                 productionEntries.map((entry) => (
                   <TableRow key={entry.id}>
                     <TableCell>{new Date(entry.date).toLocaleDateString('bn-BD')}</TableCell>
