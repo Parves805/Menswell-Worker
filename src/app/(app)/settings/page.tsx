@@ -4,8 +4,23 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Settings } from "lucide-react";
+import { useState } from "react";
 
 export default function SettingsPage() {
+    const [isDarkMode, setIsDarkMode] = useState(false);
+    const [emailNotifications, setEmailNotifications] = useState(true);
+
+    // In a real app, you would also handle theme switching logic for dark mode.
+    const handleDarkModeToggle = (checked: boolean) => {
+        setIsDarkMode(checked);
+        // Add logic to toggle dark mode theme here, e.g., by adding/removing a class on the body.
+        if (checked) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+    };
+
     return (
         <Card>
             <CardHeader>
@@ -25,6 +40,8 @@ export default function SettingsPage() {
                     <Switch
                         id="dark-mode"
                         aria-label="Toggle dark mode"
+                        checked={isDarkMode}
+                        onCheckedChange={handleDarkModeToggle}
                     />
                 </div>
                  <div className="flex items-center justify-between rounded-lg border p-4">
@@ -37,7 +54,8 @@ export default function SettingsPage() {
                     <Switch
                         id="notifications"
                         aria-label="Toggle email notifications"
-                        defaultChecked
+                        checked={emailNotifications}
+                        onCheckedChange={setEmailNotifications}
                     />
                 </div>
             </CardContent>
