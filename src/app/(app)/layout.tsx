@@ -161,12 +161,12 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         </SidebarFooter>
       </Sidebar>
       <SidebarInset className="flex flex-col">
-        <header className="sticky top-0 z-10 flex h-16 items-center gap-4 border-b bg-primary px-4 sm:px-6">
-          <SidebarTrigger className="flex text-primary-foreground hover:text-primary-foreground md:hidden" />
+        <header className="sticky top-0 z-10 flex h-16 items-center gap-4 border-b bg-background px-4 sm:px-6">
+          <SidebarTrigger className="flex text-foreground hover:text-foreground md:hidden" />
           <div className="relative flex-1">
             {/* Search can be added back if needed */}
           </div>
-          <Button variant="ghost" size="icon" className="rounded-full text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground" asChild>
+          <Button variant="ghost" size="icon" className="rounded-full text-foreground hover:bg-accent hover:text-accent-foreground" asChild>
             <Link href="/notifications">
               <Bell className="h-5 w-5" />
               <span className="sr-only">Toggle notifications</span>
@@ -180,8 +180,8 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                   <AvatarFallback>{user.email?.charAt(0).toUpperCase()}</AvatarFallback>
                 </Avatar>
                 <div className="hidden md:flex flex-col items-start">
-                    <span className="text-sm font-medium text-primary-foreground">{user.displayName ?? user.email}</span>
-                    <span className="text-xs text-primary-foreground/80">Admin</span>
+                    <span className="text-sm font-medium text-foreground">{user.displayName ?? user.email}</span>
+                    <span className="text-xs text-muted-foreground/80">Admin</span>
                 </div>
               </div>
 
