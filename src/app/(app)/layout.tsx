@@ -87,10 +87,10 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           <div className="flex items-center gap-2">
             <Button variant="ghost" size="icon" className="shrink-0" asChild>
               <Link href="/dashboard">
-                <GarmentFlowIcon className="size-5 text-primary-foreground" />
+                <GarmentFlowIcon className="size-5" />
               </Link>
             </Button>
-            <h1 className="text-lg font-semibold tracking-tight text-primary-foreground">
+            <h1 className="text-lg font-semibold tracking-tight">
               গার্মেন্টফ্লো
             </h1>
           </div>
@@ -102,11 +102,11 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                 <Link href={item.href} className="w-full">
                   <SidebarMenuButton
                     tooltip={item.title}
-                    className="text-primary-foreground hover:bg-white/20 hover:text-primary-foreground data-[active=true]:bg-white/25"
+                    className="hover:bg-primary/10 data-[active=true]:bg-primary/15 data-[active=true]:text-primary"
                     asChild
                   >
                     <div className="flex items-center gap-2">
-                        {React.cloneElement(item.icon, { className: "text-primary-foreground"})}
+                        {React.cloneElement(item.icon, { className: "text-muted-foreground data-[active=true]:text-primary"})}
                         <span>{item.title}</span>
                     </div>
                   </SidebarMenuButton>
@@ -121,9 +121,9 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
               <Link href="/profile">
                 <SidebarMenuButton
                   tooltip="প্রোফাইল"
-                  className="text-primary-foreground hover:bg-white/20 hover:text-primary-foreground"
+                  className="hover:bg-primary/10"
                 >
-                  <User className="text-primary-foreground" />
+                  <User />
                   <span>প্রোফাইল</span>
                 </SidebarMenuButton>
               </Link>
