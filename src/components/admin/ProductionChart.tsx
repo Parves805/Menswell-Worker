@@ -17,36 +17,36 @@ import {
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip } from 'recharts';
 
 const chartData = [
-  { date: 'Jul 22', tshirts: 1250, polos: 800, pants: 450 },
-  { date: 'Jul 23', tshirts: 1300, polos: 850, pants: 470 },
-  { date: 'Jul 24', tshirts: 1100, polos: 780, pants: 420 },
-  { date: 'Jul 25', tshirts: 1400, polos: 920, pants: 500 },
-  { date: 'Jul 26', tshirts: 1350, polos: 880, pants: 480 },
-  { date: 'Jul 27', tshirts: 1500, polos: 950, pants: 520 },
-  { date: 'Jul 28', tshirts: 1450, polos: 900, pants: 490 },
+  { date: 'জুলাই ২২', tshirts: 1250, polos: 800, pants: 450 },
+  { date: 'জুলাই ২৩', tshirts: 1300, polos: 850, pants: 470 },
+  { date: 'জুলাই ২৪', tshirts: 1100, polos: 780, pants: 420 },
+  { date: 'জুলাই ২৫', tshirts: 1400, polos: 920, pants: 500 },
+  { date: 'জুলাই ২৬', tshirts: 1350, polos: 880, pants: 480 },
+  { date: 'জুলাই ২৭', tshirts: 1500, polos: 950, pants: 520 },
+  { date: 'জুলাই ২৮', tshirts: 1450, polos: 900, pants: 490 },
 ];
 
 const chartConfig: ChartConfig = {
   tshirts: {
-    label: 'T-Shirts',
+    label: 'টি-শার্ট',
     color: 'hsl(var(--chart-1))',
   },
   polos: {
-    label: 'Polo Shirts',
+    label: 'পোলো শার্ট',
     color: 'hsl(var(--chart-2))',
   },
   pants: {
-    label: 'Pants',
+    label: 'প্যান্ট',
     color: 'hsl(var(--chart-3))',
   },
 };
 
 export function ProductionChart() {
   return (
-    <Card>
+    <Card className="font-sans">
       <CardHeader>
-        <CardTitle>Production Overview</CardTitle>
-        <CardDescription>Last 7 days production summary</CardDescription>
+        <CardTitle>উৎপাদন চিত্র</CardTitle>
+        <CardDescription>গত ৭ দিনের উৎপাদনের সারসংক্ষেপ</CardDescription>
       </CardHeader>
       <CardContent>
         <ChartContainer config={chartConfig} className="h-64 w-full">

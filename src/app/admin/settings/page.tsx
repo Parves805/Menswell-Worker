@@ -29,7 +29,7 @@ export default function AdminSettingsPage() {
     if (newCategory && !categories.includes(newCategory)) {
       setCategories([...categories, newCategory]);
       setNewCategory('');
-      toast({ title: 'Category Added', description: `"${newCategory}" has been added.` });
+      toast({ title: 'ক্যাটাগরি যোগ হয়েছে', description: `"${newCategory}" সফলভাবে যোগ করা হয়েছে।` });
     }
   };
 
@@ -37,8 +37,8 @@ export default function AdminSettingsPage() {
     setCategories(categories.filter((cat) => cat !== categoryToRemove));
     toast({
       variant: 'destructive',
-      title: 'Category Removed',
-      description: `"${categoryToRemove}" has been removed.`,
+      title: 'ক্যাটাগরি মুছে ফেলা হয়েছে',
+      description: `"${categoryToRemove}" তালিকা থেকে মুছে ফেলা হয়েছে।`,
     });
   };
 
@@ -49,23 +49,23 @@ export default function AdminSettingsPage() {
       allowProfilePictureChange,
     });
     toast({
-      title: 'Settings Saved',
-      description: 'Your changes have been successfully saved.',
+      title: 'সেটিংস সংরক্ষিত হয়েছে',
+      description: 'আপনার পরিবর্তনগুলো সফলভাবে সংরক্ষণ করা হয়েছে।',
     });
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 font-sans">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">Settings</h1>
-        <p className="text-muted-foreground">Manage your factory and application settings.</p>
+        <h1 className="text-2xl font-bold tracking-tight">সেটিংস</h1>
+        <p className="text-muted-foreground">আপনার ফ্যাক্টরি এবং অ্যাপ্লিকেশন সেটিংস পরিচালনা করুন।</p>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>Production Categories</CardTitle>
+          <CardTitle>উৎপাদন ক্যাটাগরি</CardTitle>
           <CardDescription>
-            Manage the list of production item categories available to workers.
+            কর্মীদের জন্য উপলব্ধ উৎপাদন আইটেম ক্যাটাগরি তালিকা পরিচালনা করুন।
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -88,7 +88,7 @@ export default function AdminSettingsPage() {
             <Input
               value={newCategory}
               onChange={(e) => setNewCategory(e.target.value)}
-              placeholder="New category name"
+              placeholder="নতুন ক্যাটাগরির নাম"
             />
             <Button onClick={handleAddCategory} size="icon">
               <PlusCircle className="h-4 w-4" />
@@ -99,17 +99,17 @@ export default function AdminSettingsPage() {
       
       <Card>
         <CardHeader>
-          <CardTitle>Application Settings</CardTitle>
+          <CardTitle>অ্যাপ্লিকেশন সেটিংস</CardTitle>
           <CardDescription>
-            Configure general settings for the worker-facing application.
+            কর্মী-মুখী অ্যাপ্লিকেশনের জন্য সাধারণ সেটিংস কনফিগার করুন।
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
             <div className="flex items-center justify-between rounded-lg border p-4">
                 <div className="space-y-0.5">
-                    <Label htmlFor="allow-profile-pic-change" className="text-base">Allow Profile Picture Change</Label>
+                    <Label htmlFor="allow-profile-pic-change" className="text-base">প্রোফাইল ছবি পরিবর্তনের অনুমতি</Label>
                     <p className="text-sm text-muted-foreground">
-                        Allow workers to change their own profile picture from the app.
+                        কর্মীদের অ্যাপ থেকে তাদের নিজস্ব প্রোফাইল ছবি পরিবর্তন করার অনুমতি দিন।
                     </p>
                 </div>
                 <Switch
@@ -123,32 +123,32 @@ export default function AdminSettingsPage() {
       
       <Card>
         <CardHeader>
-          <CardTitle>Admin Profile</CardTitle>
-          <CardDescription>Manage your personal administrator account.</CardDescription>
+          <CardTitle>অ্যাডমিন প্রোফাইল</CardTitle>
+          <CardDescription>আপনার ব্যক্তিগত অ্যাডমিনিস্ট্রেটর অ্যাকাউন্ট পরিচালনা করুন।</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
             <div className="space-y-2">
-                <Label htmlFor="admin-name">Name</Label>
-                <Input id="admin-name" defaultValue="Admin User" />
+                <Label htmlFor="admin-name">নাম</Label>
+                <Input id="admin-name" defaultValue="অ্যাডমিন" />
             </div>
             <div className="space-y-2">
-                <Label htmlFor="admin-email">Email</Label>
+                <Label htmlFor="admin-email">ইমেইল</Label>
                 <Input id="admin-email" defaultValue="admin@example.com" disabled />
             </div>
              <Separator />
              <div className="space-y-2">
-                <Label htmlFor="new-password">New Password</Label>
-                <Input id="new-password" type="password" placeholder="Enter new password" />
+                <Label htmlFor="new-password">নতুন পাসওয়ার্ড</Label>
+                <Input id="new-password" type="password" placeholder="নতুন পাসওয়ার্ড লিখুন" />
             </div>
              <div className="space-y-2">
-                <Label htmlFor="confirm-password">Confirm New Password</Label>
-                <Input id="confirm-password" type="password" placeholder="Confirm new password" />
+                <Label htmlFor="confirm-password">নতুন পাসওয়ার্ড নিশ্চিত করুন</Label>
+                <Input id="confirm-password" type="password" placeholder="নতুন পাসওয়ার্ড নিশ্চিত করুন" />
             </div>
         </CardContent>
       </Card>
       
       <div className="flex justify-end">
-        <Button onClick={handleSaveChanges}>Save All Changes</Button>
+        <Button onClick={handleSaveChanges}>সমস্ত পরিবর্তন সংরক্ষণ করুন</Button>
       </div>
 
     </div>

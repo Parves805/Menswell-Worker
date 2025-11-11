@@ -24,13 +24,13 @@ import { DatePicker } from '@/components/DatePicker';
 
 export default function ProductionPage() {
   return (
-    <Card>
+    <Card className="font-sans">
       <CardHeader>
         <div className="flex justify-between items-center">
           <div>
-            <CardTitle>Production Entries</CardTitle>
+            <CardTitle>উৎপাদন এন্ট্রি</CardTitle>
             <CardDescription>
-              View and manage all worker production entries.
+              সকল কর্মীর উৎপাদন এন্ট্রি দেখুন এবং পরিচালনা করুন।
             </CardDescription>
           </div>
            <div className='flex items-center gap-2'>
@@ -39,11 +39,11 @@ export default function ProductionPage() {
             </div>
             <Button>
               <PlusCircle className="mr-2 h-4 w-4" />
-              Add Entry
+              এন্ট্রি যোগ করুন
             </Button>
             <Button variant="outline">
               <Download className="mr-2 h-4 w-4" />
-              Export Report
+              রিপোর্ট এক্সপোর্ট
             </Button>
           </div>
         </div>
@@ -53,18 +53,18 @@ export default function ProductionPage() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Date</TableHead>
-                <TableHead>Worker Name</TableHead>
-                <TableHead>Worker ID</TableHead>
-                <TableHead className="text-center">Piece Count</TableHead>
-                <TableHead className="text-center">Overtime (hrs)</TableHead>
+                <TableHead>তারিখ</TableHead>
+                <TableHead>কর্মীর নাম</TableHead>
+                <TableHead>কর্মী আইডি</TableHead>
+                <TableHead className="text-center">পিস সংখ্যা</TableHead>
+                <TableHead className="text-center">ওভারটাইম (ঘণ্টা)</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {productionEntries.length > 0 ? (
                 productionEntries.map((entry) => (
                   <TableRow key={entry.id}>
-                    <TableCell>{new Date(entry.date).toLocaleDateString()}</TableCell>
+                    <TableCell>{new Date(entry.date).toLocaleDateString('bn-BD')}</TableCell>
                     <TableCell className="font-medium">{entry.workerName}</TableCell>
                     <TableCell>{entry.workerId}</TableCell>
                     <TableCell className="text-center">{entry.pieceCount}</TableCell>
@@ -74,7 +74,7 @@ export default function ProductionPage() {
               ) : (
                 <TableRow>
                   <TableCell colSpan={5} className="h-24 text-center">
-                    No production entries found.
+                    কোনো উৎপাদন এন্ট্রি পাওয়া যায়নি।
                   </TableCell>
                 </TableRow>
               )}

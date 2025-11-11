@@ -70,7 +70,7 @@ export default function AdminChatPage() {
         {/* Worker List */}
         <Card className="col-span-1 flex flex-col">
             <CardHeader>
-                <CardTitle>Conversations</CardTitle>
+                <CardTitle>কথোপকথন</CardTitle>
             </CardHeader>
             <ScrollArea className="flex-1">
                 {workers.map(worker => (
@@ -89,7 +89,7 @@ export default function AdminChatPage() {
                             <div className='flex-1 truncate'>
                                 <p className="font-semibold truncate">{worker.name}</p>
                                 <p className="text-xs text-muted-foreground truncate">
-                                    {messages[worker.id]?.slice(-1)[0]?.text || 'No messages yet'}
+                                    {messages[worker.id]?.slice(-1)[0]?.text || 'কোনো বার্তা নেই'}
                                 </p>
                             </div>
                         </div>
@@ -103,7 +103,7 @@ export default function AdminChatPage() {
         <Card className="col-span-1 md:col-span-2 lg:col-span-3 flex flex-col">
             {!selectedWorker ? (
                 <div className='flex-1 flex items-center justify-center text-muted-foreground'>
-                    <p>Select a conversation to start chatting.</p>
+                    <p>চ্যাট শুরু করতে একটি কথোপকথন নির্বাচন করুন।</p>
                 </div>
             ) : (
                 <>
@@ -159,7 +159,7 @@ export default function AdminChatPage() {
                         <div ref={messagesEndRef} />
                         {(messages[selectedWorkerId] || []).length === 0 && (
                             <div className="flex flex-col items-center justify-center h-full text-center text-muted-foreground">
-                                <p>No messages in this conversation yet.</p>
+                                <p>এই কথোপকথনে এখনো কোনো বার্তা নেই।</p>
                             </div>
                         )}
                     </CardContent>
@@ -167,7 +167,7 @@ export default function AdminChatPage() {
                         <form onSubmit={handleSendMessage} className="flex items-center gap-2">
                         <Input
                             type="text"
-                            placeholder="Type your message..."
+                            placeholder="আপনার বার্তা লিখুন..."
                             value={newMessage}
                             onChange={(e) => setNewMessage(e.target.value)}
                             autoComplete="off"
@@ -175,7 +175,7 @@ export default function AdminChatPage() {
                         />
                         <Button type="submit" size="icon" disabled={!newMessage.trim() || !selectedWorkerId}>
                             <Send className="h-4 w-4" />
-                            <span className="sr-only">Send Message</span>
+                            <span className="sr-only">বার্তা পাঠান</span>
                         </Button>
                         </form>
                     </div>

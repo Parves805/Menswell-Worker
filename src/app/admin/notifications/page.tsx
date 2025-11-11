@@ -13,6 +13,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { useState } from 'react';
+import { Input } from '@/components/ui/input';
 
 // Dummy data for past notifications
 const pastNotifications = [
@@ -49,7 +50,7 @@ export default function AdminNotificationsPage() {
     }
 
   return (
-    <div className="grid gap-6 md:grid-cols-2">
+    <div className="grid gap-6 md:grid-cols-2 font-sans">
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">

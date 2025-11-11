@@ -41,13 +41,13 @@ import { useRouter } from 'next/navigation';
 import { usePathname } from 'next/navigation';
 
 const adminNavItems: NavItem[] = [
-  { title: 'Dashboard', href: '/admin/dashboard', icon: <LayoutDashboard /> },
-  { title: 'Workers', href: '/admin/workers', icon: <Users /> },
-  { title: 'Production', href: '/admin/production', icon: <Factory /> },
-  { title: 'Transactions', href: '/admin/transactions', icon: <Wallet /> },
-  { title: 'Chat', href: '/admin/chat', icon: <MessageCircle /> },
-  { title: 'Notifications', href: '/admin/notifications', icon: <Bell /> },
-  { title: 'Settings', href: '/admin/settings', icon: <Settings /> },
+  { title: 'ড্যাশবোর্ড', href: '/admin/dashboard', icon: <LayoutDashboard /> },
+  { title: 'কর্মী', href: '/admin/workers', icon: <Users /> },
+  { title: 'উৎপাদন', href: '/admin/production', icon: <Factory /> },
+  { title: 'লেনদেন', href: '/admin/transactions', icon: <Wallet /> },
+  { title: 'চ্যাট', href: '/admin/chat', icon: <MessageCircle /> },
+  { title: 'নোটিফিকেশন', href: '/admin/notifications', icon: <Bell /> },
+  { title: 'সেটিংস', href: '/admin/settings', icon: <Settings /> },
 ];
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -70,15 +70,15 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   if (isUserLoading || !user) {
     return (
-      <div className="flex min-h-screen items-center justify-center admin-panel">
-        <p>Loading Admin Panel...</p>
+      <div className="flex min-h-screen items-center justify-center admin-panel font-sans">
+        <p>অ্যাডমিন প্যানেল লোড হচ্ছে...</p>
       </div>
     );
   }
 
 
   return (
-    <div className="admin-panel">
+    <div className="admin-panel font-sans">
       <SidebarProvider>
         <Sidebar side="left" collapsible="icon">
           <SidebarHeader>
@@ -89,7 +89,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 </Link>
               </Button>
               <h1 className="text-lg font-semibold tracking-tight text-foreground">
-                Admin Panel
+                অ্যাডমিন প্যানেল
               </h1>
             </div>
           </SidebarHeader>
@@ -121,11 +121,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               <SidebarMenuItem>
                  <SidebarMenuButton
                     onClick={handleLogout}
-                    tooltip="Logout"
+                    tooltip="লগআউট"
                     className="text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
                   >
                     <LogOut className="text-sidebar-foreground/80" />
-                    <span>Logout</span>
+                    <span>লগআউট</span>
                   </SidebarMenuButton>
               </SidebarMenuItem>
             </SidebarMenu>
@@ -141,9 +141,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               variant="ghost"
               size="icon"
               className="rounded-full text-foreground hover:bg-accent hover:text-accent-foreground"
+              asChild
             >
-              <Bell className="h-5 w-5" />
-              <span className="sr-only">Toggle notifications</span>
+             <Link href="/admin/notifications">
+                <Bell className="h-5 w-5" />
+                <span className="sr-only">নোটিফিকেশন দেখান</span>
+              </Link>
             </Button>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -151,7 +154,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                   <Avatar className="h-9 w-9">
                     <AvatarImage
                       src={user?.photoURL ?? `https://i.pravatar.cc/40?u=admin`}
-                      alt="Admin photo"
+                      alt="অ্যাডমিনের ছবি"
                     />
                     <AvatarFallback>
                       {user?.email?.charAt(0).toUpperCase()}
@@ -159,10 +162,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                   </Avatar>
                   <div className="hidden md:flex flex-col items-start">
                     <span className="text-sm font-medium text-foreground">
-                      {user?.displayName ?? 'Admin User'}
+                      {user?.displayName ?? 'অ্যাডমিন'}
                     </span>
                     <span className="text-xs text-muted-foreground/80">
-                      Administrator
+                      অ্যাডমিনিস্ট্রেটর
                     </span>
                   </div>
                 </div>
@@ -171,12 +174,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 <DropdownMenuLabel>{user?.displayName ?? user?.email}</DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem asChild>
-                  <Link href="/admin/settings">Settings</Link>
+                  <Link href="/admin/settings">সেটিংস</Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleLogout}>
                   <LogOut className="mr-2 h-4 w-4" />
-                  <span>Logout</span>
+                  <span>লগআউট</span>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>

@@ -15,34 +15,34 @@ import React from 'react';
 const activities = [
   {
     id: 1,
-    user: { name: 'Admin', avatar: 'https://i.pravatar.cc/40?u=admin' },
-    action: 'Paid Salaries',
-    details: 'for the month of June 2024.',
-    timestamp: '2 hours ago',
+    user: { name: 'অ্যাডমিন', avatar: 'https://i.pravatar.cc/40?u=admin' },
+    action: 'বেতন প্রদান করেছেন',
+    details: 'জুন ২০২৪ মাসের জন্য।',
+    timestamp: '২ ঘণ্টা আগে',
     type: 'payment',
   },
   {
     id: 2,
-    user: { name: 'System', avatar: null },
-    action: 'New worker added',
-    details: 'Kamal Hasan joined the Sewing department.',
-    timestamp: '1 day ago',
+    user: { name: 'সিস্টেম', avatar: null },
+    action: 'নতুন কর্মী যোগ হয়েছে',
+    details: 'কামাল হাসান সেলাই বিভাগে যোগ দিয়েছেন।',
+    timestamp: '১ দিন আগে',
     type: 'user',
   },
   {
     id: 3,
-    user: { name: 'Rahim Sheikh', avatar: 'https://i.pravatar.cc/40?u=supervisor' },
-    action: 'Approved Advance',
-    details: 'for Ayesha Khan (ID: WRK-001).',
-    timestamp: '2 days ago',
+    user: { name: 'রহিম শেখ', avatar: 'https://i.pravatar.cc/40?u=supervisor' },
+    action: 'অগ্রিম অনুমোদন করেছেন',
+    details: 'আয়েশা খানমের জন্য (আইডি: WRK-001)।',
+    timestamp: '২ দিন আগে',
     type: 'approval',
   },
    {
     id: 4,
-    user: { name: 'Admin', avatar: 'https://i.pravatar.cc/40?u=admin' },
-    action: 'Expense Recorded',
-    details: 'for Raw Materials purchase.',
-    timestamp: '3 days ago',
+    user: { name: 'অ্যাডমিন', avatar: 'https://i.pravatar.cc/40?u=admin' },
+    action: 'খরচ রেকর্ড করা হয়েছে',
+    details: 'কাঁচামাল কেনার জন্য।',
+    timestamp: '৩ দিন আগে',
     type: 'expense',
   },
 ];
@@ -56,11 +56,11 @@ const typeVariant: Record<string, 'default' | 'secondary' | 'destructive' | 'out
 
 export function ActivityFeed() {
   return (
-    <Card>
+    <Card className="font-sans">
       <CardHeader>
-        <CardTitle>Recent Activity</CardTitle>
+        <CardTitle>সাম্প্রতিক কার্যকলাপ</CardTitle>
         <CardDescription>
-          A log of recent activities in the system.
+          সিস্টেমের সাম্প্রতিক কার্যকলাপের একটি লগ।
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">

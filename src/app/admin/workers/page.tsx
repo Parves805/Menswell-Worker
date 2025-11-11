@@ -42,18 +42,18 @@ export default function WorkersPage() {
   const { data: workers, isLoading } = useCollection<Worker>(workersQuery);
 
   return (
-    <Card>
+    <Card className="font-sans">
       <CardHeader>
         <div className="flex justify-between items-center">
           <div>
-            <CardTitle>Manage Workers</CardTitle>
+            <CardTitle>কর্মী পরিচালনা</CardTitle>
             <CardDescription>
-              View, add, or manage worker profiles in your factory.
+              আপনার কারখানার কর্মীদের প্রোফাইল দেখুন, যোগ করুন বা পরিচালনা করুন।
             </CardDescription>
           </div>
           <Button>
             <PlusCircle className="mr-2 h-4 w-4" />
-            Add New Worker
+            নতুন কর্মী যোগ করুন
           </Button>
         </div>
       </CardHeader>
@@ -62,18 +62,18 @@ export default function WorkersPage() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Worker</TableHead>
-                <TableHead>Department</TableHead>
-                <TableHead>Contact</TableHead>
-                <TableHead>Join Date</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
+                <TableHead>কর্মী</TableHead>
+                <TableHead>বিভাগ</TableHead>
+                <TableHead>যোগাযোগ</TableHead>
+                <TableHead>যোগদানের তারিখ</TableHead>
+                <TableHead className="text-right">অ্যাকশন</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {isLoading ? (
                 <TableRow>
                   <TableCell colSpan={5} className="h-24 text-center">
-                    Loading workers...
+                    কর্মী লোড হচ্ছে...
                   </TableCell>
                 </TableRow>
               ) : workers && workers.length > 0 ? (
@@ -100,22 +100,22 @@ export default function WorkersPage() {
                     </TableCell>
                     <TableCell>{worker.contact}</TableCell>
                     <TableCell>
-                      {new Date(worker.joinDate).toLocaleDateString()}
+                      {new Date(worker.joinDate).toLocaleDateString('bn-BD')}
                     </TableCell>
                     <TableCell className="text-right">
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <Button variant="ghost" className="h-8 w-8 p-0">
-                            <span className="sr-only">Open menu</span>
+                            <span className="sr-only">মেনু খুলুন</span>
                             <MoreHorizontal className="h-4 w-4" />
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                          <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                          <DropdownMenuItem>Edit Profile</DropdownMenuItem>
-                          <DropdownMenuItem>View Details</DropdownMenuItem>
+                          <DropdownMenuLabel>অ্যাকশন</DropdownMenuLabel>
+                          <DropdownMenuItem>প্রোফাইল সম্পাদনা</DropdownMenuItem>
+                          <DropdownMenuItem>বিস্তারিত দেখুন</DropdownMenuItem>
                           <DropdownMenuItem className="text-destructive">
-                            Delete Worker
+                            কর্মী মুছুন
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
@@ -125,7 +125,7 @@ export default function WorkersPage() {
               ) : (
                 <TableRow>
                   <TableCell colSpan={5} className="h-24 text-center">
-                    No workers found.
+                    কোনো কর্মী পাওয়া যায়নি।
                   </TableCell>
                 </TableRow>
               )}

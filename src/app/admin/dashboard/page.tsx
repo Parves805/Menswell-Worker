@@ -21,10 +21,10 @@ const summaryData = {
 };
 
 const formatNumber = (num: number) => {
-  return new Intl.NumberFormat('en-US').format(num);
+  return new Intl.NumberFormat('bn-BD').format(num);
 };
 const formatCurrency = (amount: number) =>
-  new Intl.NumberFormat('en-IN', {
+  new Intl.NumberFormat('bn-BD', {
     style: 'currency',
     currency: 'BDT',
     minimumFractionDigits: 0,
@@ -32,38 +32,38 @@ const formatCurrency = (amount: number) =>
 
 export default function AdminDashboardPage() {
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-6 font-sans">
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Workers</CardTitle>
+            <CardTitle className="text-sm font-medium">মোট কর্মী</CardTitle>
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
               {formatNumber(summaryData.totalWorkers)}
             </div>
-            <p className="text-xs text-muted-foreground">+2 from last month</p>
+            <p className="text-xs text-muted-foreground">গত মাসের থেকে ২ জন বেশি</p>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
-              Today's Production
+              আজকের উৎপাদন
             </CardTitle>
             <Factory className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {formatNumber(summaryData.totalProductionToday)} pieces
+              {formatNumber(summaryData.totalProductionToday)} পিস
             </div>
-            <p className="text-xs text-muted-foreground">+5% from yesterday</p>
+            <p className="text-xs text-muted-foreground">গতকালের থেকে ৫% বেশি</p>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
-              Salary Paid (This Month)
+              বেতন প্রদান (এই মাসে)
             </CardTitle>
             <Banknote className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
@@ -71,13 +71,13 @@ export default function AdminDashboardPage() {
             <div className="text-2xl font-bold">
               {formatCurrency(summaryData.totalSalaryPaid)}
             </div>
-            <p className="text-xs text-muted-foreground">For July 2024</p>
+            <p className="text-xs text-muted-foreground">জুলাই ২০২৪ এর জন্য</p>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
-              Total Expenses (This Month)
+              মোট খরচ (এই মাসে)
             </CardTitle>
             <AreaChart className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
@@ -86,7 +86,7 @@ export default function AdminDashboardPage() {
               {formatCurrency(summaryData.totalExpenses)}
             </div>
             <p className="text-xs text-muted-foreground">
-              -10% from last month
+              গত মাসের থেকে ১০% কম
             </p>
           </CardContent>
         </Card>

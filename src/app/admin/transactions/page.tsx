@@ -30,7 +30,7 @@ import {
 
 
 const formatCurrency = (amount: number) =>
-  new Intl.NumberFormat('en-IN', {
+  new Intl.NumberFormat('bn-BD', {
     style: 'currency',
     currency: 'BDT',
     minimumFractionDigits: 0,
@@ -39,23 +39,23 @@ const formatCurrency = (amount: number) =>
 export default function AdminTransactionsPage() {
   
   return (
-    <Card>
+    <Card className="font-sans">
       <CardHeader>
         <div className="flex justify-between items-center">
             <div>
-                <CardTitle>Manage Transactions</CardTitle>
+                <CardTitle>লেনদেন পরিচালনা</CardTitle>
                 <CardDescription>
-                Review and manage all advance and bonus payments for workers.
+                কর্মীদের সমস্ত অগ্রিম এবং বোনাস পেমেন্ট পর্যালোচনা ও পরিচালনা করুন।
                 </CardDescription>
             </div>
             <div className="flex gap-2">
                 <Button>
                     <PlusCircle className="mr-2 h-4 w-4" />
-                    New Bonus
+                    নতুন বোনাস
                 </Button>
                 <Button>
                     <PlusCircle className="mr-2 h-4 w-4" />
-                    New Advance
+                    নতুন অগ্রিম
                 </Button>
             </div>
         </div>
@@ -63,8 +63,8 @@ export default function AdminTransactionsPage() {
       <CardContent>
         <Tabs defaultValue="advances">
           <TabsList className="mb-4">
-            <TabsTrigger value="advances">Advance Payments</TabsTrigger>
-            <TabsTrigger value="bonuses">Bonus Payments</TabsTrigger>
+            <TabsTrigger value="advances">অগ্রিম পেমেন্ট</TabsTrigger>
+            <TabsTrigger value="bonuses">বোনাস পেমেন্ট</TabsTrigger>
           </TabsList>
           
           <TabsContent value="advances">
@@ -72,11 +72,11 @@ export default function AdminTransactionsPage() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Worker</TableHead>
-                    <TableHead>Date</TableHead>
-                    <TableHead className="text-right">Amount</TableHead>
-                    <TableHead className="text-center">Status</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
+                    <TableHead>কর্মী</TableHead>
+                    <TableHead>তারিখ</TableHead>
+                    <TableHead className="text-right">পরিমাণ</TableHead>
+                    <TableHead className="text-center">অবস্থা</TableHead>
+                    <TableHead className="text-right">פעולות</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -87,27 +87,27 @@ export default function AdminTransactionsPage() {
                           <div className="font-semibold">{payment.workerName}</div>
                           <div className="text-xs text-muted-foreground">{payment.workerId}</div>
                         </TableCell>
-                        <TableCell>{new Date(payment.date).toLocaleDateString()}</TableCell>
+                        <TableCell>{new Date(payment.date).toLocaleDateString('bn-BD')}</TableCell>
                         <TableCell className="text-right">{formatCurrency(payment.amount)}</TableCell>
                         <TableCell className="text-center">
                           <Badge variant={payment.deducted ? 'default' : 'secondary'}>
-                            {payment.deducted ? 'Deducted' : 'Pending'}
+                            {payment.deducted ? 'কর্তন হয়েছে' : 'বিচারাধীন'}
                           </Badge>
                         </TableCell>
                         <TableCell className="text-right">
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                               <Button variant="ghost" className="h-8 w-8 p-0">
-                                <span className="sr-only">Open menu</span>
+                                <span className="sr-only">মেনু খুলুন</span>
                                 <MoreHorizontal className="h-4 w-4" />
                               </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
-                              <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                              <DropdownMenuItem>View Details</DropdownMenuItem>
-                              {!payment.deducted && <DropdownMenuItem>Mark as Deducted</DropdownMenuItem>}
+                              <DropdownMenuLabel>অ্যাকশন</DropdownMenuLabel>
+                              <DropdownMenuItem>বিস্তারিত দেখুন</DropdownMenuItem>
+                              {!payment.deducted && <DropdownMenuItem>কর্তন হয়েছে হিসেবে চিহ্নিত করুন</DropdownMenuItem>}
                               <DropdownMenuItem className="text-destructive">
-                                Reject/Delete
+                                বাতিল/মুছুন
                               </DropdownMenuItem>
                             </DropdownMenuContent>
                           </DropdownMenu>
@@ -117,7 +117,7 @@ export default function AdminTransactionsPage() {
                   ) : (
                     <TableRow>
                       <TableCell colSpan={5} className="h-24 text-center">
-                        No advance payments found.
+                        কোনো অগ্রিম পেমেন্ট পাওয়া যায়নি।
                       </TableCell>
                     </TableRow>
                   )}
@@ -131,10 +131,10 @@ export default function AdminTransactionsPage() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Worker</TableHead>
-                    <TableHead>Date</TableHead>
-                    <TableHead>Type</TableHead>
-                    <TableHead className="text-right">Amount</TableHead>
+                    <TableHead>কর্মী</TableHead>
+                    <TableHead>তারিখ</TableHead>
+                    <TableHead>ধরন</TableHead>
+                    <TableHead className="text-right">পরিমাণ</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -145,7 +145,7 @@ export default function AdminTransactionsPage() {
                           <div className="font-semibold">{bonus.workerName}</div>
                           <div className="text-xs text-muted-foreground">{bonus.workerId}</div>
                         </TableCell>
-                        <TableCell>{new Date(bonus.date).toLocaleDateString()}</TableCell>
+                        <TableCell>{new Date(bonus.date).toLocaleDateString('bn-BD')}</TableCell>
                         <TableCell>
                             <Badge variant="outline">{bonus.type}</Badge>
                         </TableCell>
@@ -155,7 +155,7 @@ export default function AdminTransactionsPage() {
                   ) : (
                     <TableRow>
                       <TableCell colSpan={4} className="h-24 text-center">
-                        No bonus payments found.
+                        কোনো বোনাস পেমেন্ট পাওয়া যায়নি।
                       </TableCell>
                     </TableRow>
                   )}
