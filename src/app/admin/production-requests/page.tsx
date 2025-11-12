@@ -197,6 +197,18 @@ export default function ProductionRequestsPage() {
     return allRequests.filter(req => req.status === activeTab);
   }, [allRequests, activeTab]);
 
+  const sendNotification = (workerId: string, title: string, message: string) => {
+    if (!firestore) return;
+    const notificationsCol = collection(firestore, 'notifications');
+    addDocumentNonBlocking(notificationsCol, {
+      workerId,
+      title,
+      message,
+      isRead: false,
+      createdAt: new Date().toISOString(),
+    });
+  };
+
   const handleApprove = async (request: ProductionEntryRequest) => {
     if (!firestore) return;
     setProcessingId(request.id);
@@ -232,6 +244,12 @@ export default function ProductionRequestsPage() {
         processedAt: new Date().toISOString(),
       });
 
+      sendNotification(
+        request.workerId,
+        'কাজের অনুরোধ অনুমোদিত',
+        `আপনার ${request.pieceCount} পিস ${request.categoryName}-এর কাজের অনুরোধটি অনুমোদিত হয়েছে।`
+      );
+
       toast({
         title: 'অনুরোধ অনুমোদিত হয়েছে',
         description: `${request.workerName}-এর এন্ট্রি সফলভাবে যোগ করা হয়েছে।`,
@@ -263,6 +281,12 @@ export default function ProductionRequestsPage() {
         status: 'rejected',
         processedAt: new Date().toISOString(),
       });
+      
+      sendNotification(
+        request.workerId,
+        'কাজের অনুরোধ বাতিল হয়েছে',
+        `আপনার ${request.pieceCount} পিস ${request.categoryName}-এর কাজের অনুরোধটি বাতিল করা হয়েছে।`
+      );
 
       toast({
         variant: 'destructive',

@@ -183,6 +183,17 @@ export default function AdvanceRequestsPage() {
     return allRequests.filter(req => req.status === activeTab);
   }, [allRequests, activeTab]);
 
+  const sendNotification = (workerId: string, title: string, message: string) => {
+    if (!firestore) return;
+    const notificationsCol = collection(firestore, 'notifications');
+    addDocumentNonBlocking(notificationsCol, {
+      workerId,
+      title,
+      message,
+      isRead: false,
+      createdAt: new Date().toISOString(),
+    });
+  };
 
   const handleApprove = async (request: AdvancePaymentRequest) => {
     if (!firestore) return;
@@ -214,6 +225,12 @@ export default function AdvanceRequestsPage() {
         status: 'approved',
         processedAt: new Date().toISOString(),
       });
+      
+      sendNotification(
+        request.workerId,
+        'অগ্রিম টাকার অনুরোধ অনুমোদিত',
+        `আপনার ${formatCurrency(request.amount)} অগ্রিম টাকার অনুরোধটি অনুমোদিত হয়েছে।`
+      );
 
       toast({
         title: 'অনুরোধ অনুমোদিত হয়েছে',
@@ -246,6 +263,12 @@ export default function AdvanceRequestsPage() {
         status: 'rejected',
         processedAt: new Date().toISOString(),
       });
+
+      sendNotification(
+        request.workerId,
+        'অগ্রিম টাকার অনুরোধ বাতিল হয়েছে',
+        `আপনার ${formatCurrency(request.amount)} অগ্রিম টাকার অনুরোধটি বাতিল করা হয়েছে।`
+      );
 
       toast({
         variant: 'destructive',

@@ -124,10 +124,12 @@ export type AppSettings = {
 };
 
 export type Notification = {
-    id: string;
-    title: string;
-    message: string;
-    sentAt: string; // ISO date string
-    target: 'all' | 'worker' | 'group';
-    targetId?: string; // Worker ID or Group ID
-}
+  id: string;
+  workerId: string;
+  title: string;
+  message: string;
+  createdAt: string; // ISO date string
+  isRead: boolean;
+  target?: 'all' | 'worker' | 'group';
+  targetId?: string; // Worker ID or Group ID
+};
