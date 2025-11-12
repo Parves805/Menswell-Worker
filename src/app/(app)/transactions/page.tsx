@@ -1,15 +1,6 @@
 'use client';
 
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import {
   Card,
   CardContent,
   CardDescription,
@@ -17,134 +8,112 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { PlusCircle } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
-import { useCollection, useFirestore, useUser, useMemoFirebase } from '@/firebase';
-import { collection, query, orderBy } from 'firebase/firestore';
-import type { AdvancePayment, Bonus } from '@/lib/types';
-import React from 'react';
-import Link from 'next/link';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { DatePicker } from '@/components/DatePicker';
+import { useToast } from '@/hooks/use-toast';
+import { useState } from 'react';
+import { useFirestore, useUser, addDocumentNonBlocking } from '@/firebase';
+import { collection } from 'firebase/firestore';
 
 export default function TransactionsPage() {
+  const { toast } = useToast();
   const firestore = useFirestore();
   const { user } = useUser();
 
-  const advancesQuery = useMemoFirebase(() => {
-    if (!firestore || !user) return null;
-    return query(collection(firestore, 'workers', user.uid, 'advancePayments'), orderBy('date', 'desc'));
-  }, [firestore, user]);
+  const [amount, setAmount] = useState(0);
+  const [date, setDate] = useState<Date|undefined>(new Date());
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const bonusesQuery = useMemoFirebase(() => {
-    if (!firestore || !user) return null;
-    return query(collection(firestore, 'workers', user.uid, 'bonusPayments'), orderBy('date', 'desc'));
-  }, [firestore, user]);
+  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (!date || !user || amount <= 0 || !firestore) {
+      toast({
+        variant: 'destructive',
+        title: 'ফর্ম অসম্পূর্ণ',
+        description: 'অনুগ্রহ করে তারিখ এবং টাকার পরিমাণ পূরণ করুন।',
+      });
+      return;
+    }
+    setIsSubmitting(true);
 
-  const { data: advancePayments, isLoading: isLoadingAdvances } =
-    useCollection<AdvancePayment>(advancesQuery);
-  const { data: bonuses, isLoading: isLoadingBonuses } =
-    useCollection<Bonus>(bonusesQuery);
+    const newRequest = {
+      date: date.toISOString(),
+      workerId: user.uid,
+      workerName: user.displayName,
+      amount: amount,
+      status: 'pending',
+      requestedAt: new Date().toISOString(),
+    };
+    
+    const requestsColRef = collection(firestore, 'advancePaymentRequests');
 
-  const formatCurrency = (amount: number) =>
+    addDocumentNonBlocking(requestsColRef, newRequest)
+        .then(() => {
+            toast({
+              title: 'অনুরোধ সফল হয়েছে',
+              description: `আপনার অগ্রিম টাকার অনুরোধ সফলভাবে পাঠানো হয়েছে।`,
+            });
+            // Reset form
+            setAmount(0);
+            setDate(new Date());
+        })
+        .catch(err => {
+            console.error("Error adding document: ", err);
+            toast({ variant: 'destructive', title: 'ত্রুটি', description: 'আপনার অনুরোধ পাঠানোর সময় একটি সমস্যা হয়েছে।' });
+        })
+        .finally(() => {
+            setIsSubmitting(false);
+        });
+  };
+
+  const formatCurrency = (value: number) =>
     new Intl.NumberFormat('bn-BD', {
       style: 'currency',
       currency: 'BDT',
       minimumFractionDigits: 0,
-    }).format(amount);
+    }).format(value);
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>আমার লেনদেন</CardTitle>
-        <CardDescription>
-          আপনার সমস্ত অগ্রিম এবং বোনাস পেমেন্টের ইতিহাস দেখুন।
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <Tabs defaultValue="advances">
-          <div className="flex justify-between items-center mb-4">
-            <TabsList>
-              <TabsTrigger value="advances">অগ্রিম</TabsTrigger>
-              <TabsTrigger value="bonuses">বোনাস</TabsTrigger>
-            </TabsList>
-            <Button asChild>
-              <Link href="/request-advance">
-                <PlusCircle className="mr-2 h-4 w-4" />
-                অগ্রিমের জন্য অনুরোধ
-              </Link>
+    <div className="flex justify-center items-start pt-8">
+      <Card className="w-full max-w-lg">
+        <CardHeader>
+          <CardTitle>অগ্রিম টাকার জন্য অনুরোধ</CardTitle>
+          <CardDescription>
+            আপনার প্রয়োজনীয় অগ্রিম টাকার পরিমাণ এবং তারিখ উল্লেখ করুন।
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="space-y-2">
+              <Label htmlFor="date">তারিখ</Label>
+              <DatePicker name="date" value={date} onSelect={setDate} />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="amount">টাকার পরিমাণ</Label>
+              <Input
+                id="amount"
+                name="amount"
+                type="number"
+                placeholder="e.g., 5000"
+                required
+                value={amount || ''}
+                onChange={(e) => setAmount(Number(e.target.value))}
+              />
+            </div>
+            
+            <div className="p-4 bg-muted rounded-md text-center">
+                <p className="text-sm text-muted-foreground">অনুরোধকৃত পরিমাণ</p>
+                <p className="text-2xl font-bold">{formatCurrency(amount)}</p>
+            </div>
+
+            <Button type="submit" className="w-full" disabled={isSubmitting}>
+              {isSubmitting ? 'অনুরোধ পাঠানো হচ্ছে...' : 'অনুরোধ পাঠান'}
             </Button>
-          </div>
-          <TabsContent value="advances">
-            {isLoadingAdvances ? <p>লোড হচ্ছে...</p> : (
-            <div className="rounded-md border">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>তারিখ</TableHead>
-                    <TableHead className="text-right">পরিমাণ</TableHead>
-                    <TableHead className="text-center">অবস্থা</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {advancePayments?.length ? advancePayments.map((payment) => (
-                    <TableRow key={payment.id}>
-                      <TableCell>{new Date(payment.date).toLocaleDateString('bn-BD')}</TableCell>
-                      <TableCell className="text-right">{formatCurrency(payment.amount)}</TableCell>
-                      <TableCell className="text-center">
-                        <Badge
-                          variant={payment.deducted ? 'default' : 'secondary'}
-                        >
-                          {payment.deducted ? 'কর্তন হয়েছে' : 'বিচারাধীন'}
-                        </Badge>
-                      </TableCell>
-                    </TableRow>
-                  )) : (
-                     <TableRow>
-                        <TableCell colSpan={3} className="h-24 text-center">
-                            কোনো অগ্রিমের রেকর্ড পাওয়া যায়নি।
-                        </TableCell>
-                    </TableRow>
-                  )}
-                </TableBody>
-              </Table>
-            </div>
-            )}
-          </TabsContent>
-          <TabsContent value="bonuses">
-            {isLoadingBonuses ? <p>লোড হচ্ছে...</p> : (
-            <div className="rounded-md border">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>তারিখ</TableHead>
-                    <TableHead>ধরন</TableHead>
-                    <TableHead className="text-right">পরিমাণ</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {bonuses?.length ? bonuses.map((bonus) => (
-                    <TableRow key={bonus.id}>
-                      <TableCell>{new Date(bonus.date).toLocaleDateString('bn-BD')}</TableCell>
-                      <TableCell>
-                        <Badge variant="outline">{bonus.type}</Badge>
-                      </TableCell>
-                      <TableCell className="text-right">{formatCurrency(bonus.amount)}</TableCell>
-                    </TableRow>
-                  )) : (
-                    <TableRow>
-                        <TableCell colSpan={3} className="h-24 text-center">
-                            কোনো বোনাসের রেকর্ড পাওয়া যায়নি।
-                        </TableCell>
-                    </TableRow>
-                  )}
-                </TableBody>
-              </Table>
-            </div>
-            )}
-          </TabsContent>
-        </Tabs>
-      </CardContent>
-    </Card>
+          </form>
+        </CardContent>
+      </Card>
+    </div>
   );
 }
-
-    
