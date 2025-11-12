@@ -3,7 +3,6 @@
 import * as React from 'react';
 import Link from 'next/link';
 import {
-  Bell,
   Home,
   PlusSquare,
   MessageCircle,
@@ -12,7 +11,8 @@ import {
   LogOut,
   Hourglass,
   CircleDollarSign,
-  Scissors
+  Scissors,
+  Bell,
 } from 'lucide-react';
 import {
   SidebarProvider,
@@ -56,7 +56,6 @@ const bottomNavItems: NavItem[] = [
     { title: 'হোম', href: '/dashboard', icon: <Home /> },
     { title: 'চ্যাট', href: '/chat', icon: <MessageCircle /> },
     { title: 'টাকার অনুরোধ', href: '/request-advance', icon: <CircleDollarSign /> },
-    { title: 'নোটিফিকেশন', href: '/notifications', icon: <Bell /> },
     { title: 'অ্যাকাউন্ট', href: '/profile', icon: <User /> },
 ]
 
@@ -152,12 +151,6 @@ function AppLayoutContent({ children }: { children: React.ReactNode }) {
           <div className="relative flex-1">
             {/* Search can be added back if needed */}
           </div>
-          <Button variant="ghost" size="icon" className="rounded-full text-foreground hover:bg-muted hover:text-foreground" asChild>
-            <Link href="/notifications">
-              <Bell className="h-5 w-5" />
-              <span className="sr-only">নোটিফিকেশন দেখান</span>
-            </Link>
-          </Button>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="flex items-center gap-3 cursor-pointer p-1 h-auto rounded-full hover:bg-muted">

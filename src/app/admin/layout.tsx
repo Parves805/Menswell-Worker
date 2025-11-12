@@ -52,7 +52,6 @@ const mainNavItems: NavItem[] = [
   { title: 'অ্যাডভান্স অনুরোধ', href: '/admin/advance-requests', icon: <Wallet /> },
   { title: 'ক্যাটাগরি', href: '/admin/categories', icon: <Shapes /> },
   { title: 'চ্যাট', href: '/admin/chat', icon: <MessageSquare /> },
-  { title: 'বিজ্ঞপ্তি', href: '/admin/notifications', icon: <Bell /> },
   { title: 'সেটিংস', href: '/admin/settings', icon: <Settings /> },
 ];
 
