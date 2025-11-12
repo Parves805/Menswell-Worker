@@ -74,8 +74,6 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
       return;
     }
     
-    // This part is commented out for development purposes
-    /*
     user.getIdTokenResult(true).then((idTokenResult) => {
       if (!idTokenResult.claims.isAdmin) {
         auth?.signOut();
@@ -87,7 +85,6 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
         });
       }
     });
-    */
 
   }, [user, isUserLoading, router, auth, toast]);
 
