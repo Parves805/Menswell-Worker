@@ -9,7 +9,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { PlusCircle, MoreHorizontal, Image as ImageIcon, Trash2 } from 'lucide-react';
+import { PlusCircle, Image as ImageIcon, Trash2 } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -45,11 +45,9 @@ const formatCurrency = (amount: number) =>
 function AddCategoryDialog({
   isOpen,
   onOpenChange,
-  onCategoryAdded,
 }: {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
-  onCategoryAdded: (category: Category) => void;
 }) {
   const [name, setName] = useState('');
   const [rate, setRate] = useState('');
@@ -69,13 +67,12 @@ function AddCategoryDialog({
     const newCategory = {
       name,
       rate: parseFloat(rate),
-      imageUrl: imageUrl || `https://picsum.photos/seed/${name}/400/300`,
+      imageUrl: imageUrl || `https://picsum.photos/seed/${name.replace(/\s/g, '')}/400/300`,
     };
 
     addDocumentNonBlocking(collection(firestore, 'categories'), newCategory)
       .then(docRef => {
         if (docRef) {
-            onCategoryAdded({ id: docRef.id, ...newCategory });
             toast({ title: 'ক্যাটাগরি যোগ হয়েছে', description: `"${name}" সফলভাবে যোগ করা হয়েছে।` });
             onOpenChange(false);
             setName('');
@@ -135,17 +132,6 @@ export default function CategoriesPage() {
     [firestore]
   );
   const { data: categories, isLoading, error } = useCollection<Category>(categoriesQuery);
-  const [localCategories, setLocalCategories] = useState<Category[] | null>(null);
-
-  React.useEffect(() => {
-      if(categories) {
-          setLocalCategories(categories);
-      }
-  }, [categories]);
-
-  const handleCategoryAdded = (newCategory: Category) => {
-    setLocalCategories(prev => (prev ? [newCategory, ...prev] : [newCategory]));
-  };
 
   const handleDeleteCategory = (categoryId: string) => {
     if (!firestore) return;
@@ -153,10 +139,10 @@ export default function CategoriesPage() {
     const docRef = doc(firestore, 'categories', categoryId);
     deleteDocumentNonBlocking(docRef);
 
-    setLocalCategories(prev => prev?.filter(cat => cat.id !== categoryId) || null);
     toast({
         title: 'ক্যাটাগরি মুছে ফেলা হয়েছে',
         description: 'ক্যাটাগরিটি সফলভাবে মুছে ফেলা হয়েছে।',
+        variant: 'destructive'
     });
   }
 
@@ -165,7 +151,6 @@ export default function CategoriesPage() {
       <AddCategoryDialog
         isOpen={isDialogOpen}
         onOpenChange={setIsDialogOpen}
-        onCategoryAdded={handleCategoryAdded}
       />
       <Card>
         <CardHeader className="flex-row justify-between items-center">
@@ -188,7 +173,7 @@ export default function CategoriesPage() {
                   <TableHead className="w-[80px]">ছবি</TableHead>
                   <TableHead>নাম</TableHead>
                   <TableHead>দর (প্রতি পিস)</TableHead>
-                  <TableHead className="text-right">פעולה</TableHead>
+                  <TableHead className="text-right">কার্যকলাপ</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -200,7 +185,7 @@ export default function CategoriesPage() {
                         <TableCell className="text-right"><Skeleton className="h-8 w-8 ml-auto" /></TableCell>
                     </TableRow>
                 ))}
-                {!isLoading && localCategories?.map(cat => (
+                {!isLoading && categories?.map(cat => (
                     <TableRow key={cat.id}>
                         <TableCell>
                             <Avatar className="h-12 w-12 rounded-md">
@@ -217,7 +202,7 @@ export default function CategoriesPage() {
                         </TableCell>
                     </TableRow>
                 ))}
-                {!isLoading && (!localCategories || localCategories.length === 0) && (
+                {!isLoading && (!categories || categories.length === 0) && (
                      <TableRow>
                         <TableCell colSpan={4} className="h-24 text-center">
                         কোনো ক্যাটাগরি পাওয়া যায়নি।
