@@ -121,7 +121,7 @@ service cloud.firestore {
      */
     match /categories/{categoryId} {
       allow read: if isSignedIn();
-      allow write: if isAdmin();
+      allow write: if isSignedIn(); // DEV ONLY: was isAdmin()
     }
 
     /**
