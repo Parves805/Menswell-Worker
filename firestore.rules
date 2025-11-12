@@ -176,10 +176,10 @@ service cloud.firestore {
     /**
      * @description Rules for the /expenses/{expenseId} collection.
      * @path /expenses/{expenseId}
-     * @principle Allows only admins to read and write.
+     * @principle Allows any signed in user to CUD. Should be restricted to admins.
      */
     match /expenses/{expenseId} {
-      allow read, write: if isAdmin();
+      allow read, write: if isSignedIn();
     }
 
     /**
