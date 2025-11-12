@@ -1,3 +1,4 @@
+
 'use client';
 
 import {
@@ -143,8 +144,8 @@ export default function DashboardPage() {
       </Carousel>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Link href="/all-entries" className="transform transition-transform duration-200 hover:scale-105">
-          <Card>
+        <Link href="/all-entries" className="transform transition-transform duration-200 hover:scale-105 group">
+          <Card className="transition-colors group-hover:border-primary">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">আজকের সেলাই</CardTitle>
               <Scissors className="h-4 w-4 text-muted-foreground" />
@@ -156,8 +157,8 @@ export default function DashboardPage() {
             </CardContent>
           </Card>
         </Link>
-        <Link href="/expenses" className="transform transition-transform duration-200 hover:scale-105">
-          <Card>
+        <Link href="/expenses" className="transform transition-transform duration-200 hover:scale-105 group">
+          <Card className="transition-colors group-hover:border-primary">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">মোট খরচ</CardTitle>
               <Wallet className="h-4 w-4 text-muted-foreground" />
@@ -170,8 +171,8 @@ export default function DashboardPage() {
             </CardContent>
           </Card>
         </Link>
-        <Link href="/advances" className="transform transition-transform duration-200 hover:scale-105">
-          <Card>
+        <Link href="/advances" className="transform transition-transform duration-200 hover:scale-105 group">
+          <Card className="transition-colors group-hover:border-primary">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">বকেয়া অগ্রিম</CardTitle>
               <CircleDollarSign className="h-4 w-4 text-muted-foreground" />
@@ -186,8 +187,8 @@ export default function DashboardPage() {
             </CardContent>
           </Card>
         </Link>
-        <Link href="/overtime" className="transform transition-transform duration-200 hover:scale-105">
-          <Card>
+        <Link href="/overtime" className="transform transition-transform duration-200 hover:scale-105 group">
+          <Card className="transition-colors group-hover:border-primary">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">আজকের ওভারটাইম</CardTitle>
               <Hourglass className="h-4 w-4 text-muted-foreground" />
