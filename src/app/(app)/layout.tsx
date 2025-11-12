@@ -87,7 +87,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
   return (
     <SidebarProvider>
-      <Sidebar side="left" collapsible="icon" className="data-[mobile=true]:bg-primary data-[mobile=true]:text-primary-foreground">
+      <Sidebar side="left" collapsible="icon" className="data-[mobile=true]:bg-background data-[mobile=true]:text-foreground">
         <SidebarHeader>
           <div className="flex items-center gap-2">
             <Button variant="ghost" size="icon" className="shrink-0" asChild>
@@ -137,12 +137,12 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         </SidebarFooter>
       </Sidebar>
       <SidebarInset className="flex flex-col">
-        <header className="sticky top-0 z-10 flex h-16 items-center gap-4 border-b bg-primary text-primary-foreground px-4 sm:px-6">
-          <SidebarTrigger className="flex text-primary-foreground hover:text-primary-foreground md:hidden" />
+        <header className="sticky top-0 z-10 flex h-16 items-center gap-4 border-b bg-background text-foreground px-4 sm:px-6">
+          <SidebarTrigger className="flex text-foreground hover:text-foreground md:hidden" />
           <div className="relative flex-1">
             {/* Search can be added back if needed */}
           </div>
-          <Button variant="ghost" size="icon" className="rounded-full text-primary-foreground hover:bg-white/20 hover:text-primary-foreground" asChild>
+          <Button variant="ghost" size="icon" className="rounded-full text-foreground hover:bg-muted hover:text-foreground" asChild>
             <Link href="/notifications">
               <Bell className="h-5 w-5" />
               <span className="sr-only">নোটিফিকেশন দেখান</span>
@@ -150,14 +150,14 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           </Button>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="flex items-center gap-3 cursor-pointer p-1 h-auto rounded-full hover:bg-white/20">
+              <Button variant="ghost" className="flex items-center gap-3 cursor-pointer p-1 h-auto rounded-full hover:bg-muted">
                 <Avatar className="h-9 w-9">
                   <AvatarImage src={user.photoURL ?? "https://picsum.photos/seed/99/40/40"} alt="ব্যবহারকারীর ছবি" />
                   <AvatarFallback>{user.email?.charAt(0).toUpperCase()}</AvatarFallback>
                 </Avatar>
                 <div className="hidden md:flex flex-col items-start">
-                    <span className="text-sm font-medium text-primary-foreground">{user.displayName ?? "আয়েশা খানম"}</span>
-                    <span className="text-xs text-primary-foreground/80">সুইং অপারেটর</span>
+                    <span className="text-sm font-medium text-foreground">{user.displayName ?? "আয়েশা খানম"}</span>
+                    <span className="text-xs text-muted-foreground">সুইং অপারেটর</span>
                 </div>
               </Button>
 
