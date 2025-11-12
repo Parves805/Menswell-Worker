@@ -9,7 +9,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Scissors, CircleDollarSign, Hourglass, Wallet } from 'lucide-react';
+import { Scissors, CircleDollarSign, Hourglass, Wallet2 } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import {
@@ -156,7 +156,7 @@ export default function DashboardPage() {
                       fill
                       className="object-cover"
                     />
-                     <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent flex flex-col justify-end p-6">
+                     <div className="absolute inset-0 flex flex-col justify-end p-6">
                         <h3 className="text-xl font-bold text-white [text-shadow:0_2px_4px_rgba(0,0,0,0.5)]">{image.title}</h3>
                         <p className="text-sm text-white/90 [text-shadow:0_1px_3px_rgba(0,0,0,0.5)]">{image.description}</p>
                      </div>
@@ -190,7 +190,7 @@ export default function DashboardPage() {
           <Card className="transition-colors group-hover:border-primary">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">মোট খরচ</CardTitle>
-              <Wallet className="h-4 w-4 text-muted-foreground" />
+              <Wallet2 className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
                 <div className="text-2xl font-bold">

@@ -8,7 +8,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { Wallet } from 'lucide-react';
+import { Wallet2 } from 'lucide-react';
 
 
 export default function ExpensesPage() {
@@ -17,7 +17,7 @@ export default function ExpensesPage() {
     <Card>
         <CardHeader>
             <CardTitle className="flex items-center gap-2">
-                <Wallet />
+                <Wallet2 />
                 খরচের বিবরণ
             </CardTitle>
             <CardDescription>
