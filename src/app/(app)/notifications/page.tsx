@@ -8,6 +8,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Bell, Circle } from 'lucide-react';
+import Image from 'next/image';
 import {
   useCollection,
   useFirestore,
@@ -28,7 +29,6 @@ export default function NotificationsPage() {
 
   const notificationsQuery = useMemoFirebase(() => {
     if (!user || !firestore) return null;
-    // Querying the sub-collection for the current user
     return query(
       collection(firestore, 'workers', user.uid, 'notifications'),
       orderBy('createdAt', 'desc')
@@ -40,7 +40,6 @@ export default function NotificationsPage() {
 
   useEffect(() => {
     if (notifications) {
-      // Data is already sorted by the query, so we can just set it.
       setSortedNotifications(notifications);
     }
   }, [notifications]);
@@ -90,14 +89,19 @@ export default function NotificationsPage() {
                 )}
               >
                 {!notif.isRead && (
-                  <Circle className="mt-1 h-3 w-3 fill-current text-primary" />
+                  <Circle className="mt-1 h-3 w-3 flex-shrink-0 fill-current text-primary" />
                 )}
                 <div className={cn('flex-1', notif.isRead && 'pl-7')}>
                   <p className="font-medium">{notif.title}</p>
                   <p className="text-sm text-muted-foreground">
                     {notif.message}
                   </p>
-                  <p className="mt-1 text-xs text-muted-foreground">
+                   {notif.imageUrl && (
+                    <div className="relative mt-2 aspect-video w-full max-w-sm overflow-hidden rounded-md">
+                        <Image src={notif.imageUrl} alt={notif.title} fill className="object-cover"/>
+                    </div>
+                  )}
+                  <p className="mt-2 text-xs text-muted-foreground">
                     {notif.createdAt ? new Date(notif.createdAt).toLocaleDateString('bn-BD', {
                       day: 'numeric',
                       month: 'long',
@@ -124,5 +128,3 @@ export default function NotificationsPage() {
     </Card>
   );
 }
-
-    

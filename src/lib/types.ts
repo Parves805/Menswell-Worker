@@ -131,6 +131,7 @@ export type Notification = {
   message: string;
   createdAt: string; // ISO date string
   isRead: boolean;
+  imageUrl?: string;
 };
 
     

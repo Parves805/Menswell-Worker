@@ -13,27 +13,36 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { useToast } from "@/hooks/use-toast";
-import React from 'react';
-import { useCollection, useFirestore, useMemoFirebase, addDocumentNonBlocking } from '@/firebase';
+import React, { useState, ChangeEvent } from 'react';
+import { useCollection, useFirestore, useMemoFirebase, addDocumentNonBlocking, useStorage } from '@/firebase';
 import { collection } from 'firebase/firestore';
+import { ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage';
 import type { Worker } from '@/lib/types';
 import { Input } from "@/components/ui/input";
 
 
 export default function AdminNotificationsPage() {
     const { toast } = useToast();
-    const [title, setTitle] = React.useState('');
-    const [message, setMessage] = React.useState('');
-    const [target, setTarget] = React.useState('all');
-    const [selectedWorker, setSelectedWorker] = React.useState('');
-    const [isSubmitting, setIsSubmitting] = React.useState(false);
+    const [title, setTitle] = useState('');
+    const [message, setMessage] = useState('');
+    const [target, setTarget] = useState('all');
+    const [selectedWorker, setSelectedWorker] = useState('');
+    const [imageFile, setImageFile] = useState<File | null>(null);
+    const [isSubmitting, setIsSubmitting] = useState(false);
     const firestore = useFirestore();
+    const storage = useStorage();
 
     const workersQuery = useMemoFirebase(
       () => (firestore ? collection(firestore, 'workers') : null),
       [firestore]
     );
     const { data: workers, isLoading } = useCollection<Worker>(workersQuery);
+
+    const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files && e.target.files[0]) {
+            setImageFile(e.target.files[0]);
+        }
+    };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -48,20 +57,28 @@ export default function AdminNotificationsPage() {
         }
 
         setIsSubmitting(true);
-
-        const notificationData = {
-          title,
-          message,
-          createdAt: new Date().toISOString(),
-          isRead: false,
-        };
+        
+        let uploadedImageUrl: string | undefined = undefined;
 
         try {
+            if (imageFile && storage) {
+                const imageRef = storageRef(storage, `notifications/${Date.now()}_${imageFile.name}`);
+                const snapshot = await uploadBytes(imageRef, imageFile);
+                uploadedImageUrl = await getDownloadURL(snapshot.ref);
+            }
+
+            const notificationData = {
+              title,
+              message,
+              createdAt: new Date().toISOString(),
+              isRead: false,
+              imageUrl: uploadedImageUrl
+            };
+
             if (target === 'all') {
                 if (!workers) {
                     throw new Error("কর্মী তালিকা পাওয়া যায়নি।");
                 }
-                // Send to all workers by iterating and adding to each sub-collection
                 const promises = workers.map(worker => {
                     const workerNotificationsCol = collection(firestore, 'workers', worker.id, 'notifications');
                     return addDocumentNonBlocking(workerNotificationsCol, { ...notificationData, workerId: worker.id });
@@ -72,7 +89,6 @@ export default function AdminNotificationsPage() {
                     description: "সকল কর্মীকে আপনার বিজ্ঞপ্তি সফলভাবে পাঠানো হয়েছে।",
                 });
             } else {
-                // Send to a specific worker's sub-collection
                 const workerNotificationsCol = collection(firestore, 'workers', selectedWorker, 'notifications');
                 await addDocumentNonBlocking(workerNotificationsCol, { ...notificationData, workerId: selectedWorker });
                 toast({
@@ -84,6 +100,7 @@ export default function AdminNotificationsPage() {
             setTitle('');
             setMessage('');
             setSelectedWorker('');
+            setImageFile(null);
         } catch (error) {
             console.error("Notification sending error:", error);
             toast({ variant: 'destructive', title: 'ত্রুটি', description: 'বিজ্ঞপ্তি পাঠানোর সময় সমস্যা হয়েছে।' });
@@ -99,7 +116,7 @@ export default function AdminNotificationsPage() {
                     <CardTitle className="flex items-center gap-2">
                         <Send /> নতুন বিজ্ঞপ্তি পাঠান
                     </CardTitle>
-                    <CardDescription>সকল বা নির্দিষ্ট কর্মীকে বিজ্ঞপ্তি পাঠান।</CardDescription>
+                    <CardDescription>সকল বা নির্দিষ্ট কর্মীকে ছবিসহ বিজ্ঞপ্তি পাঠান।</CardDescription>
                 </CardHeader>
                 <CardContent>
                     <form onSubmit={handleSubmit} className="space-y-4">
@@ -121,10 +138,21 @@ export default function AdminNotificationsPage() {
                                 placeholder="আপনার বিজ্ঞপ্তি এখানে লিখুন..."
                                 value={message}
                                 onChange={(e) => setMessage(e.target.value)}
-                                rows={5}
+                                rows={4}
                                 required
                             />
                         </div>
+                        
+                         <div className="space-y-2">
+                            <Label htmlFor="image">ছবি (ঐচ্ছিক)</Label>
+                            <Input
+                                id="image"
+                                type="file"
+                                accept="image/*"
+                                onChange={handleFileChange}
+                            />
+                        </div>
+
                         <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-2">
                                 <Label htmlFor="target">কাকে পাঠাবেন?</Label>
