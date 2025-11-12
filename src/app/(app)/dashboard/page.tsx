@@ -37,10 +37,18 @@ export default function DashboardPage() {
   const { user } = useUser();
   const firestore = useFirestore();
 
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const tomorrow = new Date(today);
-  tomorrow.setDate(tomorrow.getDate() + 1);
+  const today = React.useMemo(() => {
+    const d = new Date();
+    d.setHours(0, 0, 0, 0);
+    return d;
+  }, []);
+
+  const tomorrow = React.useMemo(() => {
+    const d = new Date(today);
+    d.setDate(d.getDate() + 1);
+    return d;
+  }, [today]);
+
 
   const allEntriesQuery = useMemoFirebase(() => {
     if (!user || !firestore) return null;
@@ -56,7 +64,7 @@ export default function DashboardPage() {
         where('date', '>=', Timestamp.fromDate(today)),
         where('date', '<', Timestamp.fromDate(tomorrow))
     );
-  }, [user, firestore]);
+  }, [user, firestore, today, tomorrow]);
 
   const advancePaymentsQuery = useMemoFirebase(() => {
       if(!user || !firestore) return null;
