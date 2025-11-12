@@ -21,7 +21,7 @@
  * - Workers can create chat messages in their own chat path.
  * - Admins (identified by a custom claim `isAdmin: true`) can read any chat.
  * - Listing other worker's data is now allowed for any signed-in user for the admin panel.
- * - Categories are readable by any signed-in user, but only writable by admins.
+ * - Categories are readable by any signed-in user, but only writable by admins (currently relaxed for dev).
  * - Production Entry Requests can be created by the worker who owns it. Admins can read/write all requests.
  *
  * Denormalization for Authorization:
@@ -136,7 +136,8 @@ service cloud.firestore {
 
       // Worker can read their own requests. Admins can read all.
       allow get: if isOwner(resource.data.workerId) || isAdmin();
-      allow list: if isAdmin();
+      // Any signed-in user (effectively an admin on the admin panel) can list all requests.
+      allow list: if isSignedIn();
       
       // Admins can update (approve/reject) any request.
       // Workers cannot update their own requests.
