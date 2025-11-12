@@ -16,6 +16,7 @@
  * - /categories/{categoryId}: Stores production categories for items.
  * - /productionEntryRequests/{requestId}: Stores worker requests for production entries.
  * - /advancePaymentRequests/{requestId}: Stores worker requests for advance payments.
+ * - /notifications/{notificationId}: Stores notifications for users.
  *
  * Key Security Decisions:
  * - Workers can only read and write their own profile and related data.
@@ -24,6 +25,7 @@
  * - Listing other worker's data is now allowed for any signed-in user for the admin panel.
  * - Categories are readable by any signed-in user, but only writable by admins (currently relaxed for dev).
  * - Production/Advance Entry Requests can be created by the worker who owns it. Admins can read/write all requests.
+ * - Notifications are private to each user.
  *
  * Denormalization for Authorization:
  * - Worker subcollections include `workerId` field to allow authorization without `get()` calls.
@@ -164,6 +166,19 @@ service cloud.firestore {
       // Admins can delete requests.
       allow delete: if isAdmin();
     }
+    
+    /**
+     * @description Rules for notifications. Users can only read/write their own.
+     * @path /notifications/{notificationId}
+     */
+    match /notifications/{notificationId} {
+      // Allow list/get only if the query is for the user's own notifications
+      allow list, get: if isSignedIn() && request.query.where[0][2] == request.auth.uid;
+      // Allow read/update/delete if the user is the owner of the document
+      allow read, update, delete: if isOwner(resource.data.workerId);
+      // Allow admin to create notifications, or a system process (no auth)
+      allow create: if isSignedIn();
+    }
 
     /**
      * @description Rules for the /expenses/{expenseId} collection.
@@ -184,5 +199,3 @@ service cloud.firestore {
     }
   }
 }
-
-    

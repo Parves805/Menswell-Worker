@@ -14,13 +14,14 @@ import {
 } from '@/components/ui/select';
 import { useToast } from "@/hooks/use-toast";
 import React from 'react';
-import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
+import { useCollection, useFirestore, useMemoFirebase, addDocumentNonBlocking } from '@/firebase';
 import { collection } from 'firebase/firestore';
 import type { Worker } from '@/lib/types';
 
 
 export default function AdminNotificationsPage() {
     const { toast } = useToast();
+    const [title, setTitle] = React.useState('');
     const [message, setMessage] = React.useState('');
     const [target, setTarget] = React.useState('all');
     const [selectedWorker, setSelectedWorker] = React.useState('');
@@ -34,22 +35,47 @@ export default function AdminNotificationsPage() {
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        if (!message) {
-            toast({ variant: 'destructive', title: 'বার্তা খালি', description: 'অনুগ্রহ করে একটি বার্তা লিখুন।' });
+        if (!title || !message || !firestore) {
+            toast({ variant: 'destructive', title: 'ফর্ম অসম্পূর্ণ', description: 'অনুগ্রহ করে একটি শিরোনাম এবং বার্তা লিখুন।' });
+            return;
+        }
+        
+        if (target === 'worker' && !selectedWorker) {
+            toast({ variant: 'destructive', title: 'কর্মী নির্বাচন করুন', description: 'অনুগ্রহ করে একজন কর্মীকে নির্বাচন করুন।' });
             return;
         }
 
-        console.log({
-            message,
-            target,
-            workerId: target === 'worker' ? selectedWorker : undefined
-        });
+        const notificationData = {
+          title,
+          message,
+          createdAt: new Date().toISOString(),
+          isRead: false,
+        };
+
+        if (target === 'all') {
+            // Send to all workers
+             if (!workers) return;
+             workers.forEach(worker => {
+                addDocumentNonBlocking(collection(firestore, 'notifications'), {
+                    ...notificationData,
+                    workerId: worker.id
+                });
+             });
+        } else {
+            // Send to a specific worker
+            addDocumentNonBlocking(collection(firestore, 'notifications'), {
+                ...notificationData,
+                workerId: selectedWorker
+            });
+        }
+
 
         toast({
             title: "বিজ্ঞপ্তি পাঠানো হয়েছে",
             description: "আপনার বিজ্ঞপ্তি সফলভাবে পাঠানো হয়েছে।",
         });
 
+        setTitle('');
         setMessage('');
         setTarget('all');
         setSelectedWorker('');
@@ -66,6 +92,16 @@ export default function AdminNotificationsPage() {
                 </CardHeader>
                 <CardContent>
                     <form onSubmit={handleSubmit} className="space-y-4">
+                        <div className="space-y-2">
+                            <Label htmlFor="title">শিরোনাম</Label>
+                            <Input
+                                id="title"
+                                placeholder="বিজ্ঞপ্তির শিরোনাম"
+                                value={title}
+                                onChange={(e) => setTitle(e.target.value)}
+                            />
+                        </div>
+
                         <div className="space-y-2">
                             <Label htmlFor="message">বার্তা</Label>
                             <Textarea
