@@ -63,11 +63,10 @@ export default function AllEntriesPage() {
     const element = printRef.current;
     if (!element) return;
     
-    // Temporarily make the element visible for capturing, but keep it off-screen
     element.style.position = 'absolute';
     element.style.left = '-9999px';
     element.style.opacity = '1';
-    element.style.width = '800px'; // Set a fixed width for consistent PDF layout
+    element.style.width = '800px';
 
 
     const canvas = await html2canvas(element, {
@@ -77,7 +76,6 @@ export default function AllEntriesPage() {
         logging: false, 
     });
 
-    // Hide the element again after capturing
     element.style.position = 'absolute';
     element.style.left = '0';
     element.style.opacity = '0';
@@ -106,21 +104,16 @@ export default function AllEntriesPage() {
     
     const isValidImageUrl = (url: string | undefined): boolean => {
       if (!url) return false;
-      // Looser check for valid image extensions.
       const validExtensions = ['.jpg', '.jpeg', '.png', '.webp', '.gif'];
       try {
         const path = new URL(url).pathname.toLowerCase();
-        // Check if the path ends with a known image extension. This is not foolproof but covers many cases.
         if (validExtensions.some(ext => path.endsWith(ext))) {
           return true;
         }
-        // As a fallback for URLs without extensions (like from some image CDNs), we can perform a basic check.
-        // This is a simplified check. A more robust solution might involve HEAD requests, which is complex for client-side.
         if (url.startsWith('http') && (url.includes('images.unsplash.com') || url.includes('picsum.photos'))) {
             return true;
         }
       } catch (e) {
-        // If URL parsing fails, it's not a valid URL.
         return false;
       }
       return false;
@@ -187,22 +180,18 @@ export default function AllEntriesPage() {
 
   return (
     <div className="space-y-6">
-       {/* This div is used for generating the PDF. It's hidden from view. */}
        <div ref={printRef} className="p-4 bg-white absolute left-0 top-0 opacity-0 -z-50">
-            <div className='text-center mb-6'>
+            <div className='text-center mb-4'>
                 <h1 className='text-2xl font-bold'>গার্মেন্টফ্লো</h1>
                 <p className='text-sm'>১২৩, প্রধান সড়ক, ঢাকা-১২১৬</p>
-                
-                <div className='mt-4'>
-                    <h2 className='text-xl font-bold'>সকল কাজের বিস্তারিত হিসাব</h2>
-                    <p className='text-sm'>কর্মী: {user?.displayName}</p>
-                    <p className='text-sm'>রিপোর্টের তারিখ: {new Date().toLocaleDateString('bn-BD')}</p>
-                </div>
+                <h2 className='text-xl font-bold mt-2'>সকল কাজের বিস্তারিত হিসাব</h2>
+                <p className='text-sm'>কর্মী: {user?.displayName}</p>
+                <p className='text-sm'>রিপোর্টের তারিখ: {new Date().toLocaleDateString('bn-BD')}</p>
             </div>
             
             <Table>
                 <TableHeader>
-                    <TableRow>
+                    <TableRow className='bg-muted'>
                         <TableHead>তারিখ</TableHead>
                         <TableHead>ক্যাটাগরি</TableHead>
                         <TableHead className='text-center'>পিস</TableHead>
@@ -326,3 +315,5 @@ export default function AllEntriesPage() {
     </div>
   );
 }
+
+    
