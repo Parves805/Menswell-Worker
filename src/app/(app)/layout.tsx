@@ -63,7 +63,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
   // In a real app, these would come from Firestore settings
   const companyName = 'গার্মেন্টফ্লো';
-  const companyLogo = <GarmentFlowIcon className="size-5" />;
+  const companyLogo = <GarmentFlowIcon className="size-5 text-white" />;
 
 
   React.useEffect(() => {
@@ -88,7 +88,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
   return (
     <SidebarProvider>
-      <Sidebar side="left" collapsible="icon" className="data-[mobile=true]:bg-background data-[mobile=true]:text-foreground">
+      <Sidebar side="left" collapsible="icon" className="data-[mobile=true]:bg-background data-[mobile=true]:text-foreground bg-primary text-primary-foreground">
         <SidebarHeader>
           <div className="flex items-center gap-2">
             <Button variant="ghost" size="icon" className="shrink-0" asChild>
@@ -108,12 +108,12 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                 <Link href={item.href} className="w-full">
                   <SidebarMenuButton
                     tooltip={item.title}
-                    className="hover:bg-primary/10 data-[active=true]:bg-primary/15 data-[active=true]:text-primary"
+                    className="hover:bg-primary-dark data-[active=true]:bg-primary-dark data-[active=true]:text-white data-[active=true]:border-l-4 border-white text-white/80"
                     isActive={pathname === item.href}
                     asChild
                   >
                     <div className="flex items-center gap-2">
-                        {React.cloneElement(item.icon, { className: "text-muted-foreground data-[active=true]:text-primary"})}
+                        {React.cloneElement(item.icon, { className: "text-white/80 data-[active=true]:text-white"})}
                         <span>{item.title}</span>
                     </div>
                   </SidebarMenuButton>
@@ -129,7 +129,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                 <SidebarMenuButton
                   tooltip="প্রোফাইল"
                   isActive={pathname === '/profile'}
-                  className="hover:bg-primary/10"
+                  className="hover:bg-primary-dark data-[active=true]:bg-primary-dark data-[active=true]:text-white data-[active=true]:border-l-4 border-white text-white/80"
                 >
                   <User />
                   <span>প্রোফাইল</span>

@@ -11,6 +11,7 @@
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
     --primary: 142.1 76.2% 36.3%; /* Default Green */
+    --primary-dark: 142.1 76.2% 30.3%; /* A darker green for hover/active */
     --primary-foreground: 355.7 100% 97.3%;
     --secondary: 210 40% 96.1%;
     --secondary-foreground: 222.2 47.4% 11.2%;
@@ -38,7 +39,8 @@
     --card-foreground: 210 40% 98%;
     --popover: 222.2 84% 4.9%;
     --popover-foreground: 210 40% 98%;
-    --primary: 0 72.2% 50.6%; /* Red for dark mode */
+    --primary: 0 62.8% 30.6%; /* Red for dark mode */
+    --primary-dark: 0 62.8% 25.6%;
     --primary-foreground: 210 40% 98%;
     --secondary: 217.2 32.6% 17.5%;
     --secondary-foreground: 210 40% 98%;
