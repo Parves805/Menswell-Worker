@@ -1,0 +1,46 @@
+{
+  "placeholderImages": [
+    {
+      "id": "worker1",
+      "description": "Photo of a smiling female worker.",
+      "imageUrl": "https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHx3b21hbiUyMHdvcmtlcnxlbnwwfHx8fDE3NjI4MjQ2OTR8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "woman worker"
+    },
+    {
+      "id": "worker2",
+      "description": "Photo of a male worker operating a machine.",
+      "imageUrl": "https://images.unsplash.com/photo-1578988254148-9937ccb32ae7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxtYW4lMjBmYWN0b3J5fGVufDB8fHx8MTc2Mjg3NDMwMXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "man factory"
+    },
+    {
+      "id": "worker3",
+      "description": "Photo of a worker inspecting fabric.",
+      "imageUrl": "https://images.unsplash.com/photo-1759738101997-6c71d4b63235?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw2fHx3b3JrZXIlMjBmYWJyaWN8ZW58MHx8fHwxNzYyODc0MzAwfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "worker fabric"
+    },
+    {
+      "id": "worker4",
+      "description": "Portrait of a senior worker.",
+      "imageUrl": "https://images.unsplash.com/photo-1606384682764-c3065dbcaf85?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxMHx8c2VuaW9yJTIwd29ya2VyfGVufDB8fHx8MTc2MjgyNDY5NHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "senior worker"
+    },
+    {
+      "id": "worker5",
+      "description": "Photo of a young female worker.",
+      "imageUrl": "https://images.unsplash.com/photo-1563178406-4cdc2923acbc?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHx5b3VuZyUyMHdvbWFufGVufDB8fHx8MTc2Mjg0NTE4N3ww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "young woman"
+    },
+    {
+      "id": "worker6",
+      "description": "Photo of a male worker in a brightly lit factory.",
+      "imageUrl": "https://images.unsplash.com/photo-1652211955967-99c892925469?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw2fHxmYWN0b3J5JTIwd29ya2VyfGVufDB8fHx8MTc2Mjg3NDMwMHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "factory worker"
+    },
+    {
+      "id": "user-avatar",
+      "description": "Avatar for the logged-in user.",
+      "imageUrl": "https://images.unsplash.com/photo-1630910561339-4e22c7150093?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxwZXJzb24lMjBhdmF0YXJ8ZW58MHx8fHwxNzYyODQ2MTgwfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "person avatar"
+    }
+  ]
+}

@@ -1,3 +1,4 @@
+
 export type NavItem = {
   title: string;
   href: string;
@@ -134,4 +135,12 @@ export type Notification = {
   imageUrl?: string;
 };
 
+export type SliderImage = {
+  id: string;
+  title: string;
+  description?: string;
+  imageUrl: string;
+  link?: string;
+  createdAt: any; // Firestore ServerTimestamp or Date
+}
     

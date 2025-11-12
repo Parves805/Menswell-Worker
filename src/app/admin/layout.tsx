@@ -14,6 +14,7 @@ import {
   Wallet,
   CheckSquare,
   User,
+  Image as ImageIcon,
 } from 'lucide-react';
 import {
   SidebarProvider,
@@ -51,6 +52,7 @@ const mainNavItems: NavItem[] = [
   { title: 'উৎপাদন অনুরোধ', href: '/admin/production-requests', icon: <CheckSquare /> },
   { title: 'অ্যাডভান্স অনুরোধ', href: '/admin/advance-requests', icon: <Wallet /> },
   { title: 'ক্যাটাগরি', href: '/admin/categories', icon: <Shapes /> },
+  { title: 'স্লাইডার', href: '/admin/slider', icon: <ImageIcon /> },
   { title: 'চ্যাট', href: '/admin/chat', icon: <MessageSquare /> },
   { title: 'বিজ্ঞপ্তি', href: '/admin/notifications', icon: <Bell /> },
   { title: 'সেটিংস', href: '/admin/settings', icon: <Settings /> },

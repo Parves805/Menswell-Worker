@@ -12,7 +12,6 @@ import { Button } from '@/components/ui/button';
 import { Scissors, CircleDollarSign, Hourglass, Wallet } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { PlaceHolderImages } from '@/lib/placeholder-images';
 import {
   Carousel,
   CarouselContent,
@@ -22,12 +21,10 @@ import {
 } from '@/components/ui/carousel';
 import { RecentProductionTable } from '@/components/RecentProductionTable';
 import { useUser, useFirestore, useCollection, useMemoFirebase } from '@/firebase';
-import { collection, query, where, Timestamp } from 'firebase/firestore';
+import { collection, query, where, Timestamp, orderBy } from 'firebase/firestore';
 import React from 'react';
-import { ProductionEntry, AdvancePayment } from '@/lib/types';
+import { ProductionEntry, AdvancePayment, SliderImage } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
-
-const sliderImages = PlaceHolderImages.filter(img => img.id.startsWith('hero-slider'));
 
 const formatCurrency = (amount: number) =>
   new Intl.NumberFormat('bn-BD', {
@@ -68,10 +65,16 @@ export default function DashboardPage() {
           where('deducted', '==', false)
       );
   }, [user, firestore]);
+
+  const sliderImagesQuery = useMemoFirebase(() => {
+    if (!firestore) return null;
+    return query(collection(firestore, 'sliderImages'), orderBy('createdAt', 'desc'));
+  }, [firestore]);
   
   const { data: allEntries, isLoading: isLoadingAllEntries } = useCollection<ProductionEntry>(allEntriesQuery);
   const { data: todayEntries, isLoading: isLoadingTodayEntries } = useCollection<ProductionEntry>(todayEntriesQuery);
   const { data: unpaidAdvances, isLoading: isLoadingAdvances } = useCollection<AdvancePayment>(advancePaymentsQuery);
+  const { data: sliderImages, isLoading: isLoadingSlider } = useCollection<SliderImage>(sliderImagesQuery);
 
   const { todayOvertime } = React.useMemo(() => {
     if (!todayEntries) {
@@ -116,7 +119,7 @@ export default function DashboardPage() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm">মোট আয়</p>
-              {isLoadingAllEntries ? <Skeleton className="h-9 w-36 mt-1" /> : (
+              {isLoadingAllEntries ? <Skeleton className="h-9 w-36 mt-1 bg-white/20" /> : (
                 <p className="text-3xl font-bold">
                     {formatCurrency(totalEarnings)}
                 </p>
@@ -136,22 +139,31 @@ export default function DashboardPage() {
         className="w-full"
       >
         <CarouselContent>
-          {sliderImages.map((image) => (
+          {isLoadingSlider && (
+             <CarouselItem>
+              <Skeleton className="aspect-[16/7] w-full" />
+            </CarouselItem>
+          )}
+          {!isLoadingSlider && sliderImages?.map((image) => (
             <CarouselItem key={image.id}>
-              <Card className="overflow-hidden border-none">
+               <Link href={image.link || '#'} target="_blank" rel="noopener noreferrer">
+              <Card className="overflow-hidden border-none relative group">
                 <CardContent className="p-0">
                   <div className="relative aspect-[16/7] w-full">
                     <Image
                       src={image.imageUrl}
-                      alt={image.description}
+                      alt={image.title}
                       fill
                       className="object-cover"
-                      data-ai-hint={image.imageHint}
                     />
-                     <div className="absolute inset-0 bg-black/40" />
+                     <div className="absolute inset-0 bg-black/40 flex flex-col justify-end p-6">
+                        <h3 className="text-xl font-bold text-white">{image.title}</h3>
+                        <p className="text-sm text-white/80">{image.description}</p>
+                     </div>
                   </div>
                 </CardContent>
               </Card>
+              </Link>
             </CarouselItem>
           ))}
         </CarouselContent>
@@ -214,6 +226,7 @@ export default function DashboardPage() {
                {isLoadingTodayEntries ? <Skeleton className="h-7 w-20" /> : (
                   <div className="text-2xl font-bold">{todayOvertime} ঘণ্টা</div>
               )}
+               <p className="text-xs text-muted-foreground">আজকের মোট ওভারটাইম</p>
             </CardContent>
           </Card>
         </Link>
