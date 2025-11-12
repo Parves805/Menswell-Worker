@@ -18,6 +18,8 @@ import { useAuth, useUser, getUserByPhoneNumber, useFirestore, initiateEmailSign
 import { FormEvent, useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 
+const USER_CREDENTIAL_KEY = 'garmentflow_user_credential';
+
 export default function LoginPage() {
   const auth = useAuth();
   const firestore = useFirestore();
@@ -28,11 +30,23 @@ export default function LoginPage() {
   const [credential, setCredential] = useState('');
   const [password, setPassword] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [rememberedCredential, setRememberedCredential] = useState<string | null>(null);
 
   useEffect(() => {
-    // If user is already logged in, redirect to dashboard.
-    // This is the single source of truth for redirecting logged-in users from the landing/login page.
+    const savedCredential = localStorage.getItem(USER_CREDENTIAL_KEY);
+    if (savedCredential) {
+      setRememberedCredential(savedCredential);
+      setCredential(savedCredential);
+    }
+  }, []);
+
+  useEffect(() => {
     if (!isUserLoading && user) {
+        // Save credential on successful login
+        const savedCredential = localStorage.getItem(USER_CREDENTIAL_KEY);
+        if (user.email && user.email !== savedCredential) {
+            localStorage.setItem(USER_CREDENTIAL_KEY, user.email);
+        }
       router.replace('/dashboard');
     }
   }, [user, isUserLoading, router]);
@@ -52,7 +66,6 @@ export default function LoginPage() {
 
     let emailToLogin = credential;
 
-    // Check if credential is a phone number
     if (!credential.includes('@')) {
       try {
         const worker = await getUserByPhoneNumber(firestore, credential);
@@ -79,15 +92,19 @@ export default function LoginPage() {
         description: 'সফল হলে আপনাকে ড্যাশবোর্ডে নিয়ে যাওয়া হবে।',
     });
 
-    // Let the useEffect handle the redirection.
-    // Set a timeout to re-enable button in case of login failure.
     setTimeout(() => {
         setIsSubmitting(false);
     }, 5000);
   };
+  
+  const handleForgetCredential = () => {
+    localStorage.removeItem(USER_CREDENTIAL_KEY);
+    setRememberedCredential(null);
+    setCredential('');
+    setPassword('');
+  }
 
-  // While checking auth state or if user is logged in, show loading.
-  // The useEffect will handle the redirect.
+
   if (isUserLoading || user) {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center">
@@ -96,7 +113,6 @@ export default function LoginPage() {
     );
   }
 
-  // Only show login form if user is not logged in and auth check is complete.
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-background px-4">
       <div className="absolute inset-0 -z-10 h-full w-full bg-background bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-[size:14px_24px]"></div>
@@ -109,7 +125,14 @@ export default function LoginPage() {
         <form onSubmit={handleLogin}>
           <CardContent className="space-y-4">
             <div className="grid gap-2">
-              <Label htmlFor="credential">ইমেইল অথবা মোবাইল নম্বর</Label>
+              <div className="flex justify-between items-center">
+                 <Label htmlFor="credential">ইমেইল অথবা মোবাইল নম্বর</Label>
+                 {rememberedCredential && (
+                    <Button variant="link" size="sm" className="h-auto p-0" onClick={handleForgetCredential}>
+                      পরিবর্তন করুন
+                    </Button>
+                 )}
+              </div>
               <Input
                 id="credential"
                 type="text"
@@ -117,6 +140,8 @@ export default function LoginPage() {
                 required
                 value={credential}
                 onChange={(e) => setCredential(e.target.value)}
+                disabled={!!rememberedCredential}
+                className={!!rememberedCredential ? 'bg-muted' : ''}
               />
             </div>
             <div className="grid gap-2">

@@ -17,6 +17,8 @@ import { useAuth, useUser, initiateEmailSignIn } from '@/firebase';
 import { FormEvent, useEffect, useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 
+const ADMIN_CREDENTIAL_KEY = 'garmentflow_admin_credential';
+
 export default function AdminLoginPage() {
   const auth = useAuth();
   const { user, isUserLoading } = useUser();
@@ -26,23 +28,38 @@ export default function AdminLoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [rememberedEmail, setRememberedEmail] = useState<string | null>(null);
+
+  useEffect(() => {
+    // Check for remembered credential on mount
+    const savedCredential = localStorage.getItem(ADMIN_CREDENTIAL_KEY);
+    if (savedCredential) {
+      setRememberedEmail(savedCredential);
+      setEmail(savedCredential);
+    }
+  }, []);
 
   useEffect(() => {
     if (isUserLoading) return;
     if (user) {
       user.getIdTokenResult(true).then((idTokenResult) => {
         if (idTokenResult.claims.isAdmin) {
-          if (router.pathname !== '/admin/dashboard') {
-             router.replace('/admin/dashboard');
-          }
+            // Save credential on successful admin login
+            localStorage.setItem(ADMIN_CREDENTIAL_KEY, user.email || '');
+            if (router.pathname !== '/admin/dashboard') {
+                router.replace('/admin/dashboard');
+            }
         } else {
-          auth?.signOut();
-          toast({
-            variant: 'destructive',
-            title: 'প্রবেশাধিকার নেই',
-            description: 'শুধুমাত্র অ্যাডমিন এই প্যানেলে প্রবেশ করতে পারবেন।',
-          });
-          router.replace('/');
+            // This case should ideally not be hit if admin layout security is correct,
+            // but as a fallback, sign out non-admins trying to access admin login post-factum.
+            auth?.signOut();
+            toast({
+                variant: 'destructive',
+                title: 'প্রবেশাধিকার নেই',
+                description: 'শুধুমাত্র অ্যাডমিন এই প্যানেলে প্রবেশ করতে পারবেন।',
+            });
+            localStorage.removeItem(ADMIN_CREDENTIAL_KEY);
+            router.replace('/admin/login');
         }
       });
     }
@@ -60,7 +77,6 @@ export default function AdminLoginPage() {
     }
     setIsSubmitting(true);
     
-    // Special password for mafuz@gmail.com
     const finalPassword = email === 'mafuz@gmail.com' ? 'Mafuz@123' : password;
 
     initiateEmailSignIn(auth, email, finalPassword);
@@ -70,11 +86,15 @@ export default function AdminLoginPage() {
       description: 'সফল হলে আপনাকে ড্যাশবোর্ডে নিয়ে যাওয়া হবে।',
     });
     
-    // We don't need to setIsSubmitting(false) immediately because the useEffect will handle the redirect.
-    // If there's an auth error, it will be caught globally or the user will remain on the page.
-    // A timeout can prevent the button from being permanently disabled on failed login.
     setTimeout(() => setIsSubmitting(false), 5000);
   };
+  
+  const handleForgetCredential = () => {
+    localStorage.removeItem(ADMIN_CREDENTIAL_KEY);
+    setRememberedEmail(null);
+    setEmail('');
+    setPassword('');
+  }
 
   if (isUserLoading || user) {
     return (
@@ -96,7 +116,14 @@ export default function AdminLoginPage() {
         <form onSubmit={handleLogin}>
           <CardContent className="space-y-4">
             <div className="grid gap-2">
-              <Label htmlFor="email">ইমেইল</Label>
+               <div className="flex justify-between items-center">
+                 <Label htmlFor="email">ইমেইল</Label>
+                 {rememberedEmail && (
+                    <Button variant="link" size="sm" className="h-auto p-0" onClick={handleForgetCredential}>
+                      পরিবর্তন করুন
+                    </Button>
+                 )}
+              </div>
               <Input
                 id="email"
                 type="email"
@@ -104,6 +131,8 @@ export default function AdminLoginPage() {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
+                disabled={!!rememberedEmail}
+                className={!!rememberedEmail ? 'bg-muted' : ''}
               />
             </div>
             <div className="grid gap-2">
