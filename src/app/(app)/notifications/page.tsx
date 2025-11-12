@@ -28,6 +28,8 @@ export default function NotificationsPage() {
 
   const notificationsQuery = useMemoFirebase(() => {
     if (!user || !firestore) return null;
+    // IMPORTANT: Removed orderBy('createdAt', 'desc') to avoid composite index requirement.
+    // Sorting will be handled on the client-side.
     return query(
       collection(firestore, 'notifications'),
       where('workerId', '==', user.uid)
@@ -41,6 +43,7 @@ export default function NotificationsPage() {
     if (notifications) {
       // Sort the notifications by date on the client side.
       const sorted = [...notifications].sort((a, b) => {
+        // Ensure createdAt exists and is a valid date string before comparing.
         const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
         const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
         return dateB - dateA;
