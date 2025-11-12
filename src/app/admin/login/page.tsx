@@ -45,7 +45,9 @@ export default function AdminLoginPage() {
       user.getIdTokenResult(true).then((idTokenResult) => {
         if (idTokenResult.claims.isAdmin) {
             // Save credential on successful admin login
-            localStorage.setItem(ADMIN_CREDENTIAL_KEY, user.email || '');
+            if(user.email) {
+              localStorage.setItem(ADMIN_CREDENTIAL_KEY, user.email);
+            }
             if (router.pathname !== '/admin/dashboard') {
                 router.replace('/admin/dashboard');
             }
@@ -59,7 +61,6 @@ export default function AdminLoginPage() {
                 description: 'শুধুমাত্র অ্যাডমিন এই প্যানেলে প্রবেশ করতে পারবেন।',
             });
             localStorage.removeItem(ADMIN_CREDENTIAL_KEY);
-            router.replace('/admin/login');
         }
       });
     }
@@ -77,16 +78,19 @@ export default function AdminLoginPage() {
     }
     setIsSubmitting(true);
     
-    const finalPassword = email === 'mafuz@gmail.com' ? 'Mafuz@123' : password;
-
-    initiateEmailSignIn(auth, email, finalPassword);
+    initiateEmailSignIn(auth, email, password);
 
     toast({
       title: 'লগইন করার চেষ্টা করা হচ্ছে...',
       description: 'সফল হলে আপনাকে ড্যাশবোর্ডে নিয়ে যাওয়া হবে।',
     });
     
-    setTimeout(() => setIsSubmitting(false), 5000);
+    // Fallback to re-enable button after some time
+    setTimeout(() => {
+        if(isSubmitting) {
+            setIsSubmitting(false)
+        }
+    }, 5000);
   };
   
   const handleForgetCredential = () => {
