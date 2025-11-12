@@ -149,18 +149,20 @@ export default function AdminDashboardPage() {
             <p className="text-xs text-muted-foreground">চলতি মাসে মোট প্রদান</p>
           </CardContent>
         </Card>
-         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">মোট খরচ</CardTitle>
-            <Wallet2 className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {isLoadingExpenses ? '...' : formatCurrency(totalExpenses)}
-            </div>
-            <p className="text-xs text-muted-foreground">এখন পর্যন্ত মোট খরচ</p>
-          </CardContent>
-        </Card>
+         <Link href="/admin/expenses" className="transform transition-transform duration-200 hover:scale-105 group">
+            <Card className="transition-colors group-hover:border-primary">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">মোট খরচ</CardTitle>
+                    <Wallet2 className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                    <div className="text-2xl font-bold">
+                    {isLoadingExpenses ? '...' : formatCurrency(totalExpenses)}
+                    </div>
+                    <p className="text-xs text-muted-foreground">এখন পর্যন্ত মোট খরচ</p>
+                </CardContent>
+            </Card>
+         </Link>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef } from 'react';
 import {
   Card,
   CardContent,
@@ -17,11 +17,11 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
-import { useCollection, useFirestore, useMemoFirebase, addDocumentNonBlocking } from '@/firebase';
-import { collection, query, orderBy, where, Timestamp } from 'firebase/firestore';
+import { useCollection, useFirestore, useMemoFirebase, addDocumentNonBlocking, useUser } from '@/firebase';
+import { collection, query, orderBy } from 'firebase/firestore';
 import type { Expense } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Wallet2, PlusCircle } from 'lucide-react';
+import { Wallet2, PlusCircle, Download } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -29,12 +29,14 @@ import {
   DialogTitle,
   DialogDescription,
   DialogFooter,
-  DialogTrigger
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { DatePicker } from '@/components/DatePicker';
 import { useToast } from '@/hooks/use-toast';
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
+
 
 const formatCurrency = (amount: number) =>
   new Intl.NumberFormat('bn-BD', {
@@ -132,8 +134,10 @@ function AddExpenseDialog({ open, onOpenChange, onExpenseAdded }: { open: boolea
 
 export default function ExpensesPage() {
   const firestore = useFirestore();
+  const { user } = useUser();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [key, setKey] = useState(0); // To force re-fetch
+  const printRef = useRef<HTMLDivElement>(null);
 
   const firstDayOfMonth = useMemo(() => {
     const date = new Date();
@@ -157,17 +161,94 @@ export default function ExpensesPage() {
     );
     return currentMonthExpenses.reduce((sum, expense) => sum + expense.amount, 0);
   }, [allExpenses, firstDayOfMonth]);
+  
+  const grandTotal = useMemo(() => {
+    if (!allExpenses) return 0;
+    return allExpenses.reduce((sum, expense) => sum + expense.amount, 0);
+  }, [allExpenses]);
 
 
   const handleExpenseAdded = () => {
     setKey(prev => prev + 1);
   }
 
+  const handleDownloadPdf = async () => {
+    const element = printRef.current;
+    if (!element) return;
+    
+    element.style.position = 'absolute';
+    element.style.left = '-9999px';
+    element.style.opacity = '1';
+    element.style.width = '800px';
+
+
+    const canvas = await html2canvas(element, {
+        scale: 2,
+        useCORS: true,
+        backgroundColor: '#ffffff',
+        logging: false, 
+    });
+
+    element.style.position = 'absolute';
+    element.style.left = '0';
+    element.style.opacity = '0';
+    element.style.width = 'auto';
+
+
+    const data = canvas.toDataURL('image/png');
+
+    const pdf = new jsPDF('p', 'mm', 'a4');
+    const pdfWidth = pdf.internal.pageSize.getWidth();
+    const pdfHeight = pdf.internal.pageSize.getHeight();
+    const imgWidth = canvas.width;
+    const imgHeight = canvas.height;
+    const ratio = Math.min(pdfWidth / imgWidth, pdfHeight / imgHeight);
+    const imgX = (pdfWidth - imgWidth * ratio) / 2;
+    const imgY = 10;
+
+    pdf.addImage(data, 'PNG', imgX, imgY, imgWidth * ratio, imgHeight * ratio);
+    pdf.save('খরচের-হিসাব.pdf');
+  };
+
   return (
     <>
+      <div ref={printRef} className="p-4 bg-white absolute left-0 top-0 opacity-0 -z-50">
+            <div className='text-center mb-2'>
+                <h1 className='text-2xl font-bold'>গার্মেন্টফ্লো</h1>
+                <p className='text-sm'>১২৩, প্রধান সড়ক, ঢাকা-১২১৬</p>
+                <h2 className='text-xl font-bold mt-2'>খরচের বিস্তারিত হিসাব</h2>
+                <p className='text-sm'>কর্মী: {user?.displayName}</p>
+                <p className='text-sm'>রিপোর্টের তারিখ: {new Date().toLocaleDateString('bn-BD')}</p>
+            </div>
+            
+            <Table>
+                <TableHeader>
+                    <TableRow className='bg-primary text-primary-foreground'>
+                        <TableHead className='text-primary-foreground'>তারিখ</TableHead>
+                        <TableHead className='text-primary-foreground'>বিবরণ</TableHead>
+                        <TableHead className='text-primary-foreground'>ক্যাটাগরি</TableHead>
+                        <TableHead className="text-right text-primary-foreground">পরিমাণ</TableHead>
+                    </TableRow>
+                </TableHeader>
+                <TableBody>
+                    {allExpenses?.map(expense => (
+                        <TableRow key={expense.id}>
+                            <TableCell>{new Date(expense.date).toLocaleDateString('bn-BD')}</TableCell>
+                            <TableCell>{expense.description}</TableCell>
+                            <TableCell>{expense.category}</TableCell>
+                            <TableCell className="text-right">{formatCurrency(expense.amount)}</TableCell>
+                        </TableRow>
+                    ))}
+                </TableBody>
+                <TableRow className='font-bold bg-muted'>
+                    <TableCell colSpan={3}>সর্বমোট</TableCell>
+                    <TableCell className="text-right text-primary">{formatCurrency(grandTotal)}</TableCell>
+                </TableRow>
+            </Table>
+       </div>
       <AddExpenseDialog open={isDialogOpen} onOpenChange={setIsDialogOpen} onExpenseAdded={handleExpenseAdded} />
       <Card>
-          <CardHeader className="flex-row justify-between items-center">
+          <CardHeader className="flex-row justify-between items-start">
               <div>
                   <CardTitle className="flex items-center gap-2">
                       <Wallet2 />
@@ -177,10 +258,16 @@ export default function ExpensesPage() {
                       আপনার সমস্ত খরচের বিস্তারিত হিসাব দেখুন।
                   </CardDescription>
               </div>
-              <Button onClick={() => setIsDialogOpen(true)}>
-                <PlusCircle className="mr-2 h-4 w-4" />
-                নতুন খরচ যোগ করুন
-              </Button>
+              <div className='flex gap-2'>
+                <Button onClick={() => setIsDialogOpen(true)} variant="outline">
+                    <PlusCircle className="mr-2 h-4 w-4" />
+                    নতুন খরচ
+                </Button>
+                <Button onClick={handleDownloadPdf}>
+                    <Download className="mr-2 h-4 w-4" />
+                    PDF ডাউনলোড
+                </Button>
+              </div>
           </CardHeader>
           <CardContent>
               <Card className="mb-6">
