@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useRef } from 'react';
 import {
   Card,
   CardContent,
@@ -21,9 +21,12 @@ import { useCollection, useFirestore, useUser, useMemoFirebase } from '@/firebas
 import { collection, query, orderBy } from 'firebase/firestore';
 import type { ProductionEntry } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Eye, Scissors } from 'lucide-react';
+import { Eye, Scissors, Download } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import Image from 'next/image';
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
+
 
 const formatCurrency = (amount: number) =>
   new Intl.NumberFormat('bn-BD', {
@@ -44,6 +47,7 @@ interface CategorySummary {
 export default function AllEntriesPage() {
   const { user } = useUser();
   const firestore = useFirestore();
+  const printRef = useRef<HTMLDivElement>(null);
 
   const entriesQuery = useMemoFirebase(() => {
     if (!user || !firestore) return null;
@@ -54,6 +58,30 @@ export default function AllEntriesPage() {
   }, [user, firestore]);
 
   const { data: allEntries, isLoading } = useCollection<ProductionEntry>(entriesQuery);
+  
+  const handleDownloadPdf = async () => {
+    const element = printRef.current;
+    if (!element) return;
+
+    const canvas = await html2canvas(element, {
+        scale: 2,
+        useCORS: true,
+        backgroundColor: '#ffffff',
+    });
+    const data = canvas.toDataURL('image/png');
+
+    const pdf = new jsPDF('p', 'mm', 'a4');
+    const pdfWidth = pdf.internal.pageSize.getWidth();
+    const pdfHeight = pdf.internal.pageSize.getHeight();
+    const imgWidth = canvas.width;
+    const imgHeight = canvas.height;
+    const ratio = Math.min(pdfWidth / imgWidth, pdfHeight / imgHeight);
+    const imgX = (pdfWidth - imgWidth * ratio) / 2;
+    const imgY = 10;
+
+    pdf.addImage(data, 'PNG', imgX, imgY, imgWidth * ratio, imgHeight * ratio);
+    pdf.save('সকল-কাজের-হিসাব.pdf');
+  };
 
   const categorySummaries = useMemo((): CategorySummary[] | null => {
     if (!allEntries) return null;
@@ -107,13 +135,19 @@ export default function AllEntriesPage() {
   }
 
   return (
-    <div>
+    <div ref={printRef}>
         <Card className="mb-6 bg-primary text-primary-foreground border-none">
-            <CardHeader>
-                <CardTitle className="flex items-center gap-2"><Scissors /> সকল কাজের হিসাব</CardTitle>
-                <CardDescription className="text-primary-foreground/80">
-                    আপনার সমস্ত কাজ ক্যাটাগরি অনুযায়ী বিভক্ত করে দেখানো হলো।
-                </CardDescription>
+            <CardHeader className="flex-row items-center justify-between">
+                <div>
+                    <CardTitle className="flex items-center gap-2"><Scissors /> সকল কাজের হিসাব</CardTitle>
+                    <CardDescription className="text-primary-foreground/80">
+                        আপনার সমস্ত কাজ ক্যাটাগরি অনুযায়ী বিভক্ত করে দেখানো হলো।
+                    </CardDescription>
+                </div>
+                 <Button onClick={handleDownloadPdf} variant="secondary">
+                    <Download className="mr-2 h-4 w-4" />
+                    PDF ডাউনলোড করুন
+                </Button>
             </CardHeader>
         </Card>
 
