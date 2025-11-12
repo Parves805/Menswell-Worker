@@ -68,6 +68,7 @@ export default function AllEntriesPage() {
         scale: 2,
         useCORS: true,
         backgroundColor: '#ffffff',
+        logging: false, // Suppress logging to prevent console errors on failed image loads
     });
     const data = canvas.toDataURL('image/png');
 
