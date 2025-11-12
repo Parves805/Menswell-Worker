@@ -156,6 +156,18 @@ export default function DashboardPage() {
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">মোট খরচ</CardTitle>
+            <Wallet className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+              <div className="text-2xl font-bold">
+                ৳ ১২,৩০০
+              </div>
+            <p className="text-xs text-muted-foreground">চলতি মাসের মোট খরচ</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">আজকের ওভারটাইম</CardTitle>
             <Hourglass className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
@@ -177,18 +189,6 @@ export default function DashboardPage() {
                 </div>
              )}
             <p className="text-xs text-muted-foreground">পরবর্তী বেতন থেকে কর্তনযোগ্য</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">মোট খরচ</CardTitle>
-            <Wallet className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-              <div className="text-2xl font-bold">
-                ৳ ১২,৩০০
-              </div>
-            <p className="text-xs text-muted-foreground">চলতি মাসের মোট খরচ</p>
           </CardContent>
         </Card>
       </div>
