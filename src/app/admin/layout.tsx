@@ -67,20 +67,18 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
   const { setOpenMobile } = useSidebar();
 
   React.useEffect(() => {
-    if (isUserLoading) return; // Wait until user state is loaded
+    if (isUserLoading) return;
+
+    // Do not run auth check on the login page itself to prevent redirect loops
+    if (pathname === '/admin/login') return;
 
     if (!user) {
-      // If no user is logged in and they are not on the login page, redirect them.
-      if (pathname !== '/admin/login') {
-        router.replace('/admin/login');
-      }
+      router.replace('/admin/login');
       return;
     }
 
-    // User is logged in, check for admin claim.
     user.getIdTokenResult(true).then((idTokenResult) => {
       if (!idTokenResult.claims.isAdmin) {
-        // If the user is NOT an admin, sign them out, show a toast, and redirect to admin login.
         auth?.signOut();
         toast({
             variant: 'destructive',
@@ -88,11 +86,6 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
             description: 'শুধুমাত্র অ্যাডমিন এই প্যানেলে প্রবেশ করতে পারবেন।',
         });
         router.replace('/admin/login');
-      } else {
-        // If the user IS an admin and is on the login page, redirect to the dashboard.
-        if (pathname === '/admin/login') {
-            router.replace('/admin/dashboard');
-        }
       }
     });
 
@@ -105,7 +98,7 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
   };
 
   // While checking auth state or if user is being redirected, show a loading screen.
-  if (isUserLoading) {
+  if (isUserLoading && pathname !== '/admin/login') {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <p>লোড হচ্ছে...</p>
