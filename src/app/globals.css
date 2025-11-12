@@ -29,9 +29,6 @@
     --chart-4: 220 80% 60%;
     --chart-5: 240 90% 70%;
     --radius: 0.75rem;
-
-    --admin-primary: 221.2 83.2% 53.3%;
-    --admin-primary-foreground: 210 40% 98%;
   }
 
   .dark {
@@ -59,9 +56,6 @@
     --chart-3: 200 70% 50%;
     --chart-4: 220 80% 60%;
     --chart-5: 240 90% 70%;
-
-    --admin-primary: 217.2 91.2% 59.8%;
-    --admin-primary-foreground: 210 40% 98%;
   }
 }
 
@@ -71,39 +65,5 @@
   }
   body {
     @apply bg-background text-foreground;
-  }
-  .admin-panel {
-    --background: 0 0% 100%;
-    --foreground: 224 71.4% 4.1%;
-    --card: 0 0% 100%;
-    --card-foreground: 224 71.4% 4.1%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 224 71.4% 4.1%;
-    --primary: var(--admin-primary);
-    --primary-foreground: var(--admin-primary-foreground);
-    --secondary: 220 13% 91%;
-    --secondary-foreground: 220.9 39.3% 11%;
-    --muted: 220 13% 91%;
-    --muted-foreground: 220 8.9% 46.1%;
-    --accent: 220 13% 91%;
-    --accent-foreground: 220.9 39.3% 11%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 355.7 100% 97.3%;
-    --border: 220 13% 91%;
-    --input: 220 13% 91%;
-    --ring: var(--admin-primary);
-    --radius: 0.5rem;
-    --chart-1: 217.2 91.2% 59.8%;
-    --chart-2: 172.8 91.2% 59.8%;
-
-    /* Sidebar specific light theme */
-    --sidebar-background: 240 4.8% 95.9%; /* A slightly off-white for the sidebar */
-    --sidebar-foreground: 224 71.4% 4.1%;
-    --sidebar-primary: var(--admin-primary);
-    --sidebar-primary-foreground: var(--admin-primary-foreground);
-    --sidebar-accent: 220 13% 91%;
-    --sidebar-accent-foreground: 220.9 39.3% 11%;
-    --sidebar-border: 220 13% 85%;
-    --sidebar-ring: var(--admin-primary);
   }
 }
