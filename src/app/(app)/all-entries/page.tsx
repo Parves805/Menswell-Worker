@@ -106,13 +106,24 @@ export default function AllEntriesPage() {
     
     const isValidImageUrl = (url: string | undefined): boolean => {
       if (!url) return false;
+      // Looser check for valid image extensions.
       const validExtensions = ['.jpg', '.jpeg', '.png', '.webp', '.gif'];
       try {
         const path = new URL(url).pathname.toLowerCase();
-        return validExtensions.some(ext => path.endsWith(ext));
+        // Check if the path ends with a known image extension. This is not foolproof but covers many cases.
+        if (validExtensions.some(ext => path.endsWith(ext))) {
+          return true;
+        }
+        // As a fallback for URLs without extensions (like from some image CDNs), we can perform a basic check.
+        // This is a simplified check. A more robust solution might involve HEAD requests, which is complex for client-side.
+        if (url.startsWith('http') && (url.includes('images.unsplash.com') || url.includes('picsum.photos'))) {
+            return true;
+        }
       } catch (e) {
+        // If URL parsing fails, it's not a valid URL.
         return false;
       }
+      return false;
     };
   
     allEntries.forEach((entry) => {
@@ -178,15 +189,17 @@ export default function AllEntriesPage() {
     <div className="space-y-6">
        {/* This div is used for generating the PDF. It's hidden from view. */}
        <div ref={printRef} className="p-4 bg-white absolute left-0 top-0 opacity-0 -z-50">
-            <div className='text-center mb-4 border-b pb-4'>
+            <div className='text-center mb-6'>
                 <h1 className='text-2xl font-bold'>গার্মেন্টফ্লো</h1>
                 <p className='text-sm'>১২৩, প্রধান সড়ক, ঢাকা-১২১৬</p>
+                
+                <div className='mt-4'>
+                    <h2 className='text-xl font-bold'>সকল কাজের বিস্তারিত হিসাব</h2>
+                    <p className='text-sm'>কর্মী: {user?.displayName}</p>
+                    <p className='text-sm'>রিপোর্টের তারিখ: {new Date().toLocaleDateString('bn-BD')}</p>
+                </div>
             </div>
-            <div className='text-center my-4'>
-                <h2 className='text-xl font-bold'>সকল কাজের বিস্তারিত হিসাব</h2>
-                <p className='text-sm'>কর্মী: {user?.displayName}</p>
-                <p className='text-sm'>রিপোর্টের তারিখ: {new Date().toLocaleDateString('bn-BD')}</p>
-            </div>
+            
             <Table>
                 <TableHeader>
                     <TableRow>
