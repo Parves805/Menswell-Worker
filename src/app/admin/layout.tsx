@@ -68,22 +68,33 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
   const { setOpenMobile } = useSidebar();
 
   React.useEffect(() => {
-    if (isUserLoading || pathname === '/admin/login') return;
+    // Don't run auth checks on the login page itself, or while loading.
+    if (isUserLoading || pathname === '/admin/login') {
+      return;
+    }
 
     if (!user) {
+      // If there's no user and we're not on the login page, redirect there.
       router.replace('/admin/login');
       return;
     }
 
+    // If there is a user, verify they are an admin.
     user.getIdTokenResult(true).then((idTokenResult) => {
       if (!idTokenResult.claims.isAdmin) {
+        // If the user is not an admin, sign them out and show an error.
         auth?.signOut();
         toast({
             variant: 'destructive',
             title: 'প্রবেশাধিকার নেই',
             description: 'শুধুমাত্র অ্যাডমিন এই প্যানেলে প্রবেশ করতে পারবেন।',
         });
-        router.replace('/admin/login');
+        // The onAuthStateChanged listener will then redirect to the login page.
+      } else {
+        // If user is an admin, remember their credential
+        if(user.email) {
+          localStorage.setItem('garmentflow_admin_credential', user.email);
+        }
       }
     });
 
@@ -95,10 +106,12 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
     }
   };
 
+  // The login page manages its own state and doesn't need the full layout.
   if (pathname === '/admin/login') {
     return <>{children}</>;
   }
 
+  // For all other pages, show a loading screen until auth state is confirmed.
   if (isUserLoading || !user) {
     return (
       <div className="flex min-h-screen items-center justify-center">
@@ -130,7 +143,7 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
                     <SidebarMenuButton
                       tooltip={item.title}
                       className="hover:bg-primary/10 data-[active=true]:bg-primary/15 data-[active=true]:text-primary"
-                      isActive={pathname === item.href}
+                      isActive={pathname.startsWith(item.href)}
                       asChild
                     >
                       <div className="flex items-center gap-2">

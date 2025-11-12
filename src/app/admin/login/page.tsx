@@ -44,20 +44,12 @@ export default function AdminLoginPage() {
   }, []);
 
   useEffect(() => {
-    if (isUserLoading) return;
-    if (user) {
-      user.getIdTokenResult(true).then((idTokenResult) => {
-        if (idTokenResult.claims.isAdmin) {
-            if(user.email) {
-              localStorage.setItem(ADMIN_CREDENTIAL_KEY, user.email);
-            }
-            if (pathname !== '/admin/dashboard') {
-                router.replace('/admin/dashboard');
-            }
-        }
-      });
+    // If a user is already logged in, redirect them away from the login page
+    // to the central admin routing page which will decide where they should go.
+    if (!isUserLoading && user) {
+      router.replace('/admin');
     }
-  }, [user, isUserLoading, router, pathname]);
+  }, [user, isUserLoading, router]);
 
   const handleLogin = (e: FormEvent) => {
     e.preventDefault();
@@ -78,11 +70,11 @@ export default function AdminLoginPage() {
       description: 'সফল হলে আপনাকে ড্যাশবোর্ডে নিয়ে যাওয়া হবে।',
     });
     
-    // Fallback to re-enable button after some time
+    // The onAuthStateChanged listener will handle redirects on success/failure.
+    // We'll also re-enable the button after a timeout in case of an issue where
+    // the listener doesn't fire (e.g. auth/invalid-credential).
     setTimeout(() => {
-        if(isSubmitting) {
-            setIsSubmitting(false)
-        }
+        setIsSubmitting(false);
     }, 5000);
   };
   
@@ -93,7 +85,8 @@ export default function AdminLoginPage() {
     setPassword('');
   }
 
-  if (isUserLoading) {
+  // Show a loading screen while we determine auth state
+  if (isUserLoading || user) {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center">
         <p>অ্যাডমিন প্যানেল লোড হচ্ছে...</p>
