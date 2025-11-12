@@ -110,7 +110,7 @@ function AddCategoryDialog({
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="imageUrl" className="text-right">ছবির URL</Label>
-              <Input id="imageUrl" value={imageUrl} onChange={(e) => setImageUrl(e.target.value)} className="col-span-3" placeholder="ঐচ্ছিক" />
+              <Input id="imageUrl" value={imageUrl} onChange={(e) => setImageUrl(e.target.value)} className="col-span-3" placeholder="ঐচ্ছিক, খালি রাখলে প্লেসহোল্ডার ব্যবহৃত হবে" />
             </div>
           </div>
           <DialogFooter>
