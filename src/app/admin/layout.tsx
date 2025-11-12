@@ -62,40 +62,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const { toast } = useToast();
 
   React.useEffect(() => {
-    if (isUserLoading) {
-      return; // Wait until user loading is complete.
-    }
-
-    if (!user) {
-      // If no user is logged in, redirect to the admin login page.
-      // We don't need to check the path, as this layout only applies to admin routes.
+    if (!isUserLoading && !user) {
       router.push('/admin/login');
-      return;
     }
-
-    // User is logged in, now check for admin claims.
-    user.getIdTokenResult(true) // Force refresh to get the latest claims.
-      .then((idTokenResult) => {
-        if (!idTokenResult.claims.isAdmin) {
-          // It's a regular user, not an admin.
-          // Redirect them away from the admin section.
-          toast({
-            variant: 'destructive',
-            title: 'প্রবেশাধিকার নেই',
-            description: 'এই পৃষ্ঠাটি শুধুমাত্র অ্যাডমিনদের জন্য।',
-          });
-          router.push('/dashboard'); // Redirect to the user dashboard.
-        }
-        // If they are an admin, they are allowed to stay.
-      })
-      .catch((error) => {
-        console.error("Error getting ID token result:", error);
-        // If we can't verify claims, sign out and redirect to login for safety.
-        auth?.signOut();
-        router.push('/admin/login');
-      });
-
-  }, [user, isUserLoading, router, auth, toast]);
+  }, [user, isUserLoading, router]);
 
   const handleLogout = () => {
     if (auth) {
