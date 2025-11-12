@@ -57,6 +57,18 @@ export type ProductionEntryRequest = {
   rejectionReason?: string;
 };
 
+export type AdvancePaymentRequest = {
+  id: string;
+  workerId: string;
+  workerName: string;
+  date: string;
+  amount: number;
+  status: 'pending' | 'approved' | 'rejected';
+  requestedAt: string;
+  processedAt?: string;
+  rejectionReason?: string;
+};
+
 
 export type SalaryDetails = {
   id: string;
