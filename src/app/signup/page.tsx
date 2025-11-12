@@ -16,7 +16,7 @@ import { Button } from '@/components/ui/button';
 import { GarmentFlowIcon } from '@/components/icons';
 import { useAuth, useUser, useFirestore, setDocumentNonBlocking } from '@/firebase';
 import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
-import { doc, serverTimestamp } from 'firebase/firestore';
+import { doc } from 'firebase/firestore';
 import { FormEvent, useEffect, useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 
@@ -68,7 +68,7 @@ export default function SignUpPage() {
         name: name,
         contact: phone,
         email: email,
-        joinDate: serverTimestamp(),
+        joinDate: new Date().toISOString(), // Use ISO string for serializable date
         // Add other default fields as necessary
         designation: 'Worker',
         department: 'N/A',
