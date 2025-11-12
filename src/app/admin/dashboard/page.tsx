@@ -8,7 +8,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Users, Scissors, CircleDollarSign, Hourglass } from 'lucide-react';
+import { Users, Scissors, CircleDollarSign, Hourglass, Wallet } from 'lucide-react';
 import Link from 'next/link';
 import React from 'react';
 import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
@@ -31,11 +31,18 @@ export default function AdminDashboardPage() {
     [firestore]
   );
   const { data: workers, isLoading: isLoadingWorkers } = useCollection(workersQuery);
+  
+  const expensesQuery = useMemoFirebase(
+    () => (firestore ? collection(firestore, 'expenses') : null),
+    [firestore]
+  );
+  const { data: expenses, isLoading: isLoadingExpenses } = useCollection(expensesQuery);
 
   const [productionData, setProductionData] = React.useState<{ date: string; pieces: number }[]>([]);
   const [totalPieces, setTotalPieces] = React.useState(0);
   const [totalOvertime, setTotalOvertime] = React.useState(0);
   const [totalAdvance, setTotalAdvance] = React.useState(0);
+  const [totalExpenses, setTotalExpenses] = React.useState(0);
 
   React.useEffect(() => {
     if (!firestore || !workers) return;
@@ -78,6 +85,13 @@ export default function AdminDashboardPage() {
     fetchData();
   }, [firestore, workers]);
 
+  React.useEffect(() => {
+    if(expenses) {
+        const total = expenses.reduce((sum, expense) => sum + (expense.amount || 0), 0);
+        setTotalExpenses(total);
+    }
+  }, [expenses]);
+
 
   return (
     <div className="flex flex-col gap-6">
@@ -91,7 +105,7 @@ export default function AdminDashboardPage() {
         </Link>
       </div>
       
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">মোট কর্মী</CardTitle>
@@ -132,6 +146,18 @@ export default function AdminDashboardPage() {
               {formatCurrency(totalAdvance)}
             </div>
             <p className="text-xs text-muted-foreground">চলতি মাসে মোট প্রদান</p>
+          </CardContent>
+        </Card>
+         <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">মোট খরচ</CardTitle>
+            <Wallet className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">
+              {isLoadingExpenses ? '...' : formatCurrency(totalExpenses)}
+            </div>
+            <p className="text-xs text-muted-foreground">এখন পর্যন্ত মোট খরচ</p>
           </CardContent>
         </Card>
       </div>
