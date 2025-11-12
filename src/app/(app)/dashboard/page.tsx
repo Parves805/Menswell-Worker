@@ -20,21 +20,13 @@ import {
   CarouselPrevious,
 } from '@/components/ui/carousel';
 import { RecentProductionTable } from '@/components/RecentProductionTable';
+import { useUser, useFirestore, useCollection, useMemoFirebase } from '@/firebase';
+import { collection, query, where, Timestamp } from 'firebase/firestore';
+import React from 'react';
+import { ProductionEntry, AdvancePayment } from '@/lib/types';
+import { Skeleton } from '@/components/ui/skeleton';
 
-// Dummy data for worker dashboard
-const workerData = {
-  name: 'আয়েশা খানম',
-  designation: 'সুইং অপারেটর',
-  todayProduction: 112, // pieces
-  todayOvertime: 2, // hours
-  pieceRate: 5.5, // BDT per piece
-  overtimeRate: 50, // BDT per hour
-  advanceBalance: 2500, // BDT
-};
-
-const todayEarnings =
-  workerData.todayProduction * workerData.pieceRate +
-  workerData.todayOvertime * workerData.overtimeRate;
+const sliderImages = PlaceHolderImages.filter(img => img.id.startsWith('hero-slider'));
 
 const formatCurrency = (amount: number) =>
   new Intl.NumberFormat('bn-BD', {
@@ -43,10 +35,56 @@ const formatCurrency = (amount: number) =>
     minimumFractionDigits: 2,
   }).format(amount);
 
-const sliderImages = PlaceHolderImages.filter(img => img.id.startsWith('hero-slider'));
-
-
 export default function DashboardPage() {
+  const { user } = useUser();
+  const firestore = useFirestore();
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const tomorrow = new Date(today);
+  tomorrow.setDate(tomorrow.getDate() + 1);
+
+  const todayEntriesQuery = useMemoFirebase(() => {
+    if (!user || !firestore) return null;
+    return query(
+        collection(firestore, 'workers', user.uid, 'productionEntries'),
+        where('date', '>=', Timestamp.fromDate(today)),
+        where('date', '<', Timestamp.fromDate(tomorrow))
+    );
+  }, [user, firestore]);
+
+  const advancePaymentsQuery = useMemoFirebase(() => {
+      if(!user || !firestore) return null;
+      return query(
+          collection(firestore, 'workers', user.uid, 'advancePayments'),
+          where('deducted', '==', false)
+      );
+  }, [user, firestore]);
+
+  const { data: todayEntries, isLoading: isLoadingEntries } = useCollection<ProductionEntry>(todayEntriesQuery);
+  const { data: unpaidAdvances, isLoading: isLoadingAdvances } = useCollection<AdvancePayment>(advancePaymentsQuery);
+
+  const { todayProduction, todayOvertime, todayEarnings } = React.useMemo(() => {
+    if (!todayEntries) {
+      return { todayProduction: 0, todayOvertime: 0, todayEarnings: 0 };
+    }
+    return todayEntries.reduce(
+      (acc, entry) => {
+        acc.todayProduction += entry.pieceCount || 0;
+        acc.todayOvertime += entry.overtimeHours || 0;
+        acc.todayEarnings += entry.total || 0;
+        return acc;
+      },
+      { todayProduction: 0, todayOvertime: 0, todayEarnings: 0 }
+    );
+  }, [todayEntries]);
+  
+  const advanceBalance = React.useMemo(() => {
+      if (!unpaidAdvances) return 0;
+      return unpaidAdvances.reduce((sum, payment) => sum + payment.amount, 0);
+  }, [unpaidAdvances]);
+
+
   return (
     <div className="flex flex-col gap-6">
        <Carousel
@@ -76,12 +114,12 @@ export default function DashboardPage() {
           ))}
         </CarouselContent>
         <CarouselPrevious className="absolute left-4 top-1/2 -translate-y-1/2 text-white bg-black/30 hover:bg-black/50 border-none" />
-        <CarouselNext className="absolute right-4 top-1/2 -translate-y-1/2 text-white bg-black/30 hover:bg-black/50 border-none" />
+        <CarouselNext className="absolute right-4 top-1/2 -translate-y-1/2 text-white bg-black/30 hover-bg-black/50 border-none" />
       </Carousel>
       
       <Card className="w-full bg-primary text-primary-foreground border-none">
         <CardHeader>
-          <CardTitle>স্বাগতম, {workerData.name}!</CardTitle>
+          <CardTitle>স্বাগতম, {user?.displayName ?? 'কর্মী'}!</CardTitle>
           <CardDescription className="text-primary-foreground/80">
             আপনার আজকের কাজের সারসংক্ষেপ নিচে দেওয়া হলো।
           </CardDescription>
@@ -90,9 +128,11 @@ export default function DashboardPage() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm">আজকের মোট আয়</p>
-              <p className="text-3xl font-bold">
-                {formatCurrency(todayEarnings)}
-              </p>
+              {isLoadingEntries ? <Skeleton className="h-9 w-36 mt-1" /> : (
+                <p className="text-3xl font-bold">
+                    {formatCurrency(todayEarnings)}
+                </p>
+              )}
             </div>
             <Link href="/entry">
               <Button variant="secondary">নতুন এন্ট্রি করুন</Button>
@@ -104,11 +144,13 @@ export default function DashboardPage() {
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">মোট সেলাই এর পরিমাণ</CardTitle>
+            <CardTitle className="text-sm font-medium">আজকের সেলাই</CardTitle>
             <Scissors className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{workerData.todayProduction} পিস</div>
+            {isLoadingEntries ? <Skeleton className="h-7 w-20" /> : (
+                <div className="text-2xl font-bold">{todayProduction} পিস</div>
+            )}
           </CardContent>
         </Card>
         <Card>
@@ -117,8 +159,9 @@ export default function DashboardPage() {
             <Hourglass className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{workerData.todayOvertime} ঘণ্টা</div>
-             <p className="text-xs text-muted-foreground">প্রতি ঘণ্টা রেট: {formatCurrency(workerData.overtimeRate)}</p>
+             {isLoadingEntries ? <Skeleton className="h-7 w-20" /> : (
+                <div className="text-2xl font-bold">{todayOvertime} ঘণ্টা</div>
+            )}
           </CardContent>
         </Card>
         <Card>
@@ -127,9 +170,11 @@ export default function DashboardPage() {
             <CircleDollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-destructive">
-              {formatCurrency(workerData.advanceBalance)}
-            </div>
+             {isLoadingAdvances ? <Skeleton className="h-7 w-28" /> : (
+                <div className="text-2xl font-bold text-destructive">
+                {formatCurrency(advanceBalance)}
+                </div>
+             )}
             <p className="text-xs text-muted-foreground">পরবর্তী বেতন থেকে কর্তনযোগ্য</p>
           </CardContent>
         </Card>

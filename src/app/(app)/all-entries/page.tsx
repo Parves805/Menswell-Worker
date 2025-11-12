@@ -17,18 +17,10 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-
-// Dummy data for all production entries. In a real app, you'd fetch this.
-const allEntries = [
-    { id: 'ENTRY-001', date: '২০২৪-০৭-২৮', category: 'টি-শার্ট', pieces: 112, rate: 5.5, total: 616, },
-    { id: 'ENTRY-002', date: '২০২৪-০৭-২৭', category: 'পোলো শার্ট', pieces: 105, rate: 6.0, total: 630, },
-    { id: 'ENTRY-003', date: '২০২৪-০৭-২৬', category: 'প্যান্ট', pieces: 80, rate: 12.0, total: 960, },
-    { id: 'ENTRY-004', date: '২০২৪-০৭-২৫', category: 'টি-শার্ট', pieces: 115, rate: 5.5, total: 632.5, },
-    { id: 'ENTRY-005', date: '২০২৪-০৭-২৪', category: 'শার্ট', pieces: 90, rate: 10.0, total: 900, },
-    { id: 'ENTRY-006', date: '২০২৪-০৭-২৩', category: 'পোলো শার্ট', pieces: 108, rate: 6.0, total: 648, },
-    { id: 'ENTRY-007', date: '২০২৪-০৭-২২', category: 'টি-শার্ট', pieces: 120, rate: 5.5, total: 660, },
-    { id: 'ENTRY-008', date: '২০২৪-০৭-২১', category: 'প্যান্ট', pieces: 85, rate: 12.0, total: 1020, },
-];
+import { useCollection, useFirestore, useUser, useMemoFirebase } from '@/firebase';
+import { collection, query, orderBy } from 'firebase/firestore';
+import type { ProductionEntry } from '@/lib/types';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const formatCurrency = (amount: number) =>
   new Intl.NumberFormat('bn-BD', {
@@ -38,6 +30,19 @@ const formatCurrency = (amount: number) =>
   }).format(amount);
 
 export default function AllEntriesPage() {
+  const { user } = useUser();
+  const firestore = useFirestore();
+
+  const entriesQuery = useMemoFirebase(() => {
+    if (!user || !firestore) return null;
+    return query(
+      collection(firestore, 'workers', user.uid, 'productionEntries'),
+      orderBy('date', 'desc')
+    );
+  }, [user, firestore]);
+
+  const { data: allEntries, isLoading } = useCollection<ProductionEntry>(entriesQuery);
+
   return (
     <Card>
       <CardHeader>
@@ -59,14 +64,23 @@ export default function AllEntriesPage() {
                 </TableRow>
             </TableHeader>
             <TableBody>
-                {allEntries.length > 0 ? (
+                {isLoading && Array.from({length: 5}).map((_, i) => (
+                    <TableRow key={i}>
+                        <TableCell><Skeleton className="h-5 w-24" /></TableCell>
+                        <TableCell><Skeleton className="h-6 w-20" /></TableCell>
+                        <TableCell className="text-center"><Skeleton className="h-5 w-10 mx-auto" /></TableCell>
+                        <TableCell className="text-center"><Skeleton className="h-5 w-16 mx-auto" /></TableCell>
+                        <TableCell className="text-right"><Skeleton className="h-5 w-20 ml-auto" /></TableCell>
+                    </TableRow>
+                ))}
+                {!isLoading && allEntries && allEntries.length > 0 ? (
                 allEntries.map((entry) => (
                     <TableRow key={entry.id}>
-                    <TableCell className="font-medium">{entry.date}</TableCell>
+                    <TableCell className="font-medium">{new Date(entry.date).toLocaleDateString('bn-BD')}</TableCell>
                     <TableCell>
-                        <Badge variant="outline">{entry.category}</Badge>
+                        <Badge variant="outline">{entry.categoryName}</Badge>
                     </TableCell>
-                    <TableCell className="text-center">{entry.pieces}</TableCell>
+                    <TableCell className="text-center">{entry.pieceCount}</TableCell>
                     <TableCell className="text-center">{formatCurrency(entry.rate)}</TableCell>
                     <TableCell className="text-right">
                         {formatCurrency(entry.total)}
@@ -74,11 +88,13 @@ export default function AllEntriesPage() {
                     </TableRow>
                 ))
                 ) : (
-                <TableRow>
-                    <TableCell colSpan={5} className="h-24 text-center">
-                    কোনো এন্ট্রি পাওয়া যায়নি।
-                    </TableCell>
-                </TableRow>
+                !isLoading && (
+                    <TableRow>
+                        <TableCell colSpan={5} className="h-24 text-center">
+                        কোনো এন্ট্রি পাওয়া যায়নি।
+                        </TableCell>
+                    </TableRow>
+                )
                 )}
             </TableBody>
             </Table>

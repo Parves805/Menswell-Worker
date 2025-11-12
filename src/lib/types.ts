@@ -29,12 +29,17 @@ export type AttendanceRecord = {
 
 export type ProductionEntry = {
   id: string;
-  date: string;
+  date: string; // ISO String
   workerId: string;
   workerName: string;
   pieceCount: number;
-  overtimeHours: number;
+  overtimeHours?: number; // Made optional
+  rate: number;
+  total: number;
+  categoryName: string;
+  categoryId: string;
 };
+
 
 export type ProductionEntryRequest = {
   id: string;
@@ -73,7 +78,7 @@ export type AdvancePayment = {
   workerName?: string; // Made optional as it might not be needed for worker view
   date: string;
   amount: number;
-  deducted: boolean;
+  deducted?: boolean;
 };
 
 export type Bonus = {
