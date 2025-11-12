@@ -60,6 +60,11 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const { user, isUserLoading } = useUser();
   const router = useRouter();
 
+  // In a real app, these would come from Firestore settings
+  const companyName = 'গার্মেন্টফ্লো';
+  const companyLogo = <GarmentFlowIcon className="size-5" />;
+
+
   React.useEffect(() => {
     if (!isUserLoading && !user) {
       router.push('/');
@@ -87,11 +92,11 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           <div className="flex items-center gap-2">
             <Button variant="ghost" size="icon" className="shrink-0" asChild>
               <Link href="/dashboard">
-                <GarmentFlowIcon className="size-5" />
+                {companyLogo}
               </Link>
             </Button>
             <h1 className="text-lg font-semibold tracking-tight">
-              গার্মেন্টফ্লো
+              {companyName}
             </h1>
           </div>
         </SidebarHeader>
