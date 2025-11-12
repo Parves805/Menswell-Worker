@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   Card,
   CardContent,
@@ -16,11 +16,14 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { useCollection, useFirestore, useUser, useMemoFirebase } from '@/firebase';
 import { collection, query, orderBy } from 'firebase/firestore';
 import type { ProductionEntry } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Eye, Scissors } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import Image from 'next/image';
 
 const formatCurrency = (amount: number) =>
   new Intl.NumberFormat('bn-BD', {
@@ -28,6 +31,15 @@ const formatCurrency = (amount: number) =>
     currency: 'BDT',
     minimumFractionDigits: 2,
   }).format(amount);
+
+interface CategorySummary {
+  categoryId: string;
+  categoryName: string;
+  categoryImageUrl?: string;
+  totalPieces: number;
+  totalAmount: number;
+  entries: ProductionEntry[];
+}
 
 export default function AllEntriesPage() {
   const { user } = useUser();
@@ -43,63 +55,138 @@ export default function AllEntriesPage() {
 
   const { data: allEntries, isLoading } = useCollection<ProductionEntry>(entriesQuery);
 
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle>সকল কাজের এন্ট্রি</CardTitle>
-        <CardDescription>
-          আপনার সমস্ত কাজ এবং আয়ের বিস্তারিত হিসাব দেখুন।
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <div className="rounded-md border">
-            <Table>
-            <TableHeader>
-                <TableRow>
-                    <TableHead>তারিখ</TableHead>
-                    <TableHead>ক্যাটাগরি</TableHead>
-                    <TableHead className="text-center">পিস</TableHead>
-                    <TableHead className="text-center">দর</TableHead>
-                    <TableHead className="text-right">মোট টাকা</TableHead>
-                </TableRow>
-            </TableHeader>
-            <TableBody>
-                {isLoading && Array.from({length: 5}).map((_, i) => (
-                    <TableRow key={i}>
-                        <TableCell><Skeleton className="h-5 w-24" /></TableCell>
-                        <TableCell><Skeleton className="h-6 w-20" /></TableCell>
-                        <TableCell className="text-center"><Skeleton className="h-5 w-10 mx-auto" /></TableCell>
-                        <TableCell className="text-center"><Skeleton className="h-5 w-16 mx-auto" /></TableCell>
-                        <TableCell className="text-right"><Skeleton className="h-5 w-20 ml-auto" /></TableCell>
-                    </TableRow>
-                ))}
-                {!isLoading && allEntries && allEntries.length > 0 ? (
-                allEntries.map((entry) => (
-                    <TableRow key={entry.id}>
-                    <TableCell className="font-medium">{new Date(entry.date).toLocaleDateString('bn-BD')}</TableCell>
-                    <TableCell>
-                        <Badge variant="outline">{entry.categoryName}</Badge>
-                    </TableCell>
-                    <TableCell className="text-center">{entry.pieceCount}</TableCell>
-                    <TableCell className="text-center">{formatCurrency(entry.rate)}</TableCell>
-                    <TableCell className="text-right">
-                        {formatCurrency(entry.total)}
-                    </TableCell>
-                    </TableRow>
-                ))
-                ) : (
-                !isLoading && (
-                    <TableRow>
-                        <TableCell colSpan={5} className="h-24 text-center">
-                        কোনো এন্ট্রি পাওয়া যায়নি।
-                        </TableCell>
-                    </TableRow>
-                )
-                )}
-            </TableBody>
-            </Table>
+  const categorySummaries = useMemo((): CategorySummary[] | null => {
+    if (!allEntries) return null;
+
+    const summaryMap = new Map<string, CategorySummary>();
+
+    allEntries.forEach((entry) => {
+      let summary = summaryMap.get(entry.categoryId);
+      if (!summary) {
+        summary = {
+          categoryId: entry.categoryId,
+          categoryName: entry.categoryName,
+          categoryImageUrl: entry.categoryImageUrl,
+          totalPieces: 0,
+          totalAmount: 0,
+          entries: [],
+        };
+      }
+      summary.totalPieces += entry.pieceCount;
+      summary.totalAmount += entry.total;
+      summary.entries.push(entry);
+      summaryMap.set(entry.categoryId, summary);
+    });
+
+    return Array.from(summaryMap.values());
+  }, [allEntries]);
+
+  if (isLoading) {
+    return (
+        <div className="space-y-4">
+            {Array.from({length: 3}).map((_, i) => (
+                <Card key={i}>
+                    <CardHeader>
+                        <Skeleton className="h-6 w-1/2" />
+                        <Skeleton className="h-4 w-3/4" />
+                    </CardHeader>
+                    <CardContent className="grid grid-cols-2 gap-4">
+                        <div>
+                            <Skeleton className="h-4 w-1/3 mb-2" />
+                            <Skeleton className="h-7 w-2/3" />
+                        </div>
+                        <div>
+                             <Skeleton className="h-4 w-1/3 mb-2" />
+                             <Skeleton className="h-7 w-2/3" />
+                        </div>
+                    </CardContent>
+                </Card>
+            ))}
         </div>
-      </CardContent>
-    </Card>
+    )
+  }
+
+  return (
+    <div>
+        <Card className="mb-6 bg-primary text-primary-foreground border-none">
+            <CardHeader>
+                <CardTitle className="flex items-center gap-2"><Scissors /> সকল কাজের হিসাব</CardTitle>
+                <CardDescription className="text-primary-foreground/80">
+                    আপনার সমস্ত কাজ ক্যাটাগরি অনুযায়ী বিভক্ত করে দেখানো হলো।
+                </CardDescription>
+            </CardHeader>
+        </Card>
+
+      {!categorySummaries || categorySummaries.length === 0 ? (
+        <Card>
+            <CardContent className="h-48 flex flex-col items-center justify-center text-center">
+                <Scissors className="w-12 h-12 text-muted-foreground mb-4" />
+                <h3 className="text-lg font-semibold">কোনো কাজের এন্ট্রি পাওয়া যায়নি</h3>
+                <p className="text-muted-foreground text-sm">আপনি নতুন কাজের এন্ট্রি যোগ করলে তা এখানে দেখা যাবে।</p>
+            </CardContent>
+        </Card>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {categorySummaries.map((summary) => (
+            <Card key={summary.categoryId} className="flex flex-col">
+              <CardHeader className="flex-grow">
+                <div className="flex items-center gap-4">
+                  {summary.categoryImageUrl && (
+                    <Image src={summary.categoryImageUrl} alt={summary.categoryName} width={64} height={64} className="rounded-md object-cover h-16 w-16" />
+                  )}
+                  <div>
+                    <CardTitle>{summary.categoryName}</CardTitle>
+                    <CardDescription>কাজের সারসংক্ষেপ</CardDescription>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className='flex justify-between items-center bg-muted p-3 rounded-md'>
+                    <span className="text-sm text-muted-foreground">মোট পিস</span>
+                    <span className="font-bold text-lg">{summary.totalPieces.toLocaleString('bn-BD')}</span>
+                </div>
+                 <div className='flex justify-between items-center bg-muted p-3 rounded-md'>
+                    <span className="text-sm text-muted-foreground">মোট আয়</span>
+                    <span className="font-bold text-lg text-primary">{formatCurrency(summary.totalAmount)}</span>
+                </div>
+                
+                 <Dialog>
+                    <DialogTrigger asChild>
+                        <Button variant="outline" className="w-full mt-2">
+                           <Eye className="mr-2 h-4 w-4" /> বিস্তারিত দেখুন
+                        </Button>
+                    </DialogTrigger>
+                    <DialogContent className="max-w-xl">
+                        <DialogHeader>
+                        <DialogTitle>{summary.categoryName} - বিস্তারিত এন্ট্রি</DialogTitle>
+                        </DialogHeader>
+                        <div className="max-h-[60vh] overflow-y-auto mt-4 pr-4">
+                            <Table>
+                                <TableHeader>
+                                <TableRow>
+                                    <TableHead>তারিখ</TableHead>
+                                    <TableHead className="text-center">পিস</TableHead>
+                                    <TableHead className="text-right">মোট টাকা</TableHead>
+                                </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                {summary.entries.map(entry => (
+                                    <TableRow key={entry.id}>
+                                    <TableCell>{new Date(entry.date).toLocaleDateString('bn-BD')}</TableCell>
+                                    <TableCell className="text-center">{entry.pieceCount.toLocaleString('bn-BD')}</TableCell>
+                                    <TableCell className="text-right">{formatCurrency(entry.total)}</TableCell>
+                                    </TableRow>
+                                ))}
+                                </TableBody>
+                            </Table>
+                        </div>
+                    </DialogContent>
+                </Dialog>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
+    </div>
   );
 }
