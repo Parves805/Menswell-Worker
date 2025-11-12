@@ -8,7 +8,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Scissors, CircleDollarSign, Hourglass } from 'lucide-react';
+import { Scissors, CircleDollarSign, Hourglass, Wallet } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
@@ -142,7 +142,7 @@ export default function DashboardPage() {
         <CarouselNext className="absolute right-4 top-1/2 -translate-y-1/2 text-white bg-black/30 hover-bg-black/50 border-none" />
       </Carousel>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">আজকের সেলাই</CardTitle>
@@ -177,6 +177,18 @@ export default function DashboardPage() {
                 </div>
              )}
             <p className="text-xs text-muted-foreground">পরবর্তী বেতন থেকে কর্তনযোগ্য</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">মোট খরচ</CardTitle>
+            <Wallet className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+              <div className="text-2xl font-bold">
+                ৳ ১২,৩০০
+              </div>
+            <p className="text-xs text-muted-foreground">চলতি মাসের মোট খরচ</p>
           </CardContent>
         </Card>
       </div>
