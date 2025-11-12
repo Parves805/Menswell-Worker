@@ -15,27 +15,39 @@ import {
   useMemoFirebase,
   updateDocumentNonBlocking,
 } from '@/firebase';
-import { collection, query, where, orderBy, doc } from 'firebase/firestore';
+import { collection, query, where, doc } from 'firebase/firestore';
 import type { Notification } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 
 export default function NotificationsPage() {
   const { user } = useUser();
   const firestore = useFirestore();
+  const [sortedNotifications, setSortedNotifications] = useState<Notification[] | null>(null);
 
   const notificationsQuery = useMemoFirebase(() => {
     if (!user || !firestore) return null;
+    // IMPORTANT: The orderBy was removed from here. Firestore requires a composite index
+    // for this query: where('workerId', '==', ...).orderBy('createdAt', 'desc').
+    // Without the index, it fails with a permission error.
+    // We will sort the data on the client side instead.
     return query(
       collection(firestore, 'notifications'),
-      where('workerId', '==', user.uid),
-      orderBy('createdAt', 'desc')
+      where('workerId', '==', user.uid)
     );
   }, [user, firestore]);
 
   const { data: notifications, isLoading } =
     useCollection<Notification>(notificationsQuery);
+
+  useEffect(() => {
+    if (notifications) {
+      const sorted = [...notifications].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+      setSortedNotifications(sorted);
+    }
+  }, [notifications]);
+
 
   const handleNotificationClick = (notification: Notification) => {
     if (!notification.isRead && firestore) {
@@ -69,9 +81,9 @@ export default function NotificationsPage() {
             ))}
           </div>
         )}
-        {!isLoading && notifications && notifications.length > 0 ? (
+        {!isLoading && sortedNotifications && sortedNotifications.length > 0 ? (
           <div className="flex flex-col gap-4">
-            {notifications.map((notif) => (
+            {sortedNotifications.map((notif) => (
               <div
                 key={notif.id}
                 onClick={() => handleNotificationClick(notif)}

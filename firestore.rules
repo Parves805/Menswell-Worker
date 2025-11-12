@@ -172,15 +172,17 @@ service cloud.firestore {
      * @path /notifications/{notificationId}
      */
     match /notifications/{notificationId} {
-      // Allow a user to list ONLY their own notifications.
-      // The query must include `where('workerId', '==', request.auth.uid)`.
-      allow list: if isSignedIn() && request.query.where[0][2] == request.auth.uid;
+      // This rule is critical for security.
+      // It allows a user to list notifications ONLY IF the query
+      // includes a `where('workerId', '==', request.auth.uid)` clause.
+      allow list: if isSignedIn() && request.query.where[0][0] == 'workerId' && request.query.where[0][1] == '==' && request.query.where[0][2] == request.auth.uid;
       
-      // Allow a user to get, update, or delete their own notification document.
+      // Allow a user to get, update, or delete THEIR OWN notification document.
       allow get, update, delete: if isOwner(resource.data.workerId);
       
-      // Allow any signed-in user (admin or worker) to create a notification.
-      // The `workerId` in the document must match the creator's UID.
+      // Allow any signed-in user (admin or worker) to create a notification,
+      // as long as the `workerId` in the document matches the creator's UID (for workers)
+      // or if the creator is an admin (who can create notifications for anyone).
       allow create: if isOwner(request.resource.data.workerId) || isAdmin();
     }
 
