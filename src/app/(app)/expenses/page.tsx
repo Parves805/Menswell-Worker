@@ -239,11 +239,11 @@ export default function ExpensesPage() {
                             <TableCell className="text-right">{formatCurrency(expense.amount)}</TableCell>
                         </TableRow>
                     ))}
+                    <TableRow className='font-bold bg-muted'>
+                        <TableCell colSpan={3}>সর্বমোট</TableCell>
+                        <TableCell className="text-right text-primary">{formatCurrency(grandTotal)}</TableCell>
+                    </TableRow>
                 </TableBody>
-                <TableRow className='font-bold bg-muted'>
-                    <TableCell colSpan={3}>সর্বমোট</TableCell>
-                    <TableCell className="text-right text-primary">{formatCurrency(grandTotal)}</TableCell>
-                </TableRow>
             </Table>
        </div>
       <AddExpenseDialog open={isDialogOpen} onOpenChange={setIsDialogOpen} onExpenseAdded={handleExpenseAdded} />
