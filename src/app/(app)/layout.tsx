@@ -54,7 +54,7 @@ const mainNavItems: NavItem[] = [
 
 const bottomNavItems: NavItem[] = [
     { title: 'হোম', href: '/dashboard', icon: <Home /> },
-    { title: 'এন্ট্রি', href: '/entry', icon: <PlusSquare /> },
+    { title: 'ডেইলি এন্টি', href: '/entry', icon: <PlusSquare /> },
     { title: 'চ্যাট', href: '/chat', icon: <MessageCircle /> },
     { title: 'টাকার অনুরোধ', href: '/request-advance', icon: <CircleDollarSign /> },
     { title: 'নোটিফিকেশন', href: '/notifications', icon: <Bell /> },
