@@ -37,11 +37,10 @@ export function TakaIcon(props: SVGProps<SVGSVGElement>) {
       strokeLinecap="round"
       strokeLinejoin="round"
     >
-      <path d="M4 13.5c4.142 0 4.142-4.5 8.284-4.5" />
-      <path d="M15 8.5v8" />
-      <path d="M10 11H8" />
-      <path d="M19 8.5c-2.333 1-2.333 3 0 4" />
-      <path d="M12.5 16.5C10 16.5 8 15 8 12.5s2-4 4.5-4" />
+      <path d="M4 10h12" />
+      <path d="M10 10v8" />
+      <path d="M17 10c-2.5 0-2.5-4-5-4" />
+      <path d="M14 18c2.28 0 4-1.83 4-4.09" />
     </svg>
   );
 }
