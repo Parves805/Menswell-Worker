@@ -54,7 +54,7 @@ function AddExpenseDialog({ open, onOpenChange, onExpenseAdded }: { open: boolea
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!date || !description || !category || amount <= 0) {
+    if (!date || !description || !category || amount <= 0 || !firestore) {
       toast({
         variant: 'destructive',
         title: 'ফর্ম অসম্পূর্ণ',
@@ -138,7 +138,7 @@ export default function ExpensesPage() {
   const firstDayOfMonth = useMemo(() => {
     const date = new Date();
     return new Date(date.getFullYear(), date.getMonth(), 1);
-  }, []);
+  }, [key]);
 
   const expensesQuery = useMemoFirebase(() => {
     if (!firestore) return null;
