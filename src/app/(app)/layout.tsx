@@ -25,6 +25,7 @@ import {
   SidebarTrigger,
   SidebarInset,
   SidebarFooter,
+  useSidebar,
 } from '@/components/ui/sidebar';
 import {
   DropdownMenu,
@@ -59,12 +60,13 @@ const bottomNavItems: NavItem[] = [
     { title: 'নোটিফিকেশন', href: '/notifications', icon: <Bell /> },
 ]
 
-
-export default function AppLayout({ children }: { children: React.ReactNode }) {
+function AppLayoutContent({ children }: { children: React.ReactNode }) {
   const auth = useAuth();
   const { user, isUserLoading } = useUser();
   const router = useRouter();
   const pathname = usePathname();
+  const { setOpenMobile } = useSidebar();
+
 
   // In a real app, these would come from Firestore settings
   const companyName = 'গার্মেন্টফ্লো';
@@ -92,7 +94,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <SidebarProvider>
+    <>
       <Sidebar side="left" collapsible="icon" className="data-[mobile=true]:bg-background data-[mobile=true]:text-foreground bg-primary text-primary-foreground">
         <SidebarHeader>
           <div className="flex items-center gap-2">
@@ -110,7 +112,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           <SidebarMenu>
             {mainNavItems.map((item) => (
               <SidebarMenuItem key={item.title}>
-                <Link href={item.href} className="w-full">
+                <Link href={item.href} className="w-full" onClick={() => setOpenMobile(false)}>
                   <SidebarMenuButton
                     tooltip={item.title}
                     className="hover:bg-primary-dark data-[active=true]:bg-primary-dark data-[active=true]:text-white data-[active=true]:border-l-4 border-white text-white/80"
@@ -130,7 +132,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         <SidebarFooter>
           <SidebarMenu>
             <SidebarMenuItem>
-              <Link href="/profile">
+              <Link href="/profile" onClick={() => setOpenMobile(false)}>
                 <SidebarMenuButton
                   tooltip="প্রোফাইল"
                   isActive={pathname === '/profile'}
@@ -186,6 +188,14 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         <main className="flex-1 overflow-auto p-4 sm:p-6 pb-20 md:pb-6">{children}</main>
         <BottomNav navItems={bottomNavItems} />
       </SidebarInset>
-    </SidebarProvider>
+    </>
   );
+}
+
+export default function AppLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <SidebarProvider>
+      <AppLayoutContent>{children}</AppLayoutContent>
+    </SidebarProvider>
+  )
 }

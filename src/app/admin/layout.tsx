@@ -24,6 +24,7 @@ import {
   SidebarMenuButton,
   SidebarTrigger,
   SidebarInset,
+  useSidebar,
 } from '@/components/ui/sidebar';
 import {
   DropdownMenu,
@@ -54,11 +55,12 @@ const mainNavItems: NavItem[] = [
   { title: 'সেটিংস', href: '/admin/settings', icon: <Settings /> },
 ];
 
-export default function AdminLayout({ children }: { children: React.ReactNode }) {
+function AdminLayoutContent({ children }: { children: React.ReactNode }) {
   const auth = useAuth();
   const { user, isUserLoading } = useUser();
   const router = useRouter();
   const { toast } = useToast();
+  const { setOpenMobile } = useSidebar();
 
   React.useEffect(() => {
     if (isUserLoading) return;
@@ -101,7 +103,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   return (
     <div className="admin-panel">
-      <SidebarProvider>
         <Sidebar side="left" collapsible="icon">
           <SidebarHeader>
             <div className="flex items-center gap-2">
@@ -119,7 +120,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             <SidebarMenu>
               {mainNavItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <Link href={item.href} className="w-full">
+                  <Link href={item.href} className="w-full" onClick={() => setOpenMobile(false)}>
                     <SidebarMenuButton
                       tooltip={item.title}
                       className="hover:bg-primary/10 data-[active=true]:bg-primary/15 data-[active=true]:text-primary"
@@ -167,7 +168,15 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           </header>
           <main className="flex-1 overflow-auto p-4 sm:p-6">{children}</main>
         </SidebarInset>
-      </SidebarProvider>
     </div>
   );
+}
+
+
+export default function AdminLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <SidebarProvider>
+      <AdminLayoutContent>{children}</AdminLayoutContent>
+    </SidebarProvider>
+  )
 }
