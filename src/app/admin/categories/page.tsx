@@ -58,7 +58,7 @@ function AddCategoryDialog({
 
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();
-    if (!name || !rate || !firestore) {
+    if (!name || !rate || !imageUrl || !firestore) {
       toast({ variant: 'destructive', title: 'ফর্ম অসম্পূর্ণ', description: 'অনুগ্রহ করে সমস্ত ঘর পূরণ করুন।' });
       return;
     }
@@ -67,7 +67,7 @@ function AddCategoryDialog({
     const newCategory = {
       name,
       rate: parseFloat(rate),
-      imageUrl: imageUrl || `https://picsum.photos/seed/${name.replace(/\s/g, '')}/400/300`,
+      imageUrl,
     };
 
     addDocumentNonBlocking(collection(firestore, 'categories'), newCategory)
@@ -110,7 +110,7 @@ function AddCategoryDialog({
             </div>
             <div className="grid grid-cols-4 items-center gap-4">
               <Label htmlFor="imageUrl" className="text-right">ছবির URL</Label>
-              <Input id="imageUrl" value={imageUrl} onChange={(e) => setImageUrl(e.target.value)} className="col-span-3" placeholder="ঐচ্ছিক, খালি রাখলে প্লেসহোল্ডার ব্যবহৃত হবে" />
+              <Input id="imageUrl" value={imageUrl} onChange={(e) => setImageUrl(e.target.value)} className="col-span-3" placeholder="সঠিক ছবির URL দিন" required />
             </div>
           </div>
           <DialogFooter>
