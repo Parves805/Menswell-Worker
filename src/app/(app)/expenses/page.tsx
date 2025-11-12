@@ -211,7 +211,7 @@ export default function ExpensesPage() {
   };
 
   return (
-    <>
+    <div className='space-y-6'>
       <div ref={printRef} className="p-4 bg-white absolute left-0 top-0 opacity-0 -z-50">
             <div className='text-center mb-2'>
                 <h1 className='text-2xl font-bold'>গার্মেন্টফ্লো</h1>
@@ -247,29 +247,30 @@ export default function ExpensesPage() {
             </Table>
        </div>
       <AddExpenseDialog open={isDialogOpen} onOpenChange={setIsDialogOpen} onExpenseAdded={handleExpenseAdded} />
+
+      <Card className="w-full bg-primary text-primary-foreground border-none">
+          <CardContent className="pt-6">
+              <div className="flex flex-col items-center gap-4 text-center">
+                  <h1 className="text-2xl font-bold flex items-center gap-2"><Wallet2 /> খরচের বিবরণ</h1>
+                  <p className="text-primary-foreground/80 max-w-prose">
+                  আপনার সমস্ত খরচের বিস্তারিত হিসাব দেখুন এবং নতুন খরচ যোগ করুন।
+                  </p>
+                  <div className='flex gap-2'>
+                    <Button onClick={() => setIsDialogOpen(true)} variant="secondary" className='shadow-lg'>
+                        <PlusCircle className="mr-2 h-4 w-4" />
+                        নতুন খরচ
+                    </Button>
+                    <Button onClick={handleDownloadPdf} variant="secondary" className='shadow-lg'>
+                        <Download className="mr-2 h-4 w-4" />
+                        PDF ডাউনলোড
+                    </Button>
+                </div>
+              </div>
+          </CardContent>
+      </Card>
+
       <Card>
-          <CardHeader className="flex-row justify-between items-start">
-              <div>
-                  <CardTitle className="flex items-center gap-2">
-                      <Wallet2 />
-                      খরচের বিবরণ
-                  </CardTitle>
-                  <CardDescription>
-                      আপনার সমস্ত খরচের বিস্তারিত হিসাব দেখুন।
-                  </CardDescription>
-              </div>
-              <div className='flex gap-2'>
-                <Button onClick={() => setIsDialogOpen(true)} variant="outline">
-                    <PlusCircle className="mr-2 h-4 w-4" />
-                    নতুন খরচ
-                </Button>
-                <Button onClick={handleDownloadPdf}>
-                    <Download className="mr-2 h-4 w-4" />
-                    PDF ডাউনলোড
-                </Button>
-              </div>
-          </CardHeader>
-          <CardContent>
+          <CardContent className='pt-6'>
               <Card className="mb-6">
                 <CardHeader className="pb-2">
                   <CardDescription>চলতি মাসের মোট খরচ</CardDescription>
@@ -321,6 +322,6 @@ export default function ExpensesPage() {
               </div>
           </CardContent>
       </Card>
-    </>
+    </div>
   );
 }
