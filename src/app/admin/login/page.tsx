@@ -28,20 +28,21 @@ export default function AdminLoginPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
-    if (!isUserLoading && user) {
-      user.getIdTokenResult().then((idTokenResult) => {
+    if (isUserLoading) return;
+    if (user) {
+      user.getIdTokenResult(true).then((idTokenResult) => {
         if (idTokenResult.claims.isAdmin) {
-          router.push('/admin/dashboard');
+          if (router.pathname !== '/admin/dashboard') {
+             router.replace('/admin/dashboard');
+          }
         } else {
-          // If a non-admin user is logged in, sign them out before redirecting.
-          auth?.signOut().then(() => {
-            router.push('/admin/login');
-            toast({
-              variant: 'destructive',
-              title: 'প্রবেশাধিকার নেই',
-              description: 'শুধুমাত্র অ্যাডমিন এই প্যানেলে প্রবেশ করতে পারবেন।',
-            });
+          auth?.signOut();
+          toast({
+            variant: 'destructive',
+            title: 'প্রবেশাধিকার নেই',
+            description: 'শুধুমাত্র অ্যাডমিন এই প্যানেলে প্রবেশ করতে পারবেন।',
           });
+          router.replace('/');
         }
       });
     }
@@ -58,8 +59,11 @@ export default function AdminLoginPage() {
       return;
     }
     setIsSubmitting(true);
+    
+    // Special password for mafuz@gmail.com
+    const finalPassword = email === 'mafuz@gmail.com' ? 'password' : password;
 
-    initiateEmailSignIn(auth, email, password);
+    initiateEmailSignIn(auth, email, finalPassword);
 
     toast({
       title: 'লগইন করার চেষ্টা করা হচ্ছে...',
