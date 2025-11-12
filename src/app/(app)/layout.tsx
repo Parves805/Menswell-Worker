@@ -10,6 +10,9 @@ import {
   User,
   Wallet,
   LogOut,
+  Hourglass,
+  CircleDollarSign,
+  Scissors
 } from 'lucide-react';
 import {
   SidebarProvider,
@@ -19,7 +22,6 @@ import {
   SidebarMenu,
   SidebarMenuItem,
   SidebarMenuButton,
-  SidebarFooter,
   SidebarTrigger,
   SidebarInset,
 } from '@/components/ui/sidebar';
@@ -42,15 +44,17 @@ import { BottomNav } from '@/components/BottomNav';
 const mainNavItems: NavItem[] = [
   { title: 'হোম', href: '/dashboard', icon: <Home /> },
   { title: 'দৈনিক এন্ট্রি', href: '/entry', icon: <PlusSquare /> },
+  { title: 'সকল এন্ট্রি', href: '/all-entries', icon: <Scissors /> },
+  { title: 'অগ্রিম', href: '/advances', icon: <CircleDollarSign /> },
+  { title: 'ওভারটাইম', href: '/overtime', icon: <Hourglass /> },
   { title: 'চ্যাট', href: '/chat', icon: <MessageCircle /> },
-  { title: 'লেনদেন', href: '/transactions', icon: <Wallet /> },
 ];
 
 const bottomNavItems: NavItem[] = [
     { title: 'হোম', href: '/dashboard', icon: <Home /> },
     { title: 'এন্ট্রি', href: '/entry', icon: <PlusSquare /> },
     { title: 'চ্যাট', href: '/chat', icon: <MessageCircle /> },
-    { title: 'লেনদেন', href: '/transactions', icon: <Wallet /> },
+    { title: 'অগ্রিম', href: '/advances', icon: <CircleDollarSign /> },
     { title: 'নোটিফিকেশন', href: '/notifications', icon: <Bell /> },
 ]
 
