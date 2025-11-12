@@ -22,3 +22,26 @@ export function GarmentFlowIcon(props: SVGProps<SVGSVGElement>) {
     </svg>
   );
 }
+
+export function TakaIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg
+      {...props}
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M4 13.5c4.142 0 4.142-4.5 8.284-4.5" />
+      <path d="M15 8.5v8" />
+      <path d="M10 11H8" />
+      <path d="M19 8.5c-2.333 1-2.333 3 0 4" />
+      <path d="M12.5 16.5C10 16.5 8 15 8 12.5s2-4 4.5-4" />
+    </svg>
+  );
+}

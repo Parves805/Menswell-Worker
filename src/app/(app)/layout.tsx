@@ -37,7 +37,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { GarmentFlowIcon } from '@/components/icons';
+import { GarmentFlowIcon, TakaIcon } from '@/components/icons';
 import type { NavItem } from '@/lib/types';
 import { useAuth, useUser } from '@/firebase';
 import { usePathname, useRouter } from 'next/navigation';
@@ -54,7 +54,7 @@ const mainNavItems: NavItem[] = [
 
 const bottomNavItems: NavItem[] = [
     { title: 'হোম', href: '/dashboard', icon: <Home /> },
-    { title: 'টাকার অনুরোধ', href: '/request-advance', icon: <CircleDollarSign /> },
+    { title: 'টাকার অনুরোধ', href: '/request-advance', icon: <TakaIcon /> },
     { title: 'চ্যাট', href: '/chat', icon: <MessageCircle /> },
     { title: 'নোটিফিকেশন', href: '/notifications', icon: <Bell /> },
     { title: 'অ্যাকাউন্ট', href: '/profile', icon: <User /> },
