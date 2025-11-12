@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useMemo, useState, useRef } from 'react';
@@ -136,20 +137,22 @@ export default function AllEntriesPage() {
 
   return (
     <div ref={printRef}>
-        <Card className="mb-6 bg-primary text-primary-foreground border-none">
-            <CardHeader className="flex flex-row items-start justify-between">
-                <div>
+        <div className="mb-6">
+            <Card className="bg-primary text-primary-foreground border-none">
+                <CardHeader>
                     <CardTitle className="flex items-center gap-2"><Scissors /> সকল কাজের হিসাব</CardTitle>
                     <CardDescription className="text-primary-foreground/80 pt-1">
                         আপনার সমস্ত কাজ ক্যাটাগরি অনুযায়ী বিভক্ত করে দেখানো হলো।
                     </CardDescription>
-                </div>
-                 <Button onClick={handleDownloadPdf} variant="secondary">
+                </CardHeader>
+            </Card>
+            <div className="flex justify-end -mt-12 pr-4">
+                 <Button onClick={handleDownloadPdf} variant="secondary" className='shadow-lg'>
                     <Download className="mr-2 h-4 w-4" />
                     PDF ডাউনলোড করুন
                 </Button>
-            </CardHeader>
-        </Card>
+            </div>
+        </div>
 
       {!categorySummaries || categorySummaries.length === 0 ? (
         <Card>
