@@ -99,7 +99,7 @@ export default function DashboardPage() {
         <CardContent>
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm">আজকের মোট আয়</p>
+              <p className="text-sm">মোট আয়</p>
               {isLoadingEntries ? <Skeleton className="h-9 w-36 mt-1" /> : (
                 <p className="text-3xl font-bold">
                     {formatCurrency(todayEarnings)}
