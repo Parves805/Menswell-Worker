@@ -13,6 +13,7 @@ import {
   Shapes,
   Wallet,
   CheckSquare,
+  User,
 } from 'lucide-react';
 import {
   SidebarProvider,
@@ -39,7 +40,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { GarmentFlowIcon } from '@/components/icons';
 import type { NavItem } from '@/lib/types';
 import { useAuth, useUser } from '@/firebase';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 
 
@@ -59,6 +60,7 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
   const auth = useAuth();
   const { user, isUserLoading } = useUser();
   const router = useRouter();
+  const pathname = usePathname();
   const { toast } = useToast();
   const { setOpenMobile } = useSidebar();
 
@@ -124,6 +126,7 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
                     <SidebarMenuButton
                       tooltip={item.title}
                       className="hover:bg-primary/10 data-[active=true]:bg-primary/15 data-[active=true]:text-primary"
+                      isActive={pathname === item.href}
                       asChild
                     >
                       <div className="flex items-center gap-2">

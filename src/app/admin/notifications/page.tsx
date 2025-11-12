@@ -17,6 +17,7 @@ import React from 'react';
 import { useCollection, useFirestore, useMemoFirebase, addDocumentNonBlocking } from '@/firebase';
 import { collection } from 'firebase/firestore';
 import type { Worker } from '@/lib/types';
+import { Input } from "@/components/ui/input";
 
 
 export default function AdminNotificationsPage() {
@@ -25,6 +26,7 @@ export default function AdminNotificationsPage() {
     const [message, setMessage] = React.useState('');
     const [target, setTarget] = React.useState('all');
     const [selectedWorker, setSelectedWorker] = React.useState('');
+    const [isSubmitting, setIsSubmitting] = React.useState(false);
     const firestore = useFirestore();
 
     const workersQuery = useMemoFirebase(
@@ -45,6 +47,8 @@ export default function AdminNotificationsPage() {
             return;
         }
 
+        setIsSubmitting(true);
+
         const notificationData = {
           title,
           message,
@@ -52,33 +56,52 @@ export default function AdminNotificationsPage() {
           isRead: false,
         };
 
+        const notificationsCol = collection(firestore, 'notifications');
+
         if (target === 'all') {
             // Send to all workers
-             if (!workers) return;
-             workers.forEach(worker => {
-                addDocumentNonBlocking(collection(firestore, 'notifications'), {
+             if (!workers) {
+                setIsSubmitting(false);
+                return;
+             }
+             const promises = workers.map(worker => {
+                return addDocumentNonBlocking(notificationsCol, {
                     ...notificationData,
                     workerId: worker.id
                 });
              });
+             Promise.all(promises).then(() => {
+                toast({
+                    title: "বিজ্ঞপ্তি পাঠানো হয়েছে",
+                    description: "সকল কর্মীকে আপনার বিজ্ঞপ্তি সফলভাবে পাঠানো হয়েছে।",
+                });
+                setTitle('');
+                setMessage('');
+                setIsSubmitting(false);
+             }).catch(() => {
+                toast({ variant: 'destructive', title: 'ত্রুটি', description: 'বিজ্ঞপ্তি পাঠানোর সময় সমস্যা হয়েছে।' });
+                setIsSubmitting(false);
+             })
+
         } else {
             // Send to a specific worker
-            addDocumentNonBlocking(collection(firestore, 'notifications'), {
+            addDocumentNonBlocking(notificationsCol, {
                 ...notificationData,
                 workerId: selectedWorker
+            }).then(() => {
+                 toast({
+                    title: "বিজ্ঞপ্তি পাঠানো হয়েছে",
+                    description: "আপনার বিজ্ঞপ্তি সফলভাবে পাঠানো হয়েছে।",
+                });
+                setTitle('');
+                setMessage('');
+                setSelectedWorker('');
+                setIsSubmitting(false);
+            }).catch(() => {
+                toast({ variant: 'destructive', title: 'ত্রুটি', description: 'বিজ্ঞপ্তি পাঠানোর সময় সমস্যা হয়েছে।' });
+                setIsSubmitting(false);
             });
         }
-
-
-        toast({
-            title: "বিজ্ঞপ্তি পাঠানো হয়েছে",
-            description: "আপনার বিজ্ঞপ্তি সফলভাবে পাঠানো হয়েছে।",
-        });
-
-        setTitle('');
-        setMessage('');
-        setTarget('all');
-        setSelectedWorker('');
     }
 
     return (
@@ -99,6 +122,7 @@ export default function AdminNotificationsPage() {
                                 placeholder="বিজ্ঞপ্তির শিরোনাম"
                                 value={title}
                                 onChange={(e) => setTitle(e.target.value)}
+                                required
                             />
                         </div>
 
@@ -110,6 +134,7 @@ export default function AdminNotificationsPage() {
                                 value={message}
                                 onChange={(e) => setMessage(e.target.value)}
                                 rows={5}
+                                required
                             />
                         </div>
                         <div className="grid grid-cols-2 gap-4">
@@ -128,7 +153,7 @@ export default function AdminNotificationsPage() {
                             {target === 'worker' && (
                                 <div className="space-y-2">
                                     <Label htmlFor="worker">কর্মী নির্বাচন করুন</Label>
-                                     <Select value={selectedWorker} onValueChange={setSelectedWorker}>
+                                     <Select value={selectedWorker} onValueChange={setSelectedWorker} required={target === 'worker'}>
                                         <SelectTrigger id="worker">
                                             <SelectValue placeholder="কর্মী নির্বাচন করুন" />
                                         </SelectTrigger>
@@ -142,9 +167,8 @@ export default function AdminNotificationsPage() {
                                 </div>
                             )}
                         </div>
-                        <Button type="submit" className="w-full">
-                            <Send className="mr-2 h-4 w-4" />
-                            বিজ্ঞপ্তি পাঠান
+                        <Button type="submit" className="w-full" disabled={isSubmitting}>
+                            {isSubmitting ? 'পাঠানো হচ্ছে...' : <><Send className="mr-2 h-4 w-4" /> বিজ্ঞপ্তি পাঠান</>}
                         </Button>
                     </form>
                 </CardContent>
