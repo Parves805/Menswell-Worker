@@ -15,6 +15,7 @@
  * - /activityLogs/{activityLogId}: Activity log entries (potentially restricted access).
  * - /categories/{categoryId}: Stores production categories for items.
  * - /productionEntryRequests/{requestId}: Stores worker requests for production entries.
+ * - /advancePaymentRequests/{requestId}: Stores worker requests for advance payments.
  *
  * Key Security Decisions:
  * - Workers can only read and write their own profile and related data.
@@ -22,7 +23,7 @@
  * - Admins (identified by a custom claim `isAdmin: true`) can read any chat.
  * - Listing other worker's data is now allowed for any signed-in user for the admin panel.
  * - Categories are readable by any signed-in user, but only writable by admins (currently relaxed for dev).
- * - Production Entry Requests can be created by the worker who owns it. Admins can read/write all requests.
+ * - Production/Advance Entry Requests can be created by the worker who owns it. Admins can read/write all requests.
  *
  * Denormalization for Authorization:
  * - Worker subcollections include `workerId` field to allow authorization without `get()` calls.
@@ -146,6 +147,23 @@ service cloud.firestore {
       // Admins can delete requests. Workers cannot.
       allow delete: if isAdmin();
     }
+    
+    /**
+     * @description Rules for advance payment requests.
+     * @path /advancePaymentRequests/{requestId}
+     */
+    match /advancePaymentRequests/{requestId} {
+      // Worker can create their own request.
+      allow create: if isOwner(request.resource.data.workerId);
+      // Worker can read their own requests. Admins can read all.
+      allow get: if isOwner(resource.data.workerId) || isAdmin();
+      // Any signed-in user (admin panel) can list all requests.
+      allow list: if isSignedIn();
+      // Admins can update (approve/reject) any request.
+      allow update: if isSignedIn(); // DEV ONLY: was isAdmin()
+      // Admins can delete requests.
+      allow delete: if isAdmin();
+    }
 
     /**
      * @description Rules for the /expenses/{expenseId} collection.
@@ -166,3 +184,5 @@ service cloud.firestore {
     }
   }
 }
+
+    

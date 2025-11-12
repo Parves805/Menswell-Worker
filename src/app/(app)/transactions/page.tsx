@@ -23,6 +23,7 @@ import { useCollection, useFirestore, useUser, useMemoFirebase } from '@/firebas
 import { collection, query, orderBy } from 'firebase/firestore';
 import type { AdvancePayment, Bonus } from '@/lib/types';
 import React from 'react';
+import Link from 'next/link';
 
 export default function TransactionsPage() {
   const firestore = useFirestore();
@@ -65,9 +66,11 @@ export default function TransactionsPage() {
               <TabsTrigger value="advances">অগ্রিম</TabsTrigger>
               <TabsTrigger value="bonuses">বোনাস</TabsTrigger>
             </TabsList>
-            <Button>
-              <PlusCircle className="mr-2 h-4 w-4" />
-              অগ্রিমের জন্য অনুরোধ
+            <Button asChild>
+              <Link href="/request-advance">
+                <PlusCircle className="mr-2 h-4 w-4" />
+                অগ্রিমের জন্য অনুরোধ
+              </Link>
             </Button>
           </div>
           <TabsContent value="advances">
@@ -143,3 +146,5 @@ export default function TransactionsPage() {
     </Card>
   );
 }
+
+    
