@@ -191,12 +191,12 @@ export default function AllEntriesPage() {
             
             <Table>
                 <TableHeader>
-                    <TableRow className='bg-muted'>
-                        <TableHead>তারিখ</TableHead>
-                        <TableHead>ক্যাটাগরি</TableHead>
-                        <TableHead className='text-center'>পিস</TableHead>
-                        <TableHead className='text-center'>দর</TableHead>
-                        <TableHead className="text-right">মোট</TableHead>
+                    <TableRow className='bg-primary text-primary-foreground'>
+                        <TableHead className='text-primary-foreground'>তারিখ</TableHead>
+                        <TableHead className='text-primary-foreground'>ক্যাটাগরি</TableHead>
+                        <TableHead className='text-center text-primary-foreground'>পিস</TableHead>
+                        <TableHead className='text-center text-primary-foreground'>দর</TableHead>
+                        <TableHead className="text-right text-primary-foreground">মোট</TableHead>
                     </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -213,7 +213,7 @@ export default function AllEntriesPage() {
                         <TableCell colSpan={2}>সর্বমোট</TableCell>
                         <TableCell className="text-center">{totalAllPieces.toLocaleString('bn-BD')}</TableCell>
                         <TableCell></TableCell>
-                        <TableCell className="text-right">{formatCurrency(totalAllEarnings)}</TableCell>
+                        <TableCell className="text-right text-primary">{formatCurrency(totalAllEarnings)}</TableCell>
                     </TableRow>
                 </TableBody>
             </Table>
