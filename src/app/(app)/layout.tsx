@@ -36,7 +36,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { GarmentFlowIcon } from '@/components/icons';
 import type { NavItem } from '@/lib/types';
 import { useAuth, useUser } from '@/firebase';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { BottomNav } from '@/components/BottomNav';
 
 const mainNavItems: NavItem[] = [
@@ -59,6 +59,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const auth = useAuth();
   const { user, isUserLoading } = useUser();
   const router = useRouter();
+  const pathname = usePathname();
 
   // In a real app, these would come from Firestore settings
   const companyName = 'গার্মেন্টফ্লো';
@@ -108,6 +109,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
                   <SidebarMenuButton
                     tooltip={item.title}
                     className="hover:bg-primary/10 data-[active=true]:bg-primary/15 data-[active=true]:text-primary"
+                    isActive={pathname === item.href}
                     asChild
                   >
                     <div className="flex items-center gap-2">
@@ -126,6 +128,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
               <Link href="/profile">
                 <SidebarMenuButton
                   tooltip="প্রোফাইল"
+                  isActive={pathname === '/profile'}
                   className="hover:bg-primary/10"
                 >
                   <User />
