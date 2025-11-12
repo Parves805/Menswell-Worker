@@ -142,7 +142,7 @@ export default function ExpensesPage() {
   const firstDayOfMonth = useMemo(() => {
     const date = new Date();
     return new Date(date.getFullYear(), date.getMonth(), 1);
-  }, [key]);
+  }, []);
 
   const expensesQuery = useMemoFirebase(() => {
     if (!firestore) return null;
@@ -248,7 +248,7 @@ export default function ExpensesPage() {
        </div>
       <AddExpenseDialog open={isDialogOpen} onOpenChange={setIsDialogOpen} onExpenseAdded={handleExpenseAdded} />
 
-      <Card className="w-full bg-primary text-primary-foreground border-none">
+       <Card className="w-full bg-primary text-primary-foreground border-none">
           <CardContent className="pt-6">
               <div className="flex flex-col items-center gap-4 text-center">
                   <h1 className="text-2xl font-bold flex items-center gap-2"><Wallet2 /> খরচের বিবরণ</h1>
@@ -317,6 +317,12 @@ export default function ExpensesPage() {
                           </TableRow>
                       )
                       )}
+                        {!isLoading && allExpenses && (
+                             <TableRow className='font-bold bg-muted'>
+                                <TableCell colSpan={3}>সর্বমোট</TableCell>
+                                <TableCell className="text-right text-primary">{formatCurrency(grandTotal)}</TableCell>
+                            </TableRow>
+                        )}
                   </TableBody>
                   </Table>
               </div>
