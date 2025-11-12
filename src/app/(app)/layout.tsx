@@ -55,9 +55,9 @@ const mainNavItems: NavItem[] = [
 const bottomNavItems: NavItem[] = [
     { title: 'হোম', href: '/dashboard', icon: <Home /> },
     { title: 'টাকার অনুরোধ', href: '/request-advance', icon: <CircleDollarSign /> },
+    { title: 'চ্যাট', href: '/chat', icon: <MessageCircle /> },
     { title: 'অ্যাকাউন্ট', href: '/profile', icon: <User /> },
     { title: 'নোটিফিকেশন', href: '/notifications', icon: <Bell /> },
-    { title: 'চ্যাট', href: '/chat', icon: <MessageCircle /> },
 ]
 
 function AppLayoutContent({ children }: { children: React.ReactNode }) {
