@@ -35,7 +35,7 @@ export default function AdminNotificationsPage() {
     );
     const { data: workers, isLoading } = useCollection<Worker>(workersQuery);
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!title || !message || !firestore) {
             toast({ variant: 'destructive', title: 'ফর্ম অসম্পূর্ণ', description: 'অনুগ্রহ করে একটি শিরোনাম এবং বার্তা লিখুন।' });
@@ -56,51 +56,39 @@ export default function AdminNotificationsPage() {
           isRead: false,
         };
 
-        const notificationsCol = collection(firestore, 'notifications');
-
-        if (target === 'all') {
-            // Send to all workers
-             if (!workers) {
-                setIsSubmitting(false);
-                return;
-             }
-             const promises = workers.map(worker => {
-                return addDocumentNonBlocking(notificationsCol, {
-                    ...notificationData,
-                    workerId: worker.id
+        try {
+            if (target === 'all') {
+                if (!workers) {
+                    throw new Error("কর্মী তালিকা পাওয়া যায়নি।");
+                }
+                // Send to all workers by iterating and adding to each sub-collection
+                const promises = workers.map(worker => {
+                    const workerNotificationsCol = collection(firestore, 'workers', worker.id, 'notifications');
+                    return addDocumentNonBlocking(workerNotificationsCol, { ...notificationData, workerId: worker.id });
                 });
-             });
-             Promise.all(promises).then(() => {
+                await Promise.all(promises);
                 toast({
                     title: "বিজ্ঞপ্তি পাঠানো হয়েছে",
                     description: "সকল কর্মীকে আপনার বিজ্ঞপ্তি সফলভাবে পাঠানো হয়েছে।",
                 });
-                setTitle('');
-                setMessage('');
-                setIsSubmitting(false);
-             }).catch(() => {
-                toast({ variant: 'destructive', title: 'ত্রুটি', description: 'বিজ্ঞপ্তি পাঠানোর সময় সমস্যা হয়েছে।' });
-                setIsSubmitting(false);
-             })
-
-        } else {
-            // Send to a specific worker
-            addDocumentNonBlocking(notificationsCol, {
-                ...notificationData,
-                workerId: selectedWorker
-            }).then(() => {
-                 toast({
+            } else {
+                // Send to a specific worker's sub-collection
+                const workerNotificationsCol = collection(firestore, 'workers', selectedWorker, 'notifications');
+                await addDocumentNonBlocking(workerNotificationsCol, { ...notificationData, workerId: selectedWorker });
+                toast({
                     title: "বিজ্ঞপ্তি পাঠানো হয়েছে",
                     description: "আপনার বিজ্ঞপ্তি সফলভাবে পাঠানো হয়েছে।",
                 });
-                setTitle('');
-                setMessage('');
-                setSelectedWorker('');
-                setIsSubmitting(false);
-            }).catch(() => {
-                toast({ variant: 'destructive', title: 'ত্রুটি', description: 'বিজ্ঞপ্তি পাঠানোর সময় সমস্যা হয়েছে।' });
-                setIsSubmitting(false);
-            });
+            }
+            // Reset form on success
+            setTitle('');
+            setMessage('');
+            setSelectedWorker('');
+        } catch (error) {
+            console.error("Notification sending error:", error);
+            toast({ variant: 'destructive', title: 'ত্রুটি', description: 'বিজ্ঞপ্তি পাঠানোর সময় সমস্যা হয়েছে।' });
+        } finally {
+            setIsSubmitting(false);
         }
     }
 
