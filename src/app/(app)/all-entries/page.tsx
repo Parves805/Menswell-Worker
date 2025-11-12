@@ -166,7 +166,18 @@ export default function AllEntriesPage() {
               <CardHeader className="flex-grow">
                 <div className="flex items-center gap-4">
                   {summary.categoryImageUrl && (
-                    <Image src={summary.categoryImageUrl} alt={summary.categoryName} width={64} height={64} className="rounded-md object-cover h-16 w-16" />
+                    <Image 
+                      src={summary.categoryImageUrl} 
+                      alt={summary.categoryName} 
+                      width={64} 
+                      height={64} 
+                      className="rounded-md object-cover h-16 w-16" 
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        target.onerror = null; // prevents looping
+                        target.src = 'https://picsum.photos/seed/placeholder/64/64';
+                      }}
+                    />
                   )}
                   <div>
                     <CardTitle>{summary.categoryName}</CardTitle>
