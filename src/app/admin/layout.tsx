@@ -67,26 +67,36 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
   const { setOpenMobile } = useSidebar();
 
   React.useEffect(() => {
-    if (isUserLoading) return;
+    if (isUserLoading) return; // Wait until user state is loaded
 
     if (!user) {
-      router.push('/admin/login');
+      // If no user is logged in and they are not on the login page, redirect them.
+      if (pathname !== '/admin/login') {
+        router.replace('/admin/login');
+      }
       return;
     }
-    
+
+    // User is logged in, check for admin claim.
     user.getIdTokenResult(true).then((idTokenResult) => {
       if (!idTokenResult.claims.isAdmin) {
+        // If the user is NOT an admin, sign them out, show a toast, and redirect to admin login.
         auth?.signOut();
-        router.push('/dashboard');
         toast({
             variant: 'destructive',
             title: 'প্রবেশাধিকার নেই',
             description: 'শুধুমাত্র অ্যাডমিন এই প্যানেলে প্রবেশ করতে পারবেন।',
         });
+        router.replace('/admin/login');
+      } else {
+        // If the user IS an admin and is on the login page, redirect to the dashboard.
+        if (pathname === '/admin/login') {
+            router.replace('/admin/dashboard');
+        }
       }
     });
 
-  }, [user, isUserLoading, router, auth, toast]);
+  }, [user, isUserLoading, router, auth, toast, pathname]);
 
   const handleLogout = () => {
     if (auth) {
@@ -94,7 +104,8 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
     }
   };
 
-  if (isUserLoading || !user) {
+  // While checking auth state or if user is being redirected, show a loading screen.
+  if (isUserLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <p>লোড হচ্ছে...</p>
@@ -102,74 +113,89 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
     );
   }
 
-  return (
-    <div className="admin-panel">
-        <Sidebar side="left" collapsible="icon">
-          <SidebarHeader>
-            <div className="flex items-center gap-2">
-              <Button variant="ghost" size="icon" className="shrink-0" asChild>
-                <Link href="/admin/dashboard">
-                  <GarmentFlowIcon className="size-5" />
-                </Link>
-              </Button>
-              <h1 className="text-lg font-semibold tracking-tight">
-                অ্যাডমিন প্যানেল
-              </h1>
-            </div>
-          </SidebarHeader>
-          <SidebarContent>
-            <SidebarMenu>
-              {mainNavItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <Link href={item.href} className="w-full" onClick={() => setOpenMobile(false)}>
-                    <SidebarMenuButton
-                      tooltip={item.title}
-                      className="hover:bg-primary/10 data-[active=true]:bg-primary/15 data-[active=true]:text-primary"
-                      isActive={pathname === item.href}
-                      asChild
-                    >
-                      <div className="flex items-center gap-2">
-                          {React.cloneElement(item.icon, { className: "text-muted-foreground data-[active=true]:text-primary"})}
-                          <span>{item.title}</span>
-                      </div>
-                    </SidebarMenuButton>
+  // Do not render the admin layout for the login page
+  if (pathname === '/admin/login') {
+    return <>{children}</>;
+  }
+  
+  // Render full layout only for authenticated admins on other pages
+  if (user) {
+    return (
+      <div className="admin-panel">
+          <Sidebar side="left" collapsible="icon">
+            <SidebarHeader>
+              <div className="flex items-center gap-2">
+                <Button variant="ghost" size="icon" className="shrink-0" asChild>
+                  <Link href="/admin/dashboard">
+                    <GarmentFlowIcon className="size-5" />
                   </Link>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarContent>
-        </Sidebar>
-        <SidebarInset className="flex flex-col">
-          <header className="sticky top-0 z-10 flex h-16 items-center gap-4 border-b bg-background px-4 sm:px-6">
-            <SidebarTrigger className="flex text-foreground hover:text-foreground md:hidden" />
-            <div className="relative flex-1">
-              {/* Search can be added here if needed */}
-            </div>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="flex items-center gap-3 cursor-pointer p-1 h-auto rounded-full hover:bg-muted">
-                  <Avatar className="h-9 w-9">
-                    <AvatarImage src={user.photoURL ?? "https://picsum.photos/seed/admin/40/40"} alt="অ্যাডমিনের ছবি" />
-                    <AvatarFallback>{user.email?.charAt(0).toUpperCase()}</AvatarFallback>
-                  </Avatar>
-                  <div className="hidden md:flex flex-col items-start">
-                      <span className="text-sm font-medium text-foreground">{user.displayName ?? "অ্যাডমিন"}</span>
-                      <span className="text-xs text-muted-foreground">সুপার অ্যাডমিন</span>
-                  </div>
                 </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuLabel>{user.displayName ?? user.email}</DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={handleLogout}>
-                  <LogOut className="mr-2 h-4 w-4" />
-                  <span>লগআউট</span>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </header>
-          <main className="flex-1 overflow-auto p-4 sm:p-6">{children}</main>
-        </SidebarInset>
+                <h1 className="text-lg font-semibold tracking-tight">
+                  অ্যাডমিন প্যানেল
+                </h1>
+              </div>
+            </SidebarHeader>
+            <SidebarContent>
+              <SidebarMenu>
+                {mainNavItems.map((item) => (
+                  <SidebarMenuItem key={item.title}>
+                    <Link href={item.href} className="w-full" onClick={() => setOpenMobile(false)}>
+                      <SidebarMenuButton
+                        tooltip={item.title}
+                        className="hover:bg-primary/10 data-[active=true]:bg-primary/15 data-[active=true]:text-primary"
+                        isActive={pathname === item.href}
+                        asChild
+                      >
+                        <div className="flex items-center gap-2">
+                            {React.cloneElement(item.icon, { className: "text-muted-foreground data-[active=true]:text-primary"})}
+                            <span>{item.title}</span>
+                        </div>
+                      </SidebarMenuButton>
+                    </Link>
+                  </SidebarMenuItem>
+                ))}
+              </SidebarMenu>
+            </SidebarContent>
+          </Sidebar>
+          <SidebarInset className="flex flex-col">
+            <header className="sticky top-0 z-10 flex h-16 items-center gap-4 border-b bg-background px-4 sm:px-6">
+              <SidebarTrigger className="flex text-foreground hover:text-foreground md:hidden" />
+              <div className="relative flex-1">
+                {/* Search can be added here if needed */}
+              </div>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" className="flex items-center gap-3 cursor-pointer p-1 h-auto rounded-full hover:bg-muted">
+                    <Avatar className="h-9 w-9">
+                      <AvatarImage src={user.photoURL ?? "https://picsum.photos/seed/admin/40/40"} alt="অ্যাডমিনের ছবি" />
+                      <AvatarFallback>{user.email?.charAt(0).toUpperCase()}</AvatarFallback>
+                    </Avatar>
+                    <div className="hidden md:flex flex-col items-start">
+                        <span className="text-sm font-medium text-foreground">{user.displayName ?? "অ্যাডমিন"}</span>
+                        <span className="text-xs text-muted-foreground">সুপার অ্যাডমিন</span>
+                    </div>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuLabel>{user.displayName ?? user.email}</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={handleLogout}>
+                    <LogOut className="mr-2 h-4 w-4" />
+                    <span>লগআউট</span>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </header>
+            <main className="flex-1 overflow-auto p-4 sm:p-6">{children}</main>
+          </SidebarInset>
+      </div>
+    );
+  }
+
+  // Fallback for edge cases, renders a loading screen.
+  return (
+    <div className="flex min-h-screen items-center justify-center">
+      <p>অ্যাডমিন প্যানেল লোড হচ্ছে...</p>
     </div>
   );
 }
