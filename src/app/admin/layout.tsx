@@ -38,7 +38,6 @@ import { GarmentFlowIcon } from '@/components/icons';
 import type { NavItem } from '@/lib/types';
 import { useAuth, useUser } from '@/firebase';
 import { useRouter } from 'next/navigation';
-import './admin.css';
 
 
 const mainNavItems: NavItem[] = [
@@ -57,20 +56,13 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const { user, isUserLoading } = useUser();
   const router = useRouter();
 
-  useEffect(() => {
+  React.useEffect(() => {
     if (isUserLoading) return; // Wait until user status is determined
 
     if (!user) {
       router.push('/admin/login');
       return;
     }
-
-    user.getIdTokenResult(true).then((idTokenResult) => {
-      if (!idTokenResult.claims.isAdmin) {
-        auth?.signOut();
-        router.push('/admin/login');
-      }
-    });
   }, [user, isUserLoading, router, auth]);
 
   const handleLogout = () => {
