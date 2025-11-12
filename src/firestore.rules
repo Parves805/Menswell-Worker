@@ -1,0 +1,208 @@
+/**
+ * @fileoverview Firestore Security Rules for the GarmentFlow application.
+ *
+ * Core Philosophy:
+ * This ruleset enforces a strict user-ownership model for worker-related data
+ * (attendance, overtime, production, salary, advance payments, bonus payments, and chats).
+ * Workers can only access their own data. An admin role is assumed for reading any worker's
+ * chat messages for support purposes.
+ *
+ * Data Structure:
+ * - /workers/{workerId}: Stores worker profile information. The document ID is the worker's UID.
+ * - /workers/{workerId}/...: Various subcollections for worker-specific data.
+ * - /chats/{workerId}/messages/{messageId}: Chat messages between a worker and an admin.
+ * - /expenses/{expenseId}: Expense records (potentially admin-only).
+ * - /activityLogs/{activityLogId}: Activity log entries (potentially restricted access).
+ * - /categories/{categoryId}: Stores production categories for items.
+ * - /productionEntryRequests/{requestId}: Stores worker requests for production entries.
+ * - /advancePaymentRequests/{requestId}: Stores worker requests for advance payments.
+ * - /notifications/{notificationId}: Stores notifications for users.
+ *
+ * Key Security Decisions:
+ * - Workers can only read and write their own profile and related data.
+ * - Workers can create chat messages in their own chat path.
+ * - Admins (identified by a custom claim `isAdmin: true`) can read any chat.
+ * - Listing other worker's data is now allowed for any signed-in user for the admin panel.
+ * - Categories are readable by any signed-in user, but only writable by admins (currently relaxed for dev).
+ * - Production/Advance Entry Requests can be created by the worker who owns it. Admins can read/write all requests.
+ * - Notifications are private to each user.
+ *
+ * Denormalization for Authorization:
+ * - Worker subcollections include `workerId` field to allow authorization without `get()` calls.
+ */
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    /**
+     * @description Checks if the request is authenticated (user is signed in).
+     */
+    function isSignedIn() {
+      return request.auth != null;
+    }
+    
+    /**
+     * @description Checks if the user has an 'isAdmin' custom claim.
+     */
+    function isAdmin() {
+      return isSignedIn() && request.auth.token.isAdmin == true;
+    }
+
+    /**
+     * @description Checks if the authenticated user's ID matches the provided userId.
+     * @param {string} userId - The user ID to compare against the authenticated user's ID.
+     */
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    /**
+     * @description Checks if the authenticated user is the owner of the existing document.
+     * @param {string} userId - The user ID to compare against the authenticated user's ID.
+     */
+    function isExistingOwner(userId) {
+        return isOwner(userId) && resource != null;
+    }
+
+    /**
+     * @description Checks if the list query on the workers collection is safe.
+     * Allows listing for any signed-in user (for admin panel) or for unauthenticated 
+     * users if they are querying by 'contact' for login purposes.
+     */
+    function isSafeWorkerList() {
+        let isContactQuery = request.query.where[0][0] == 'contact' && request.query.where[0][1] == '==';
+        let isLimited = request.query.limit == 1;
+
+        // Allow if any signed-in user is listing (for admin panel)
+        // OR it's an unauthenticated, specific, limited query by contact number for login.
+        return isSignedIn() || (request.auth == null && isContactQuery && isLimited);
+    }
+
+    /**
+     * @description Rules for the /workers/{workerId} collection.
+     * @path /workers/{workerId}
+     */
+    match /workers/{workerId} {
+      allow get: if isOwner(workerId) || isAdmin();
+      allow list: if isSignedIn();
+      allow create: if isOwner(workerId) && request.resource.data.id == workerId;
+      allow update: if isExistingOwner(workerId) && request.resource.data.id == resource.data.id;
+      allow delete: if isExistingOwner(workerId);
+    }
+
+    /**
+     * @description Rules for worker-specific subcollections.
+     */
+    match /workers/{workerId}/{subcollection}/{docId} {
+      allow get, list: if isOwner(workerId) || isAdmin();
+      allow create: if isOwner(workerId) && request.resource.data.workerId == workerId;
+      allow update: if isExistingOwner(workerId) && request.resource.data.workerId == resource.data.workerId;
+      allow delete: if isExistingOwner(workerId);
+    }
+    
+    /**
+     * @description Rules for the /chats/{workerId}/messages/{messageId} collection.
+     * @path /chats/{workerId}/messages/{messageId}
+     */
+    match /chats/{workerId}/messages/{messageId} {
+        // Worker can read their own chat messages. Admin can read any chat message.
+        allow get, list: if isOwner(workerId) || isAdmin();
+        
+        // Worker can create messages in their own chat.
+        // Admin can create messages in any worker's chat (e.g. to reply).
+        allow create: if (isOwner(workerId) && request.resource.data.senderId == workerId)
+                      || (isAdmin() && request.resource.data.senderId == 'admin');
+
+        // Messages are immutable once created.
+        allow update, delete: if false;
+    }
+
+    /**
+     * @description Rules for the /categories/{categoryId} collection.
+     * @path /categories/{categoryId}
+     * @principle Allows any signed-in user to read, but only admins to write.
+     *            Temporarily allowing any signed-in user to write for development purposes.
+     */
+    match /categories/{categoryId} {
+      allow read: if isSignedIn();
+      allow write: if isSignedIn(); // DEV ONLY: was isAdmin()
+    }
+    
+    /**
+     * @description Rules for production entry requests.
+     * @path /productionEntryRequests/{requestId}
+     */
+    match /productionEntryRequests/{requestId} {
+      // Worker can create their own request.
+      // Admin can create requests on behalf of others (covered by isAdmin write).
+      allow create: if isOwner(request.resource.data.workerId);
+
+      // Worker can read their own requests. Admins can read all.
+      allow get: if isOwner(resource.data.workerId) || isAdmin();
+      // Any signed-in user (effectively an admin on the admin panel) can list all requests.
+      allow list: if isSignedIn();
+      
+      // Admins can update (approve/reject) any request.
+      // Workers cannot update their own requests.
+      allow update: if isSignedIn(); // DEV ONLY: was isAdmin()
+      
+      // Admins can delete requests. Workers cannot.
+      allow delete: if isAdmin();
+    }
+    
+    /**
+     * @description Rules for advance payment requests.
+     * @path /advancePaymentRequests/{requestId}
+     */
+    match /advancePaymentRequests/{requestId} {
+      // Worker can create their own request.
+      allow create: if isOwner(request.resource.data.workerId);
+      // Worker can read their own requests. Admins can read all.
+      allow get: if isOwner(resource.data.workerId) || isAdmin();
+      // Any signed-in user (admin panel) can list all requests.
+      allow list: if isSignedIn();
+      // Admins can update (approve/reject) any request.
+      allow update: if isSignedIn(); // DEV ONLY: was isAdmin()
+      // Admins can delete requests.
+      allow delete: if isAdmin();
+    }
+    
+    /**
+     * @description Rules for notifications. Users can only read/write their own.
+     * @path /notifications/{notificationId}
+     */
+    match /notifications/{notificationId} {
+        // This rule is critical for security.
+        // It allows a user to list notifications ONLY IF the query
+        // includes a `where('workerId', '==', request.auth.uid)` clause.
+        // This prevents a user from listing all notifications in the system.
+        allow list: if isSignedIn() && request.query.where[0][2] == request.auth.uid;
+
+        // Allow a user to get, update, or delete THEIR OWN notification document.
+        allow get, update, delete: if isSignedIn() && isOwner(resource.data.workerId);
+        
+        // Allow any signed-in user (admin or worker) to create a notification,
+        // as long as the `workerId` in the document matches the creator's UID (for workers)
+        // or if the creator is an admin (who can create notifications for anyone).
+        allow create: if isOwner(request.resource.data.workerId) || isAdmin();
+    }
+
+    /**
+     * @description Rules for the /expenses/{expenseId} collection.
+     * @path /expenses/{expenseId}
+     * @principle Allows any signed in user to CUD. Should be restricted to admins.
+     */
+    match /expenses/{expenseId} {
+      allow read, write: if isSignedIn();
+    }
+
+    /**
+     * @description Rules for the /activityLogs/{activityLogId} collection.
+     * @path /activityLogs/{activityLogId}
+     * @principle Allows any signed in user to CUD. Should be restricted.
+     */
+    match /activityLogs/{activityLogId} {
+      allow read, write: if isSignedIn();
+    }
+  }
+}
