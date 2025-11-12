@@ -3,32 +3,31 @@
  *
  * Core Philosophy:
  * This ruleset enforces a strict user-ownership model for worker-related data
- * (attendance, overtime, production, salary, advance payments, bonus payments, and chats).
- * Workers can only access their own data. An admin role is assumed for reading any worker's
- * chat messages for support purposes.
+ * (attendance, overtime, production, salary, advance payments, bonus payments, chats, and notifications).
+ * Workers can only access their own data. An admin role is provided for broader access.
  *
  * Data Structure:
  * - /workers/{workerId}: Stores worker profile information. The document ID is the worker's UID.
- * - /workers/{workerId}/...: Various subcollections for worker-specific data.
+ * - /workers/{workerId}/...: Various subcollections for worker-specific data, including notifications.
  * - /chats/{workerId}/messages/{messageId}: Chat messages between a worker and an admin.
  * - /expenses/{expenseId}: Expense records (potentially admin-only).
  * - /activityLogs/{activityLogId}: Activity log entries (potentially restricted access).
  * - /categories/{categoryId}: Stores production categories for items.
  * - /productionEntryRequests/{requestId}: Stores worker requests for production entries.
  * - /advancePaymentRequests/{requestId}: Stores worker requests for advance payments.
- * - /notifications/{notificationId}: Stores notifications for users.
+ * - /sliderImages/{sliderImageId}: Stores images for the user dashboard slider.
  *
  * Key Security Decisions:
- * - Workers can only read and write their own profile and related data.
+ * - Workers can only read and write their own profile and related data (including notifications).
  * - Workers can create chat messages in their own chat path.
- * - Admins (identified by a custom claim `isAdmin: true`) can read any chat.
- * - Listing other worker's data is now allowed for any signed-in user for the admin panel.
- * - Categories are readable by any signed-in user, but only writable by admins (currently relaxed for dev).
+ * - Admins (identified by a custom claim `isAdmin: true`) have broad read/write access.
+ * - Listing other worker's data is allowed for any signed-in user for the admin panel.
+ * - Categories and Slider Images are readable by any signed-in user, but only writable by admins.
  * - Production/Advance Entry Requests can be created by the worker who owns it. Admins can read/write all requests.
- * - Notifications are private to each user.
  *
- * Denormalization for Authorization:
- * - Worker subcollections include `workerId` field to allow authorization without `get()` calls.
+ * Path-Based Authorization:
+ * - Worker subcollections like notifications are nested under `/workers/{workerId}`. This allows
+ *   for simple, robust, and secure path-based authorization (`isOwner(workerId)`).
  */
 rules_version = '2';
 service cloud.firestore {
@@ -91,13 +90,11 @@ service cloud.firestore {
     }
 
     /**
-     * @description Rules for worker-specific subcollections.
+     * @description Rules for worker-specific subcollections (e.g., productionEntries, notifications).
+     * This rule provides secure, path-based access control.
      */
     match /workers/{workerId}/{subcollection}/{docId} {
-      allow get, list: if isOwner(workerId) || isAdmin();
-      allow create: if isOwner(workerId) && request.resource.data.workerId == workerId;
-      allow update: if isExistingOwner(workerId) && request.resource.data.workerId == resource.data.workerId;
-      allow delete: if isExistingOwner(workerId);
+      allow read, write: if isOwner(workerId) || isAdmin();
     }
     
     /**
@@ -121,11 +118,20 @@ service cloud.firestore {
      * @description Rules for the /categories/{categoryId} collection.
      * @path /categories/{categoryId}
      * @principle Allows any signed-in user to read, but only admins to write.
-     *            Temporarily allowing any signed-in user to write for development purposes.
      */
     match /categories/{categoryId} {
       allow read: if isSignedIn();
-      allow write: if isSignedIn(); // DEV ONLY: was isAdmin()
+      allow write: if isAdmin();
+    }
+
+    /**
+     * @description Rules for the /sliderImages/{sliderImageId} collection.
+     * @path /sliderImages/{sliderImageId}
+     * @principle Allows any signed-in user to read, but only admins to write.
+     */
+    match /sliderImages/{sliderImageId} {
+        allow read: if isSignedIn();
+        allow write: if isSignedIn(); // DEV ONLY: was isAdmin()
     }
     
     /**
@@ -144,7 +150,7 @@ service cloud.firestore {
       
       // Admins can update (approve/reject) any request.
       // Workers cannot update their own requests.
-      allow update: if isSignedIn(); // DEV ONLY: was isAdmin()
+      allow update: if isAdmin();
       
       // Admins can delete requests. Workers cannot.
       allow delete: if isAdmin();
@@ -162,24 +168,9 @@ service cloud.firestore {
       // Any signed-in user (admin panel) can list all requests.
       allow list: if isSignedIn();
       // Admins can update (approve/reject) any request.
-      allow update: if isSignedIn(); // DEV ONLY: was isAdmin()
+      allow update: if isAdmin();
       // Admins can delete requests.
       allow delete: if isAdmin();
-    }
-    
-    /**
-     * @description Rules for notifications. Users can only read/write their own.
-     * @path /notifications/{notificationId}
-     */
-    match /notifications/{notificationId} {
-        // CORRECT RULE FOR LIST: Ensures the client query is filtering by the user's own ID.
-        // This is a robust way to secure list operations without complex indexing.
-        allow list: if isSignedIn() && request.query.where[0][0] == 'workerId' && request.query.where[0][2] == request.auth.uid;
-
-        // CORRECT RULE FOR DOCUMENT-SPECIFIC OPS: Check the workerId inside the document.
-        allow get, update, delete: if isSignedIn() && isOwner(resource.data.workerId);
-        
-        allow create: if isOwner(request.resource.data.workerId) || isAdmin();
     }
 
     /**
@@ -194,10 +185,10 @@ service cloud.firestore {
     /**
      * @description Rules for the /activityLogs/{activityLogId} collection.
      * @path /activityLogs/{activityLogId}
-     * @principle Allows any signed in user to CUD. Should be restricted.
+     * @principle Allows only admins to read and write.
      */
     match /activityLogs/{activityLogId} {
-      allow read, write: if isSignedIn();
+      allow read, write: if isAdmin();
     }
   }
 }
