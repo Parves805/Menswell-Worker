@@ -172,18 +172,13 @@ service cloud.firestore {
      * @path /notifications/{notificationId}
      */
     match /notifications/{notificationId} {
-        // This rule is critical for security.
-        // It allows a user to list notifications ONLY IF the query
-        // includes a `where('workerId', '==', request.auth.uid)` clause.
-        // This prevents a user from listing all notifications in the system.
-        allow list: if isSignedIn() && request.query.where[0][2] == request.auth.uid;
+        // CORRECT RULE FOR LIST: Ensures the client query is filtering by the user's own ID.
+        // This is a robust way to secure list operations without complex indexing.
+        allow list: if isSignedIn() && request.query.where[0][0] == 'workerId' && request.query.where[0][2] == request.auth.uid;
 
-        // Allow a user to get, update, or delete THEIR OWN notification document.
+        // CORRECT RULE FOR DOCUMENT-SPECIFIC OPS: Check the workerId inside the document.
         allow get, update, delete: if isSignedIn() && isOwner(resource.data.workerId);
         
-        // Allow any signed-in user (admin or worker) to create a notification,
-        // as long as the `workerId` in the document matches the creator's UID (for workers)
-        // or if the creator is an admin (who can create notifications for anyone).
         allow create: if isOwner(request.resource.data.workerId) || isAdmin();
     }
 
