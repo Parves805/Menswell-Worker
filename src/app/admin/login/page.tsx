@@ -61,7 +61,7 @@ export default function AdminLoginPage() {
     setIsSubmitting(true);
     
     // Special password for mafuz@gmail.com
-    const finalPassword = email === 'mafuz@gmail.com' ? 'password' : password;
+    const finalPassword = email === 'mafuz@gmail.com' ? 'Mafuz@123' : password;
 
     initiateEmailSignIn(auth, email, finalPassword);
 
