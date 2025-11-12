@@ -15,7 +15,7 @@ import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { GarmentFlowIcon } from '@/components/icons';
 import { useAuth, useUser, getUserByPhoneNumber, useFirestore, initiateEmailSignIn } from '@/firebase';
-import { FormEvent, useState } from 'react';
+import { FormEvent, useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 
 export default function LoginPage() {
@@ -28,6 +28,15 @@ export default function LoginPage() {
   const [credential, setCredential] = useState('');
   const [password, setPassword] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    // If user is already logged in, redirect to dashboard.
+    // This is the single source of truth for redirecting logged-in users from the landing/login page.
+    if (!isUserLoading && user) {
+      router.replace('/dashboard');
+    }
+  }, [user, isUserLoading, router]);
+
 
   const handleLogin = async (e: FormEvent) => {
     e.preventDefault();
@@ -53,7 +62,6 @@ export default function LoginPage() {
           throw new Error('এই ফোন নম্বরের সাথে কোনো ইমেইল যুক্ত নেই।');
         }
       } catch (error: any) {
-        // This catch block will now also handle FirestorePermissionError if getUserByPhoneNumber is configured for it
         toast({
           variant: 'destructive',
           title: 'লগইন ব্যর্থ হয়েছে',
@@ -64,30 +72,22 @@ export default function LoginPage() {
       }
     }
     
-    // Using non-blocking sign-in as an example of further optimization
-    // The `initiateEmailSignIn` function does not return a promise that we need to await here.
-    // It triggers the sign-in and lets the onAuthStateChanged listener handle the result.
     initiateEmailSignIn(auth, emailToLogin, password);
 
-    // To provide immediate feedback, we can optimistically show a toast.
-    // The onAuthStateChanged listener will handle redirects.
-    // A more robust solution might listen for auth errors globally.
     toast({
         title: 'লগইন করার চেষ্টা করা হচ্ছে...',
         description: 'সফল হলে আপনাকে ড্যাশবোর্ডে নিয়ে যাওয়া হবে।',
     });
 
-    // Since we are not awaiting, we might want to reset the state differently,
-    // perhaps based on a global auth error state. For now, we'll just stop submitting.
-     // In a real app, you might want to wait for the auth state to change
-    // or handle login failures gracefully before redirecting.
-    // For this app, the layouts will handle redirection based on auth state.
+    // Let the useEffect handle the redirection.
+    // Set a timeout to re-enable button in case of login failure.
     setTimeout(() => {
-        router.push('/dashboard');
         setIsSubmitting(false);
-    }, 1500);
+    }, 5000);
   };
 
+  // While checking auth state or if user is logged in, show loading.
+  // The useEffect will handle the redirect.
   if (isUserLoading || user) {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center">
@@ -96,6 +96,7 @@ export default function LoginPage() {
     );
   }
 
+  // Only show login form if user is not logged in and auth check is complete.
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-background px-4">
       <div className="absolute inset-0 -z-10 h-full w-full bg-background bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-[size:14px_24px]"></div>

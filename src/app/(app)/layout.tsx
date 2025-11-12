@@ -74,8 +74,10 @@ function AppLayoutContent({ children }: { children: React.ReactNode }) {
 
 
   React.useEffect(() => {
+    // This is the single source of truth for protecting the app routes.
+    // If auth state is determined and there is no user, redirect to login.
     if (!isUserLoading && !user) {
-      router.push('/');
+      router.replace('/');
     }
   }, [user, isUserLoading, router]);
 
@@ -85,6 +87,7 @@ function AppLayoutContent({ children }: { children: React.ReactNode }) {
     }
   };
 
+  // Show a loading screen while the auth state is being determined.
   if (isUserLoading || !user) {
     return (
       <div className="flex min-h-screen items-center justify-center">
@@ -93,6 +96,7 @@ function AppLayoutContent({ children }: { children: React.ReactNode }) {
     );
   }
 
+  // Render the full layout only when we are sure a user is logged in.
   return (
     <>
       <Sidebar side="left" collapsible="icon" className="data-[mobile=true]:bg-background data-[mobile=true]:text-foreground bg-primary text-primary-foreground">
