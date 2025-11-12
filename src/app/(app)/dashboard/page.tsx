@@ -180,7 +180,7 @@ export default function DashboardPage() {
             </CardHeader>
             <CardContent>
               {isLoadingAllEntries ? <Skeleton className="h-7 w-20" /> : (
-                  <div className="text-2xl font-bold">{totalProduction} পিস</div>
+                  <div className="text-2xl font-bold">{totalProduction.toLocaleString('bn-BD')} পিস</div>
               )}
                <p className="text-xs text-muted-foreground">এখন পর্যন্ত মোট কাজ</p>
             </CardContent>
@@ -224,7 +224,7 @@ export default function DashboardPage() {
             </CardHeader>
             <CardContent>
                {isLoadingTodayEntries ? <Skeleton className="h-7 w-20" /> : (
-                  <div className="text-2xl font-bold">{todayOvertime} ঘণ্টা</div>
+                  <div className="text-2xl font-bold">{todayOvertime.toLocaleString('bn-BD')} ঘণ্টা</div>
               )}
                <p className="text-xs text-muted-foreground">আজকের মোট ওভারটাইম</p>
             </CardContent>
