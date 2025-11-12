@@ -14,14 +14,15 @@
  * - /expenses/{expenseId}: Expense records (potentially admin-only).
  * - /activityLogs/{activityLogId}: Activity log entries (potentially restricted access).
  * - /categories/{categoryId}: Stores production categories for items.
+ * - /productionEntryRequests/{requestId}: Stores worker requests for production entries.
  *
  * Key Security Decisions:
  * - Workers can only read and write their own profile and related data.
  * - Workers can create chat messages in their own chat path.
  * - Admins (identified by a custom claim `isAdmin: true`) can read any chat.
  * - Listing other worker's data is now allowed for any signed-in user for the admin panel.
- * - The exact authorization for expenses and activity logs is TBD but currently allows any signed-in user.
  * - Categories are readable by any signed-in user, but only writable by admins.
+ * - Production Entry Requests can be created by the worker who owns it. Admins can read/write all requests.
  *
  * Denormalization for Authorization:
  * - Worker subcollections include `workerId` field to allow authorization without `get()` calls.
@@ -121,6 +122,27 @@ service cloud.firestore {
     match /categories/{categoryId} {
       allow read: if isSignedIn();
       allow write: if isAdmin();
+    }
+    
+    /**
+     * @description Rules for production entry requests.
+     * @path /productionEntryRequests/{requestId}
+     */
+    match /productionEntryRequests/{requestId} {
+      // Worker can create their own request.
+      // Admin can create requests on behalf of others (covered by isAdmin write).
+      allow create: if isOwner(request.resource.data.workerId);
+
+      // Worker can read their own requests. Admins can read all.
+      allow get: if isOwner(resource.data.workerId) || isAdmin();
+      allow list: if isAdmin();
+      
+      // Admins can update (approve/reject) any request.
+      // Workers cannot update their own requests.
+      allow update: if isAdmin();
+      
+      // Admins can delete requests. Workers cannot.
+      allow delete: if isAdmin();
     }
 
     /**

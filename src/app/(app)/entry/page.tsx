@@ -79,7 +79,7 @@ export default function EntryPage() {
         return;
     }
 
-    const newEntry = {
+    const newRequest = {
       date: date.toISOString(),
       workerId: user.uid,
       workerName: user.displayName,
@@ -88,15 +88,17 @@ export default function EntryPage() {
       pieceCount: pieces,
       rate,
       total,
+      status: 'pending', // Add status for the request
+      requestedAt: new Date().toISOString(),
     };
     
-    const entriesColRef = collection(firestore, 'workers', user.uid, 'productionEntries');
+    const requestsColRef = collection(firestore, 'productionEntryRequests');
 
-    addDocumentNonBlocking(entriesColRef, newEntry)
+    addDocumentNonBlocking(requestsColRef, newRequest)
         .then(() => {
             toast({
-              title: 'এন্ট্রি সফল হয়েছে',
-              description: `আপনার ${pieces} পিস (${category.name}) এন্ট্রি সফলভাবে জমা হয়েছে। মোট টাকা: ${formatCurrency(total)}`,
+              title: 'অনুরোধ সফল হয়েছে',
+              description: `আপনার এন্ট্রির অনুরোধ সফলভাবে পাঠানো হয়েছে।`,
             });
             // Reset form
             setSelectedCategoryId('');
@@ -105,7 +107,7 @@ export default function EntryPage() {
         })
         .catch(err => {
             console.error("Error adding document: ", err);
-            toast({ variant: 'destructive', title: 'ত্রুটি', description: 'আপনার এন্ট্রি জমা দেওয়ার সময় একটি সমস্যা হয়েছে।' });
+            toast({ variant: 'destructive', title: 'ত্রুটি', description: 'আপনার অনুরোধ পাঠানোর সময় একটি সমস্যা হয়েছে।' });
         })
         .finally(() => {
             setIsSubmitting(false);
@@ -125,7 +127,7 @@ export default function EntryPage() {
         <CardHeader>
           <CardTitle>দৈনিক কাজের এন্ট্রি</CardTitle>
           <CardDescription>
-            আপনার দৈনন্দিন কাজের হিসাব জমা দিন।
+            আপনার দৈনন্দিন কাজের হিসাব জমা দিন। অ্যাডমিন অনুমোদন করলে এটি চূড়ান্ত হবে।
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -199,7 +201,7 @@ export default function EntryPage() {
             </div>
 
             <Button type="submit" className="w-full" disabled={isSubmitting}>
-              {isSubmitting ? 'জমা হচ্ছে...' : 'জমা দিন'}
+              {isSubmitting ? 'অনুরোধ পাঠানো হচ্ছে...' : 'অনুরোধ পাঠান'}
             </Button>
           </form>
         </CardContent>

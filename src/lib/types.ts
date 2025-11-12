@@ -36,6 +36,23 @@ export type ProductionEntry = {
   overtimeHours: number;
 };
 
+export type ProductionEntryRequest = {
+  id: string;
+  workerId: string;
+  workerName: string;
+  categoryId: string;
+  categoryName: string;
+  date: string;
+  pieceCount: number;
+  rate: number;
+  total: number;
+  status: 'pending' | 'approved' | 'rejected';
+  requestedAt: string;
+  processedAt?: string;
+  rejectionReason?: string;
+};
+
+
 export type SalaryDetails = {
   id: string;
   workerId: string;
