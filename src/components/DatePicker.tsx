@@ -4,6 +4,7 @@ import * as React from 'react';
 import { format } from 'date-fns';
 import { bn } from 'date-fns/locale';
 import { Calendar as CalendarIcon } from 'lucide-react';
+import { SelectSingleEventHandler } from 'react-day-picker';
 
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -16,10 +17,23 @@ import {
 
 interface DatePickerProps {
     name?: string;
+    value?: Date;
+    onSelect?: SelectSingleEventHandler;
 }
 
-export function DatePicker({ name }: DatePickerProps) {
-  const [date, setDate] = React.useState<Date>();
+export function DatePicker({ name, value, onSelect }: DatePickerProps) {
+  const [date, setDate] = React.useState<Date|undefined>(value);
+
+  React.useEffect(() => {
+    setDate(value);
+  }, [value]);
+
+  const handleSelect: SelectSingleEventHandler = (day, selectedDay, activeModifiers, e) => {
+      setDate(selectedDay);
+      if (onSelect) {
+          onSelect(day, selectedDay, activeModifiers, e);
+      }
+  }
 
   return (
     <Popover>
@@ -39,7 +53,7 @@ export function DatePicker({ name }: DatePickerProps) {
         <Calendar
           mode="single"
           selected={date}
-          onSelect={setDate}
+          onSelect={handleSelect}
           initialFocus
           locale={bn}
         />

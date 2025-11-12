@@ -20,7 +20,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { useState, useEffect } from 'react';
-import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
+import { useCollection, useFirestore, useMemoFirebase, useUser, addDocumentNonBlocking } from '@/firebase';
 import { collection } from 'firebase/firestore';
 import type { Category } from '@/lib/types';
 
@@ -28,10 +28,14 @@ import type { Category } from '@/lib/types';
 export default function EntryPage() {
   const { toast } = useToast();
   const firestore = useFirestore();
+  const { user } = useUser();
+
   const [pieces, setPieces] = useState(0);
   const [rate, setRate] = useState(0);
   const [total, setTotal] = useState(0);
-  const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
+  const [selectedCategoryId, setSelectedCategoryId] = useState('');
+  const [date, setDate] = useState<Date|undefined>(new Date());
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const categoriesQuery = useMemoFirebase(
     () => (firestore ? collection(firestore, 'categories') : null),
@@ -45,36 +49,67 @@ export default function EntryPage() {
   }, [pieces, rate]);
   
   useEffect(() => {
-    if (selectedCategory) {
-        setRate(selectedCategory.rate);
+    if (selectedCategoryId) {
+        const category = categories?.find(c => c.id === selectedCategoryId);
+        if (category) {
+            setRate(category.rate);
+        }
+    } else {
+        setRate(0);
     }
-  }, [selectedCategory]);
+  }, [selectedCategoryId, categories]);
 
-  const handleCategoryChange = (categoryId: string) => {
-    const category = categories?.find(c => c.id === categoryId) || null;
-    setSelectedCategory(category);
-  };
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    const formData = new FormData(event.currentTarget);
-    const pieceCount = formData.get('piece-count');
-    const categoryId = formData.get('category');
-    const categoryName = categories?.find(c => c.id === categoryId)?.name || '';
-    const rate = formData.get('rate');
-    const date = formData.get('date');
+    if (!date || !user || !selectedCategoryId || pieces <= 0 || !firestore) {
+      toast({
+        variant: 'destructive',
+        title: 'ফর্ম অসম্পূর্ণ',
+        description: 'অনুগ্রহ করে তারিখ, ক্যাটাগরি এবং পিসের সংখ্যা পূরণ করুন।',
+      });
+      return;
+    }
+    setIsSubmitting(true);
 
-    console.log({ date, pieceCount, category: categoryName, rate, total });
+    const category = categories?.find(c => c.id === selectedCategoryId);
+    if (!category) {
+        toast({ variant: 'destructive', title: 'ক্যাটাগরি পাওয়া যায়নি', description: 'অনুগ্রহ করে একটি সঠিক ক্যাটাগরি নির্বাচন করুন।' });
+        setIsSubmitting(false);
+        return;
+    }
 
-    toast({
-      title: 'এন্ট্রি সফল হয়েছে',
-      description: `আপনার ${pieceCount} পিস (${categoryName}) এন্ট্রি সফলভাবে জমা হয়েছে। মোট টাকা: ${total}`,
-    });
+    const newEntry = {
+      date: date.toISOString(),
+      workerId: user.uid,
+      workerName: user.displayName,
+      categoryId: selectedCategoryId,
+      categoryName: category.name,
+      pieceCount: pieces,
+      rate,
+      total,
+    };
+    
+    const entriesColRef = collection(firestore, 'workers', user.uid, 'productionEntries');
 
-    event.currentTarget.reset();
-    setPieces(0);
-    setRate(0);
-    setSelectedCategory(null);
+    addDocumentNonBlocking(entriesColRef, newEntry)
+        .then(() => {
+            toast({
+              title: 'এন্ট্রি সফল হয়েছে',
+              description: `আপনার ${pieces} পিস (${category.name}) এন্ট্রি সফলভাবে জমা হয়েছে। মোট টাকা: ${formatCurrency(total)}`,
+            });
+            // Reset form
+            setSelectedCategoryId('');
+            setPieces(0);
+            setDate(new Date());
+        })
+        .catch(err => {
+            console.error("Error adding document: ", err);
+            toast({ variant: 'destructive', title: 'ত্রুটি', description: 'আপনার এন্ট্রি জমা দেওয়ার সময় একটি সমস্যা হয়েছে।' });
+        })
+        .finally(() => {
+            setIsSubmitting(false);
+        });
   };
 
   const formatCurrency = (amount: number) =>
@@ -97,7 +132,7 @@ export default function EntryPage() {
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-2">
               <Label htmlFor="date">তারিখ</Label>
-              <DatePicker name="date" />
+              <DatePicker name="date" value={date} onSelect={setDate} />
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -109,12 +144,13 @@ export default function EntryPage() {
                   type="number"
                   placeholder="e.g., 120"
                   required
+                  value={pieces || ''}
                   onChange={(e) => setPieces(Number(e.target.value))}
                 />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="category">ক্যাটাগরি</Label>
-                <Select name="category" required onValueChange={handleCategoryChange}>
+                <Select name="category" required onValueChange={setSelectedCategoryId} value={selectedCategoryId}>
                   <SelectTrigger id="category">
                     <SelectValue placeholder="ক্যাটাগরি নির্বাচন করুন" />
                   </SelectTrigger>
@@ -143,10 +179,10 @@ export default function EntryPage() {
                   step="0.01"
                   placeholder="e.g., 5.5"
                   required
-                  value={rate}
+                  value={rate || ''}
                   onChange={(e) => setRate(Number(e.target.value))}
-                  readOnly={!!selectedCategory}
-                  className={selectedCategory ? 'bg-muted' : ''}
+                  readOnly={!!selectedCategoryId}
+                  className={selectedCategoryId ? 'bg-muted' : ''}
                 />
               </div>
               <div className="space-y-2">
@@ -162,8 +198,8 @@ export default function EntryPage() {
               </div>
             </div>
 
-            <Button type="submit" className="w-full">
-              জমা দিন
+            <Button type="submit" className="w-full" disabled={isSubmitting}>
+              {isSubmitting ? 'জমা হচ্ছে...' : 'জমা দিন'}
             </Button>
           </form>
         </CardContent>
