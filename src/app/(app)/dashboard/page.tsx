@@ -45,6 +45,13 @@ export default function DashboardPage() {
   const tomorrow = new Date(today);
   tomorrow.setDate(tomorrow.getDate() + 1);
 
+  const allEntriesQuery = useMemoFirebase(() => {
+    if (!user || !firestore) return null;
+    return query(
+        collection(firestore, 'workers', user.uid, 'productionEntries')
+    );
+  }, [user, firestore]);
+
   const todayEntriesQuery = useMemoFirebase(() => {
     if (!user || !firestore) return null;
     return query(
@@ -61,24 +68,29 @@ export default function DashboardPage() {
           where('deducted', '==', false)
       );
   }, [user, firestore]);
-
-  const { data: todayEntries, isLoading: isLoadingEntries } = useCollection<ProductionEntry>(todayEntriesQuery);
+  
+  const { data: allEntries, isLoading: isLoadingAllEntries } = useCollection<ProductionEntry>(allEntriesQuery);
+  const { data: todayEntries, isLoading: isLoadingTodayEntries } = useCollection<ProductionEntry>(todayEntriesQuery);
   const { data: unpaidAdvances, isLoading: isLoadingAdvances } = useCollection<AdvancePayment>(advancePaymentsQuery);
 
-  const { todayProduction, todayOvertime, todayEarnings } = React.useMemo(() => {
+  const { todayProduction, todayOvertime } = React.useMemo(() => {
     if (!todayEntries) {
-      return { todayProduction: 0, todayOvertime: 0, todayEarnings: 0 };
+      return { todayProduction: 0, todayOvertime: 0 };
     }
     return todayEntries.reduce(
       (acc, entry) => {
         acc.todayProduction += entry.pieceCount || 0;
         acc.todayOvertime += entry.overtimeHours || 0;
-        acc.todayEarnings += entry.total || 0;
         return acc;
       },
-      { todayProduction: 0, todayOvertime: 0, todayEarnings: 0 }
+      { todayProduction: 0, todayOvertime: 0 }
     );
   }, [todayEntries]);
+  
+  const totalEarnings = React.useMemo(() => {
+    if (!allEntries) return 0;
+    return allEntries.reduce((sum, entry) => sum + (entry.total || 0), 0);
+  }, [allEntries]);
   
   const advanceBalance = React.useMemo(() => {
       if (!unpaidAdvances) return 0;
@@ -93,16 +105,16 @@ export default function DashboardPage() {
         <CardHeader>
           <CardTitle>স্বাগতম, {user?.displayName ?? 'কর্মী'}!</CardTitle>
           <CardDescription className="text-primary-foreground/80">
-            আপনার আজকের কাজের সারসংক্ষেপ নিচে দেওয়া হলো।
+            আপনার কাজের সারসংক্ষেপ নিচে দেওয়া হলো।
           </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm">মোট আয়</p>
-              {isLoadingEntries ? <Skeleton className="h-9 w-36 mt-1" /> : (
+              {isLoadingAllEntries ? <Skeleton className="h-9 w-36 mt-1" /> : (
                 <p className="text-3xl font-bold">
-                    {formatCurrency(todayEarnings)}
+                    {formatCurrency(totalEarnings)}
                 </p>
               )}
             </div>
@@ -151,7 +163,7 @@ export default function DashboardPage() {
               <Scissors className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              {isLoadingEntries ? <Skeleton className="h-7 w-20" /> : (
+              {isLoadingTodayEntries ? <Skeleton className="h-7 w-20" /> : (
                   <div className="text-2xl font-bold">{todayProduction} পিস</div>
               )}
             </CardContent>
@@ -194,7 +206,7 @@ export default function DashboardPage() {
               <Hourglass className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-               {isLoadingEntries ? <Skeleton className="h-7 w-20" /> : (
+               {isLoadingTodayEntries ? <Skeleton className="h-7 w-20" /> : (
                   <div className="text-2xl font-bold">{todayOvertime} ঘণ্টা</div>
               )}
             </CardContent>
