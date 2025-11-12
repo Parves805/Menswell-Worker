@@ -68,7 +68,7 @@ export default function AllEntriesPage() {
         scale: 2,
         useCORS: true,
         backgroundColor: '#ffffff',
-        logging: false, // Suppress logging to prevent console errors on failed image loads
+        logging: false, 
     });
     const data = canvas.toDataURL('image/png');
 
@@ -87,16 +87,31 @@ export default function AllEntriesPage() {
 
   const categorySummaries = useMemo((): CategorySummary[] | null => {
     if (!allEntries) return null;
-
+  
     const summaryMap = new Map<string, CategorySummary>();
-
+    
+    // Helper function to validate if a URL is likely a direct image link
+    const isValidImageUrl = (url: string | undefined): boolean => {
+      if (!url) return false;
+      const validExtensions = ['.jpg', '.jpeg', '.png', '.webp'];
+      try {
+        const path = new URL(url).pathname.toLowerCase();
+        return validExtensions.some(ext => path.endsWith(ext));
+      } catch (e) {
+        return false; // Invalid URL format
+      }
+    };
+  
     allEntries.forEach((entry) => {
       let summary = summaryMap.get(entry.categoryId);
       if (!summary) {
         summary = {
           categoryId: entry.categoryId,
           categoryName: entry.categoryName,
-          categoryImageUrl: entry.categoryImageUrl,
+          // Use a valid placeholder if the URL is invalid
+          categoryImageUrl: isValidImageUrl(entry.categoryImageUrl) 
+            ? entry.categoryImageUrl 
+            : 'https://picsum.photos/seed/placeholder/64/64',
           totalPieces: 0,
           totalAmount: 0,
           entries: [],
@@ -107,7 +122,7 @@ export default function AllEntriesPage() {
       summary.entries.push(entry);
       summaryMap.set(entry.categoryId, summary);
     });
-
+  
     return Array.from(summaryMap.values());
   }, [allEntries]);
 
@@ -174,11 +189,7 @@ export default function AllEntriesPage() {
                       width={64} 
                       height={64} 
                       className="rounded-md object-cover h-16 w-16" 
-                      onError={(e) => {
-                        const target = e.target as HTMLImageElement;
-                        target.onerror = null; // prevents looping
-                        target.src = 'https://picsum.photos/seed/placeholder/64/64';
-                      }}
+                      unoptimized // Helps with external, sometimes problematic URLs
                     />
                   )}
                   <div>
@@ -237,3 +248,5 @@ export default function AllEntriesPage() {
     </div>
   );
 }
+
+    
