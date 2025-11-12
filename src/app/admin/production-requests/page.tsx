@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   Card,
   CardContent,
@@ -27,7 +27,7 @@ import {
   updateDocumentNonBlocking,
   addDocumentNonBlocking,
 } from '@/firebase';
-import { collection, query, where, doc, orderBy } from 'firebase/firestore';
+import { collection, query, doc, orderBy } from 'firebase/firestore';
 import type { ProductionEntryRequest } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -183,15 +183,19 @@ export default function ProductionRequestsPage() {
       firestore
         ? query(
             collection(firestore, 'productionEntryRequests'),
-            where('status', '==', activeTab),
             orderBy('requestedAt', 'desc')
           )
         : null,
-    [firestore, activeTab]
+    [firestore]
   );
 
-  const { data: requests, isLoading } =
+  const { data: allRequests, isLoading } =
     useCollection<ProductionEntryRequest>(requestsQuery);
+
+  const filteredRequests = useMemo(() => {
+    if (!allRequests) return null;
+    return allRequests.filter(req => req.status === activeTab);
+  }, [allRequests, activeTab]);
 
   const handleApprove = async (request: ProductionEntryRequest) => {
     if (!firestore) return;
@@ -299,7 +303,7 @@ export default function ProductionRequestsPage() {
           </TabsList>
           <TabsContent value="pending">
             <RequestsTable
-              requests={requests}
+              requests={filteredRequests}
               isLoading={isLoading}
               onApprove={handleApprove}
               onReject={handleReject}
@@ -308,7 +312,7 @@ export default function ProductionRequestsPage() {
           </TabsContent>
           <TabsContent value="approved">
             <RequestsTable
-              requests={requests}
+              requests={filteredRequests}
               isLoading={isLoading}
               onApprove={handleApprove}
               onReject={handleReject}
@@ -317,7 +321,7 @@ export default function ProductionRequestsPage() {
           </TabsContent>
           <TabsContent value="rejected">
             <RequestsTable
-              requests={requests}
+              requests={filteredRequests}
               isLoading={isLoading}
               onApprove={handleApprove}
               onReject={handleReject}
