@@ -27,8 +27,8 @@ import {
   updateDocumentNonBlocking,
   addDocumentNonBlocking,
 } from '@/firebase';
-import { collection, query, doc, orderBy } from 'firebase/firestore';
-import type { ProductionEntryRequest } from '@/lib/types';
+import { collection, query, doc, orderBy, getDoc } from 'firebase/firestore';
+import type { ProductionEntryRequest, Category } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
 
@@ -213,30 +213,35 @@ export default function ProductionRequestsPage() {
     if (!firestore) return;
     setProcessingId(request.id);
 
-    const approvedEntry = {
-      date: request.date,
-      workerId: request.workerId,
-      workerName: request.workerName,
-      categoryId: request.categoryId,
-      categoryName: request.categoryName,
-      pieceCount: request.pieceCount,
-      rate: request.rate,
-      total: request.total,
-    };
-
-    const workerEntriesRef = collection(
-      firestore,
-      'workers',
-      request.workerId,
-      'productionEntries'
-    );
-    const requestDocRef = doc(
-      firestore,
-      'productionEntryRequests',
-      request.id
-    );
-
     try {
+      const categoryDocRef = doc(firestore, 'categories', request.categoryId);
+      const categoryDoc = await getDoc(categoryDocRef);
+      const categoryData = categoryDoc.data() as Category;
+
+      const approvedEntry = {
+        date: request.date,
+        workerId: request.workerId,
+        workerName: request.workerName,
+        categoryId: request.categoryId,
+        categoryName: request.categoryName,
+        pieceCount: request.pieceCount,
+        rate: request.rate,
+        total: request.total,
+        categoryImageUrl: categoryData?.imageUrl || '',
+      };
+
+      const workerEntriesRef = collection(
+        firestore,
+        'workers',
+        request.workerId,
+        'productionEntries'
+      );
+      const requestDocRef = doc(
+        firestore,
+        'productionEntryRequests',
+        request.id
+      );
+
       await addDocumentNonBlocking(workerEntriesRef, approvedEntry);
 
       updateDocumentNonBlocking(requestDocRef, {

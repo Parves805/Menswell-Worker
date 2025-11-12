@@ -125,6 +125,7 @@ export function AddProductionEntryDialog({
       pieceCount: pieces,
       rate,
       total,
+      categoryImageUrl: category.imageUrl || '',
     };
     
     const entriesColRef = collection(firestore, 'workers', selectedWorkerId, 'productionEntries');

@@ -38,6 +38,7 @@ export type ProductionEntry = {
   total: number;
   categoryName: string;
   categoryId: string;
+  categoryImageUrl?: string;
 };
 
 
