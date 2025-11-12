@@ -23,7 +23,7 @@ import { RecentProductionTable } from '@/components/RecentProductionTable';
 import { useUser, useFirestore, useCollection, useMemoFirebase } from '@/firebase';
 import { collection, query, where, Timestamp, orderBy } from 'firebase/firestore';
 import React from 'react';
-import { ProductionEntry, AdvancePayment, SliderImage } from '@/lib/types';
+import { ProductionEntry, AdvancePayment, SliderImage, Expense } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
 
 const formatCurrency = (amount: number) =>
@@ -66,6 +66,15 @@ export default function DashboardPage() {
       );
   }, [user, firestore]);
 
+  const expensesQuery = useMemoFirebase(() => {
+    if (!firestore) return null;
+    const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+    return query(
+        collection(firestore, 'expenses'),
+        where('date', '>=', Timestamp.fromDate(firstDayOfMonth))
+    );
+  }, [firestore, today]);
+
   const sliderImagesQuery = useMemoFirebase(() => {
     if (!firestore) return null;
     return query(collection(firestore, 'sliderImages'), orderBy('createdAt', 'desc'));
@@ -74,6 +83,7 @@ export default function DashboardPage() {
   const { data: allEntries, isLoading: isLoadingAllEntries } = useCollection<ProductionEntry>(allEntriesQuery);
   const { data: todayEntries, isLoading: isLoadingTodayEntries } = useCollection<ProductionEntry>(todayEntriesQuery);
   const { data: unpaidAdvances, isLoading: isLoadingAdvances } = useCollection<AdvancePayment>(advancePaymentsQuery);
+  const { data: monthlyExpenses, isLoading: isLoadingExpenses } = useCollection<Expense>(expensesQuery);
   const { data: sliderImages, isLoading: isLoadingSlider } = useCollection<SliderImage>(sliderImagesQuery);
 
   const { todayOvertime } = React.useMemo(() => {
@@ -103,6 +113,11 @@ export default function DashboardPage() {
       if (!unpaidAdvances) return 0;
       return unpaidAdvances.reduce((sum, payment) => sum + payment.amount, 0);
   }, [unpaidAdvances]);
+
+  const totalMonthlyExpenses = React.useMemo(() => {
+    if(!monthlyExpenses) return 0;
+    return monthlyExpenses.reduce((sum, expense) => sum + expense.amount, 0);
+  }, [monthlyExpenses]);
 
 
   return (
@@ -156,7 +171,7 @@ export default function DashboardPage() {
                       fill
                       className="object-cover"
                     />
-                     <div className="absolute inset-0 flex flex-col justify-end p-6">
+                     <div className="absolute inset-0 flex flex-col justify-end p-6 bg-gradient-to-t from-black/60 to-transparent">
                         <h3 className="text-xl font-bold text-white [text-shadow:0_2px_4px_rgba(0,0,0,0.5)]">{image.title}</h3>
                         <p className="text-sm text-white/90 [text-shadow:0_1px_3px_rgba(0,0,0,0.5)]">{image.description}</p>
                      </div>
@@ -193,9 +208,11 @@ export default function DashboardPage() {
               <Wallet2 className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
+               {isLoadingExpenses ? <Skeleton className="h-7 w-28" /> : (
                 <div className="text-2xl font-bold">
-                  ৳ ১২,৩০০
+                  {formatCurrency(totalMonthlyExpenses)}
                 </div>
+               )}
               <p className="text-xs text-muted-foreground">চলতি মাসের মোট খরচ</p>
             </CardContent>
           </Card>

@@ -119,6 +119,14 @@ export type Category = {
   imageUrl?: string;
 };
 
+export type Expense = {
+  id: string;
+  date: string;
+  description: string;
+  category: string;
+  amount: number;
+}
+
 
 export type AppSettings = {
     productionCategories: Category[];
