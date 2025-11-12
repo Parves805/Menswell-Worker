@@ -28,7 +28,6 @@ import Image from 'next/image';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 
-
 const formatCurrency = (amount: number) =>
   new Intl.NumberFormat('bn-BD', {
     style: 'currency',
@@ -63,6 +62,13 @@ export default function AllEntriesPage() {
   const handleDownloadPdf = async () => {
     const element = printRef.current;
     if (!element) return;
+    
+    // Temporarily make the element visible for capturing, but keep it off-screen
+    element.style.position = 'absolute';
+    element.style.left = '-9999px';
+    element.style.opacity = '1';
+    element.style.width = '800px'; // Set a fixed width for consistent PDF layout
+
 
     const canvas = await html2canvas(element, {
         scale: 2,
@@ -70,6 +76,14 @@ export default function AllEntriesPage() {
         backgroundColor: '#ffffff',
         logging: false, 
     });
+
+    // Hide the element again after capturing
+    element.style.position = 'absolute';
+    element.style.left = '0';
+    element.style.opacity = '0';
+    element.style.width = 'auto';
+
+
     const data = canvas.toDataURL('image/png');
 
     const pdf = new jsPDF('p', 'mm', 'a4');
@@ -90,15 +104,14 @@ export default function AllEntriesPage() {
   
     const summaryMap = new Map<string, CategorySummary>();
     
-    // Helper function to validate if a URL is likely a direct image link
     const isValidImageUrl = (url: string | undefined): boolean => {
       if (!url) return false;
-      const validExtensions = ['.jpg', '.jpeg', '.png', '.webp'];
+      const validExtensions = ['.jpg', '.jpeg', '.png', '.webp', '.gif'];
       try {
         const path = new URL(url).pathname.toLowerCase();
         return validExtensions.some(ext => path.endsWith(ext));
       } catch (e) {
-        return false; // Invalid URL format
+        return false;
       }
     };
   
@@ -108,7 +121,6 @@ export default function AllEntriesPage() {
         summary = {
           categoryId: entry.categoryId,
           categoryName: entry.categoryName,
-          // Use a valid placeholder if the URL is invalid
           categoryImageUrl: isValidImageUrl(entry.categoryImageUrl) 
             ? entry.categoryImageUrl 
             : 'https://picsum.photos/seed/placeholder/64/64',
@@ -125,6 +137,17 @@ export default function AllEntriesPage() {
   
     return Array.from(summaryMap.values());
   }, [allEntries]);
+  
+  const totalAllPieces = useMemo(() => {
+    if (!allEntries) return 0;
+    return allEntries.reduce((acc, entry) => acc + entry.pieceCount, 0);
+  }, [allEntries]);
+
+  const totalAllEarnings = useMemo(() => {
+    if (!allEntries) return 0;
+    return allEntries.reduce((acc, entry) => acc + entry.total, 0);
+  }, [allEntries]);
+
 
   if (isLoading) {
     return (
@@ -152,7 +175,44 @@ export default function AllEntriesPage() {
   }
 
   return (
-    <div ref={printRef} className="space-y-6">
+    <div className="space-y-6">
+       {/* This div is used for generating the PDF. It's hidden from view. */}
+       <div ref={printRef} className="p-4 bg-white absolute left-0 top-0 opacity-0 -z-50">
+            <div className='text-center mb-4 border-b pb-4'>
+                <h2 className='text-xl font-bold'>সকল কাজের বিস্তারিত হিসাব</h2>
+                <p className='text-sm'>কর্মী: {user?.displayName}</p>
+                <p className='text-sm'>রিপোর্টের তারিখ: {new Date().toLocaleDateString('bn-BD')}</p>
+            </div>
+            <Table>
+                <TableHeader>
+                    <TableRow>
+                        <TableHead>তারিখ</TableHead>
+                        <TableHead>ক্যাটাগরি</TableHead>
+                        <TableHead className='text-center'>পিস</TableHead>
+                        <TableHead className='text-center'>দর</TableHead>
+                        <TableHead className="text-right">মোট</TableHead>
+                    </TableRow>
+                </TableHeader>
+                <TableBody>
+                    {allEntries?.map(entry => (
+                        <TableRow key={entry.id}>
+                            <TableCell>{new Date(entry.date).toLocaleDateString('bn-BD')}</TableCell>
+                            <TableCell>{entry.categoryName}</TableCell>
+                            <TableCell className="text-center">{entry.pieceCount.toLocaleString('bn-BD')}</TableCell>
+                            <TableCell className="text-center">{formatCurrency(entry.rate)}</TableCell>
+                            <TableCell className="text-right">{formatCurrency(entry.total)}</TableCell>
+                        </TableRow>
+                    ))}
+                    <TableRow className='font-bold bg-muted'>
+                        <TableCell colSpan={2}>সর্বমোট</TableCell>
+                        <TableCell className="text-center">{totalAllPieces.toLocaleString('bn-BD')}</TableCell>
+                        <TableCell></TableCell>
+                        <TableCell className="text-right">{formatCurrency(totalAllEarnings)}</TableCell>
+                    </TableRow>
+                </TableBody>
+            </Table>
+       </div>
+
         <Card className="w-full bg-primary text-primary-foreground border-none">
             <CardContent className="pt-6">
                 <div className="flex flex-col items-center gap-4 text-center">
@@ -189,7 +249,8 @@ export default function AllEntriesPage() {
                       width={64} 
                       height={64} 
                       className="rounded-md object-cover h-16 w-16" 
-                      unoptimized // Helps with external, sometimes problematic URLs
+                      unoptimized
+                      onError={(e) => { e.currentTarget.src = 'https://picsum.photos/seed/placeholder/64/64'; }}
                     />
                   )}
                   <div>
@@ -248,5 +309,3 @@ export default function AllEntriesPage() {
     </div>
   );
 }
-
-    
