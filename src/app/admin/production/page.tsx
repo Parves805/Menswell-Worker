@@ -85,17 +85,8 @@ export default function ProductionPage() {
     fetchProductionEntries();
   }, [fetchProductionEntries]);
 
-  const handleEntryAdded = (newEntry: any) => {
-    // Optimistically update the UI
-    setProductionEntries(prev => [
-        {
-            ...newEntry,
-            id: 'temp-' + Date.now(), // temporary id
-            date: new Date(newEntry.date).toLocaleDateString('bn-BD'),
-        },
-        ...prev
-    ]);
-    // Optionally refetch all data to ensure consistency
+  const handleEntryAdded = () => {
+    // Refetch all data to ensure consistency
     fetchProductionEntries();
   };
 
