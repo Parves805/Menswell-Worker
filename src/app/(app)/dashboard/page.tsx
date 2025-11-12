@@ -87,6 +87,31 @@ export default function DashboardPage() {
 
   return (
     <div className="flex flex-col gap-6">
+      
+      <Card className="w-full bg-primary text-primary-foreground border-none">
+        <CardHeader>
+          <CardTitle>স্বাগতম, {user?.displayName ?? 'কর্মী'}!</CardTitle>
+          <CardDescription className="text-primary-foreground/80">
+            আপনার আজকের কাজের সারসংক্ষেপ নিচে দেওয়া হলো।
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm">আজকের মোট আয়</p>
+              {isLoadingEntries ? <Skeleton className="h-9 w-36 mt-1" /> : (
+                <p className="text-3xl font-bold">
+                    {formatCurrency(todayEarnings)}
+                </p>
+              )}
+            </div>
+            <Link href="/entry">
+              <Button variant="secondary">নতুন এন্ট্রি করুন</Button>
+            </Link>
+          </div>
+        </CardContent>
+      </Card>
+      
        <Carousel
         opts={{
           loop: true,
@@ -116,30 +141,6 @@ export default function DashboardPage() {
         <CarouselPrevious className="absolute left-4 top-1/2 -translate-y-1/2 text-white bg-black/30 hover:bg-black/50 border-none" />
         <CarouselNext className="absolute right-4 top-1/2 -translate-y-1/2 text-white bg-black/30 hover-bg-black/50 border-none" />
       </Carousel>
-      
-      <Card className="w-full bg-primary text-primary-foreground border-none">
-        <CardHeader>
-          <CardTitle>স্বাগতম, {user?.displayName ?? 'কর্মী'}!</CardTitle>
-          <CardDescription className="text-primary-foreground/80">
-            আপনার আজকের কাজের সারসংক্ষেপ নিচে দেওয়া হলো।
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm">আজকের মোট আয়</p>
-              {isLoadingEntries ? <Skeleton className="h-9 w-36 mt-1" /> : (
-                <p className="text-3xl font-bold">
-                    {formatCurrency(todayEarnings)}
-                </p>
-              )}
-            </div>
-            <Link href="/entry">
-              <Button variant="secondary">নতুন এন্ট্রি করুন</Button>
-            </Link>
-          </div>
-        </CardContent>
-      </Card>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         <Card>
