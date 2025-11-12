@@ -78,7 +78,7 @@ export default function RequestAdvancePage() {
     <div className="flex justify-center items-start pt-8">
       <Card className="w-full max-w-lg">
         <CardHeader>
-          <CardTitle>অগ্রিম টাকার জন্য অনুরোধ</CardTitle>
+          <CardTitle>টাকার অনুরোধ</CardTitle>
           <CardDescription>
             আপনার প্রয়োজনীয় অগ্রিম টাকার পরিমাণ এবং তারিখ উল্লেখ করুন।
           </CardDescription>
