@@ -121,7 +121,7 @@ service cloud.firestore {
      */
     match /categories/{categoryId} {
       allow read: if isSignedIn();
-      allow write: if isSignedIn(); // DEV ONLY: was isAdmin()
+      allow write: if isSignedIn();
     }
 
     /**
@@ -150,7 +150,7 @@ service cloud.firestore {
       
       // Admins can update (approve/reject) any request.
       // Workers cannot update their own requests.
-      allow update: if isSignedIn(); // DEV ONLY: was isAdmin()
+      allow update: if isSignedIn();
       
       // Admins can delete requests. Workers cannot.
       allow delete: if isAdmin();
