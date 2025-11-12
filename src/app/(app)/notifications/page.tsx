@@ -15,7 +15,7 @@ import {
   useMemoFirebase,
   updateDocumentNonBlocking,
 } from '@/firebase';
-import { collection, query, where, doc } from 'firebase/firestore';
+import { collection, query, doc, orderBy } from 'firebase/firestore';
 import type { Notification } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
@@ -28,11 +28,10 @@ export default function NotificationsPage() {
 
   const notificationsQuery = useMemoFirebase(() => {
     if (!user || !firestore) return null;
-    // IMPORTANT: Removed orderBy('createdAt', 'desc') to avoid composite index requirement.
-    // Sorting will be handled on the client-side.
+    // Querying the sub-collection for the current user
     return query(
-      collection(firestore, 'notifications'),
-      where('workerId', '==', user.uid)
+      collection(firestore, 'workers', user.uid, 'notifications'),
+      orderBy('createdAt', 'desc')
     );
   }, [user, firestore]);
 
@@ -41,21 +40,15 @@ export default function NotificationsPage() {
 
   useEffect(() => {
     if (notifications) {
-      // Sort the notifications by date on the client side.
-      const sorted = [...notifications].sort((a, b) => {
-        // Ensure createdAt exists and is a valid date string before comparing.
-        const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
-        const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
-        return dateB - dateA;
-      });
-      setSortedNotifications(sorted);
+      // Data is already sorted by the query, so we can just set it.
+      setSortedNotifications(notifications);
     }
   }, [notifications]);
 
 
   const handleNotificationClick = (notification: Notification) => {
-    if (!notification.isRead && firestore && notification.id) {
-      const notifDocRef = doc(firestore, 'notifications', notification.id);
+    if (!notification.isRead && firestore && notification.id && user) {
+      const notifDocRef = doc(firestore, 'workers', user.uid, 'notifications', notification.id);
       updateDocumentNonBlocking(notifDocRef, { isRead: true });
     }
   };
@@ -131,3 +124,5 @@ export default function NotificationsPage() {
     </Card>
   );
 }
+
+    

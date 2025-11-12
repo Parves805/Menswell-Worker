@@ -185,7 +185,7 @@ export default function AdvanceRequestsPage() {
 
   const sendNotification = (workerId: string, title: string, message: string) => {
     if (!firestore) return;
-    const notificationsCol = collection(firestore, 'notifications');
+    const notificationsCol = collection(firestore, 'workers', workerId, 'notifications');
     addDocumentNonBlocking(notificationsCol, {
       workerId,
       title,
@@ -340,3 +340,5 @@ export default function AdvanceRequestsPage() {
     </Card>
   );
 }
+
+    

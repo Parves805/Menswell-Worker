@@ -199,7 +199,7 @@ export default function ProductionRequestsPage() {
 
   const sendNotification = (workerId: string, title: string, message: string) => {
     if (!firestore) return;
-    const notificationsCol = collection(firestore, 'notifications');
+    const notificationsCol = collection(firestore, 'workers', workerId, 'notifications');
     addDocumentNonBlocking(notificationsCol, {
       workerId,
       title,
@@ -362,3 +362,5 @@ export default function ProductionRequestsPage() {
     </Card>
   );
 }
+
+    

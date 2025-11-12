@@ -9,26 +9,25 @@
  *
  * Data Structure:
  * - /workers/{workerId}: Stores worker profile information. The document ID is the worker's UID.
- * - /workers/{workerId}/...: Various subcollections for worker-specific data.
+ * - /workers/{workerId}/...: Various subcollections for worker-specific data, including notifications.
  * - /chats/{workerId}/messages/{messageId}: Chat messages between a worker and an admin.
  * - /expenses/{expenseId}: Expense records (potentially admin-only).
  * - /activityLogs/{activityLogId}: Activity log entries (potentially restricted access).
  * - /categories/{categoryId}: Stores production categories for items.
  * - /productionEntryRequests/{requestId}: Stores worker requests for production entries.
  * - /advancePaymentRequests/{requestId}: Stores worker requests for advance payments.
- * - /notifications/{notificationId}: Stores notifications for users.
  *
  * Key Security Decisions:
- * - Workers can only read and write their own profile and related data.
+ * - Workers can only read and write their own profile and related data (including notifications).
  * - Workers can create chat messages in their own chat path.
  * - Admins (identified by a custom claim `isAdmin: true`) can read any chat.
  * - Listing other worker's data is now allowed for any signed-in user for the admin panel.
  * - Categories are readable by any signed-in user, but only writable by admins (currently relaxed for dev).
  * - Production/Advance Entry Requests can be created by the worker who owns it. Admins can read/write all requests.
- * - Notifications are private to each user.
  *
  * Denormalization for Authorization:
- * - Worker subcollections include `workerId` field to allow authorization without `get()` calls.
+ * - Worker subcollections include `workerId` field to allow authorization without `get()` calls where needed.
+ *   For subcollections under `/workers/{workerId}`, path-based authorization is sufficient and preferred.
  */
 rules_version = '2';
 service cloud.firestore {
@@ -91,13 +90,11 @@ service cloud.firestore {
     }
 
     /**
-     * @description Rules for worker-specific subcollections.
+     * @description Rules for worker-specific subcollections (e.g., productionEntries, notifications).
+     * This rule provides secure, path-based access control.
      */
     match /workers/{workerId}/{subcollection}/{docId} {
-      allow get, list: if isOwner(workerId) || isAdmin();
-      allow create: if isOwner(workerId) && request.resource.data.workerId == workerId;
-      allow update: if isExistingOwner(workerId) && request.resource.data.workerId == resource.data.workerId;
-      allow delete: if isExistingOwner(workerId);
+      allow read, write: if isOwner(workerId) || isAdmin();
     }
     
     /**
@@ -166,26 +163,6 @@ service cloud.firestore {
       // Admins can delete requests.
       allow delete: if isAdmin();
     }
-    
-    /**
-     * @description Rules for notifications. Users can only read/write their own.
-     * @path /notifications/{notificationId}
-     */
-    match /notifications/{notificationId} {
-        // This rule is critical for security.
-        // It allows a user to list notifications ONLY IF the query
-        // includes a `where('workerId', '==', request.auth.uid)` clause.
-        // This prevents a user from listing all notifications in the system.
-        allow list: if isSignedIn() && request.query.where[0][2] == request.auth.uid;
-
-        // Allow a user to get, update, or delete THEIR OWN notification document.
-        allow get, update, delete: if isSignedIn() && isOwner(resource.data.workerId);
-        
-        // Allow any signed-in user (admin or worker) to create a notification,
-        // as long as the `workerId` in the document matches the creator's UID (for workers)
-        // or if the creator is an admin (who can create notifications for anyone).
-        allow create: if isOwner(request.resource.data.workerId) || isAdmin();
-    }
 
     /**
      * @description Rules for the /expenses/{expenseId} collection.
@@ -206,3 +183,5 @@ service cloud.firestore {
     }
   }
 }
+
+    
