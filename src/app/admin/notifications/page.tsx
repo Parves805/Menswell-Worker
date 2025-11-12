@@ -13,10 +13,9 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { useToast } from "@/hooks/use-toast";
-import React, { useState, ChangeEvent } from 'react';
-import { useCollection, useFirestore, useMemoFirebase, addDocumentNonBlocking, useStorage } from '@/firebase';
+import React, { useState } from 'react';
+import { useCollection, useFirestore, useMemoFirebase, addDocumentNonBlocking } from '@/firebase';
 import { collection } from 'firebase/firestore';
-import { ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage';
 import type { Worker } from '@/lib/types';
 import { Input } from "@/components/ui/input";
 
@@ -27,22 +26,15 @@ export default function AdminNotificationsPage() {
     const [message, setMessage] = useState('');
     const [target, setTarget] = useState('all');
     const [selectedWorker, setSelectedWorker] = useState('');
-    const [imageFile, setImageFile] = useState<File | null>(null);
+    const [imageUrl, setImageUrl] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
     const firestore = useFirestore();
-    const storage = useStorage();
 
     const workersQuery = useMemoFirebase(
       () => (firestore ? collection(firestore, 'workers') : null),
       [firestore]
     );
     const { data: workers, isLoading } = useCollection<Worker>(workersQuery);
-
-    const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
-        if (e.target.files && e.target.files[0]) {
-            setImageFile(e.target.files[0]);
-        }
-    };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -58,21 +50,13 @@ export default function AdminNotificationsPage() {
 
         setIsSubmitting(true);
         
-        let uploadedImageUrl: string | undefined = undefined;
-
         try {
-            if (imageFile && storage) {
-                const imageRef = storageRef(storage, `notifications/${Date.now()}_${imageFile.name}`);
-                const snapshot = await uploadBytes(imageRef, imageFile);
-                uploadedImageUrl = await getDownloadURL(snapshot.ref);
-            }
-
             const notificationData = {
               title,
               message,
               createdAt: new Date().toISOString(),
               isRead: false,
-              imageUrl: uploadedImageUrl
+              imageUrl: imageUrl || undefined,
             };
 
             if (target === 'all') {
@@ -100,7 +84,7 @@ export default function AdminNotificationsPage() {
             setTitle('');
             setMessage('');
             setSelectedWorker('');
-            setImageFile(null);
+            setImageUrl('');
         } catch (error) {
             console.error("Notification sending error:", error);
             toast({ variant: 'destructive', title: 'ত্রুটি', description: 'বিজ্ঞপ্তি পাঠানোর সময় সমস্যা হয়েছে।' });
@@ -144,12 +128,13 @@ export default function AdminNotificationsPage() {
                         </div>
                         
                          <div className="space-y-2">
-                            <Label htmlFor="image">ছবি (ঐচ্ছিক)</Label>
+                            <Label htmlFor="imageUrl">ছবির URL (ঐচ্ছিক)</Label>
                             <Input
-                                id="image"
-                                type="file"
-                                accept="image/*"
-                                onChange={handleFileChange}
+                                id="imageUrl"
+                                type="text"
+                                placeholder="https://example.com/image.png"
+                                value={imageUrl}
+                                onChange={(e) => setImageUrl(e.target.value)}
                             />
                         </div>
 
