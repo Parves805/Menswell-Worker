@@ -1,3 +1,4 @@
+
 'use client';
 
 import Link from 'next/link';
@@ -19,6 +20,7 @@ import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
 import { doc } from 'firebase/firestore';
 import { FormEvent, useEffect, useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
+import { Eye, EyeOff } from 'lucide-react';
 
 export default function SignUpPage() {
   const auth = useAuth();
@@ -29,6 +31,7 @@ export default function SignUpPage() {
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -68,8 +71,7 @@ export default function SignUpPage() {
         name: name,
         contact: phone,
         email: email,
-        joinDate: new Date().toISOString(), // Use ISO string for serializable date
-        // Add other default fields as necessary
+        joinDate: new Date().toISOString(),
         designation: 'Worker',
         department: 'N/A',
         basicSalary: 0,
@@ -162,14 +164,28 @@ export default function SignUpPage() {
               </div>
               <div className="grid gap-2">
                 <Label htmlFor="password">পাসওয়ার্ড</Label>
-                <Input
-                  id="password"
-                  type="password"
-                  placeholder="********"
-                  required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                />
+                <div className="relative">
+                  <Input
+                    id="password"
+                    type={showPassword ? 'text' : 'password'}
+                    placeholder="********"
+                    required
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                  />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="absolute right-1 top-1/2 h-7 w-7 -translate-y-1/2 text-muted-foreground"
+                    onClick={() => setShowPassword((prev) => !prev)}
+                  >
+                    {showPassword ? <EyeOff /> : <Eye />}
+                    <span className="sr-only">
+                      {showPassword ? 'Hide password' : 'Show password'}
+                    </span>
+                  </Button>
+                </div>
               </div>
             </div>
           </CardContent>

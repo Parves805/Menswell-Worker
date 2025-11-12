@@ -1,3 +1,4 @@
+
 'use client';
 
 import {
@@ -12,7 +13,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useUser, useFirestore, useAuth, useDoc, useMemoFirebase, updateDocumentNonBlocking } from '@/firebase';
-import { Camera } from 'lucide-react';
+import { Camera, Eye, EyeOff } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import { useRef, useState, ChangeEvent } from 'react';
 import { useToast } from '@/hooks/use-toast';
@@ -28,6 +29,8 @@ export default function ProfilePage() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [newPhotoURL, setNewPhotoURL] = useState<string | null>(null);
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
 
   const workerDocRef = useMemoFirebase(() => {
     if (!firestore || !user) return null;
@@ -171,11 +174,45 @@ export default function ProfilePage() {
         <CardContent className="space-y-4">
            <div className="space-y-2">
               <Label htmlFor="current-password">বর্তমান পাসওয়ার্ড</Label>
-              <Input id="current-password" type="password" />
+              <div className="relative">
+                <Input
+                  id="current-password"
+                  type={showCurrentPassword ? 'text' : 'password'}
+                />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="absolute right-1 top-1/2 h-7 w-7 -translate-y-1/2 text-muted-foreground"
+                  onClick={() => setShowCurrentPassword((prev) => !prev)}
+                >
+                  {showCurrentPassword ? <EyeOff /> : <Eye />}
+                  <span className="sr-only">
+                    {showCurrentPassword ? 'Hide password' : 'Show password'}
+                  </span>
+                </Button>
+              </div>
             </div>
              <div className="space-y-2">
               <Label htmlFor="new-password">নতুন পাসওয়ার্ড</Label>
-              <Input id="new-password" type="password" />
+              <div className="relative">
+                <Input
+                  id="new-password"
+                  type={showNewPassword ? 'text' : 'password'}
+                />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="absolute right-1 top-1/2 h-7 w-7 -translate-y-1/2 text-muted-foreground"
+                  onClick={() => setShowNewPassword((prev) => !prev)}
+                >
+                  {showNewPassword ? <EyeOff /> : <Eye />}
+                  <span className="sr-only">
+                    {showNewPassword ? 'Hide password' : 'Show password'}
+                  </span>
+                </Button>
+              </div>
             </div>
           <Button>পাসওয়ার্ড আপডেট করুন</Button>
         </CardContent>
