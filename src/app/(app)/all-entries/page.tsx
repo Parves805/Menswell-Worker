@@ -137,7 +137,7 @@ export default function AllEntriesPage() {
   return (
     <div ref={printRef}>
         <Card className="mb-6 bg-primary text-primary-foreground border-none">
-            <CardHeader className="flex flex-row items-start justify-between">
+            <CardHeader className="flex flex-row items-center justify-between">
                 <div>
                     <CardTitle className="flex items-center gap-2"><Scissors /> সকল কাজের হিসাব</CardTitle>
                     <CardDescription className="text-primary-foreground/80 pt-1">
