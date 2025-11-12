@@ -131,7 +131,7 @@ service cloud.firestore {
      */
     match /sliderImages/{sliderImageId} {
         allow read: if isSignedIn();
-        allow write: if isAdmin();
+        allow write: if isSignedIn(); // DEV ONLY: was isAdmin()
     }
     
     /**
