@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import {
   Card,
   CardContent,
@@ -26,6 +26,7 @@ export default function AdminLoginPage() {
   const { user, isUserLoading } = useUser();
   const router = useRouter();
   const { toast } = useToast();
+  const pathname = usePathname();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -43,32 +44,20 @@ export default function AdminLoginPage() {
   }, []);
 
   useEffect(() => {
-    if (pathname === '/admin/login') return;
     if (isUserLoading) return;
     if (user) {
       user.getIdTokenResult(true).then((idTokenResult) => {
         if (idTokenResult.claims.isAdmin) {
-            // Save credential on successful admin login
             if(user.email) {
               localStorage.setItem(ADMIN_CREDENTIAL_KEY, user.email);
             }
-            if (router.pathname !== '/admin/dashboard') {
+            if (pathname !== '/admin/dashboard') {
                 router.replace('/admin/dashboard');
             }
-        } else {
-            // This case should ideally not be hit if admin layout security is correct,
-            // but as a fallback, sign out non-admins trying to access admin login post-factum.
-            auth?.signOut();
-            toast({
-                variant: 'destructive',
-                title: 'প্রবেশাধিকার নেই',
-                description: 'শুধুমাত্র অ্যাডমিন এই প্যানেলে প্রবেশ করতে পারবেন।',
-            });
-            localStorage.removeItem(ADMIN_CREDENTIAL_KEY);
         }
       });
     }
-  }, [user, isUserLoading, router, auth, toast]);
+  }, [user, isUserLoading, router, pathname]);
 
   const handleLogin = (e: FormEvent) => {
     e.preventDefault();
@@ -104,22 +93,10 @@ export default function AdminLoginPage() {
     setPassword('');
   }
 
-  // This check is important. If the path is /admin/login, we should not show the loading screen
-  // if the user object exists, because the useEffect above will handle the redirect.
-  // Showing a loading screen here would cause a flash of "loading" content.
-  const pathname = typeof window !== 'undefined' ? window.location.pathname : '';
-  if (isUserLoading && pathname !== '/admin/login') {
+  if (isUserLoading) {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center">
         <p>অ্যাডমিন প্যানেল লোড হচ্ছে...</p>
-      </div>
-    );
-  }
-  
-  if (user && pathname !== '/admin/login') {
-     return (
-      <div className="flex min-h-screen flex-col items-center justify-center">
-        <p>আপনাকে ড্যাশবোর্ডে নিয়ে যাওয়া হচ্ছে...</p>
       </div>
     );
   }
