@@ -12,6 +12,7 @@ import {
   MessageSquare,
   Shapes,
   Wallet,
+  CheckSquare,
 } from 'lucide-react';
 import {
   SidebarProvider,
@@ -38,12 +39,14 @@ import { GarmentFlowIcon } from '@/components/icons';
 import type { NavItem } from '@/lib/types';
 import { useAuth, useUser } from '@/firebase';
 import { useRouter } from 'next/navigation';
+import { useToast } from '@/hooks/use-toast';
 
 
 const mainNavItems: NavItem[] = [
   { title: 'ড্যাশবোর্ড', href: '/admin/dashboard', icon: <Home /> },
   { title: 'কর্মী', href: '/admin/workers', icon: <Users /> },
   { title: 'উৎপাদন', href: '/admin/production', icon: <Scissors /> },
+  { title: 'অনুরোধসমূহ', href: '/admin/production-requests', icon: <CheckSquare /> },
   { title: 'ক্যাটাগরি', href: '/admin/categories', icon: <Shapes /> },
   { title: 'লেনদেন', href: '/admin/transactions', icon: <Wallet /> },
   { title: 'চ্যাট', href: '/admin/chat', icon: <MessageSquare /> },
@@ -55,15 +58,32 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const auth = useAuth();
   const { user, isUserLoading } = useUser();
   const router = useRouter();
+  const { toast } = useToast();
 
   React.useEffect(() => {
-    if (isUserLoading) return; // Wait until user status is determined
+    if (isUserLoading) return;
 
     if (!user) {
       router.push('/admin/login');
       return;
     }
-  }, [user, isUserLoading, router, auth]);
+    
+    // This part is commented out for development purposes
+    /*
+    user.getIdTokenResult(true).then((idTokenResult) => {
+      if (!idTokenResult.claims.isAdmin) {
+        auth?.signOut();
+        router.push('/dashboard');
+        toast({
+            variant: 'destructive',
+            title: 'প্রবেশাধিকার নেই',
+            description: 'শুধুমাত্র অ্যাডমিন এই প্যানেলে প্রবেশ করতে পারবেন।',
+        });
+      }
+    });
+    */
+
+  }, [user, isUserLoading, router, auth, toast]);
 
   const handleLogout = () => {
     if (auth) {
