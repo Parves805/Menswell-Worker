@@ -199,11 +199,20 @@ export default function AdvanceRequestsPage() {
     if (!firestore) return;
     setProcessingId(request.id);
 
+    // 1. Create the entry for the worker's advance payment record
     const approvedAdvance = {
       date: request.date,
       workerId: request.workerId,
       amount: request.amount,
-      deducted: false, // Will be deducted from next salary
+      deducted: false, // This will be deducted from the next salary
+    };
+
+    // 2. Create the entry for the company's expense record
+    const newExpense = {
+        date: request.date,
+        description: `Advance payment to ${request.workerName}`,
+        category: 'Advance Payment',
+        amount: request.amount,
     };
 
     const workerAdvanceColRef = collection(
@@ -212,6 +221,7 @@ export default function AdvanceRequestsPage() {
       request.workerId,
       'advancePayments'
     );
+    const expensesColRef = collection(firestore, 'expenses');
     const requestDocRef = doc(
       firestore,
       'advancePaymentRequests',
@@ -219,13 +229,19 @@ export default function AdvanceRequestsPage() {
     );
 
     try {
+      // Add to worker's advance history
       await addDocumentNonBlocking(workerAdvanceColRef, approvedAdvance);
+      
+      // Add to company's expenses
+      await addDocumentNonBlocking(expensesColRef, newExpense);
 
+      // Update the original request status
       updateDocumentNonBlocking(requestDocRef, {
         status: 'approved',
         processedAt: new Date().toISOString(),
       });
       
+      // Send a notification to the worker
       sendNotification(
         request.workerId,
         'অগ্রিম টাকার অনুরোধ অনুমোদিত',
@@ -234,7 +250,7 @@ export default function AdvanceRequestsPage() {
 
       toast({
         title: 'অনুরোধ অনুমোদিত হয়েছে',
-        description: `${request.workerName}-এর অগ্রিম অনুরোধ সফলভাবে যোগ করা হয়েছে।`,
+        description: `${request.workerName}-এর অগ্রিম অনুরোধ সফলভাবে যোগ করা হয়েছে এবং খরচ হিসেবে গণ্য করা হয়েছে।`,
       });
     } catch (err) {
       console.error('Approval Error:', err);
@@ -340,5 +356,3 @@ export default function AdvanceRequestsPage() {
     </Card>
   );
 }
-
-    
