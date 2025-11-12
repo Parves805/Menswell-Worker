@@ -131,6 +131,4 @@ export type Notification = {
   message: string;
   createdAt: string; // ISO date string
   isRead: boolean;
-  target?: 'all' | 'worker' | 'group';
-  targetId?: string; // Worker ID or Group ID
 };

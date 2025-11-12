@@ -28,10 +28,6 @@ export default function NotificationsPage() {
 
   const notificationsQuery = useMemoFirebase(() => {
     if (!user || !firestore) return null;
-    // IMPORTANT: The orderBy was removed from here. Firestore requires a composite index
-    // for a query with `where` on one field and `orderBy` on another.
-    // Without the index, it fails with a permission error that looks like a rules issue.
-    // We will sort the data on the client side instead.
     return query(
       collection(firestore, 'notifications'),
       where('workerId', '==', user.uid)

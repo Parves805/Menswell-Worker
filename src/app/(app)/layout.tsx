@@ -54,9 +54,10 @@ const mainNavItems: NavItem[] = [
 
 const bottomNavItems: NavItem[] = [
     { title: 'হোম', href: '/dashboard', icon: <Home /> },
-    { title: 'চ্যাট', href: '/chat', icon: <MessageCircle /> },
     { title: 'টাকার অনুরোধ', href: '/request-advance', icon: <CircleDollarSign /> },
     { title: 'অ্যাকাউন্ট', href: '/profile', icon: <User /> },
+    { title: 'নোটিফিকেশন', href: '/notifications', icon: <Bell /> },
+    { title: 'চ্যাট', href: '/chat', icon: <MessageCircle /> },
 ]
 
 function AppLayoutContent({ children }: { children: React.ReactNode }) {
@@ -151,6 +152,12 @@ function AppLayoutContent({ children }: { children: React.ReactNode }) {
           <div className="relative flex-1">
             {/* Search can be added back if needed */}
           </div>
+           <Button variant="ghost" size="icon" asChild>
+                <Link href="/notifications">
+                  <Bell />
+                  <span className="sr-only">নোটিফিকেশন</span>
+                </Link>
+            </Button>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="flex items-center gap-3 cursor-pointer p-1 h-auto rounded-full hover:bg-muted">
