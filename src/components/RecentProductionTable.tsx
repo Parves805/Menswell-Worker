@@ -168,30 +168,32 @@ export function RecentProductionTable() {
             </DialogDescription>
           </DialogHeader>
           {selectedEntry && (
-            <div className="space-y-4 pt-4">
-                <div className="flex justify-between items-center">
-                    <span className="text-muted-foreground">তারিখ</span>
-                    <span className="font-medium">{new Date(selectedEntry.date).toLocaleDateString('bn-BD', { day: 'numeric', month: 'long', year: 'numeric' })}</span>
+            <div className="space-y-3 pt-4 font-sans">
+                <div className="flex justify-between items-center border-b pb-2">
+                    <span className="text-sm text-muted-foreground">তারিখ</span>
+                    <span className="font-medium text-sm">{new Date(selectedEntry.date).toLocaleDateString('bn-BD', { day: 'numeric', month: 'long', year: 'numeric' })}</span>
                 </div>
-                 <div className="flex justify-between items-center">
-                    <span className="text-muted-foreground">কর্মীর নাম</span>
-                    <span className="font-medium">{selectedEntry.workerName}</span>
+                 <div className="flex justify-between items-center border-b pb-2">
+                    <span className="text-sm text-muted-foreground">কর্মীর নাম</span>
+                    <span className="font-medium text-sm">{selectedEntry.workerName}</span>
                 </div>
-                 <div className="flex justify-between items-center">
-                    <span className="text-muted-foreground">ক্যাটাগরি</span>
-                    <span className="font-medium">{selectedEntry.categoryName}</span>
+                 <div className="flex justify-between items-center border-b pb-2">
+                    <span className="text-sm text-muted-foreground">ক্যাটাগরি</span>
+                    <span className="font-medium text-sm">{selectedEntry.categoryName}</span>
                 </div>
-                 <div className="flex justify-between items-center">
-                    <span className="text-muted-foreground">পিসের সংখ্যা</span>
-                    <span className="font-medium">{selectedEntry.pieceCount}</span>
+                 <div className="flex justify-between items-center border-b pb-2">
+                    <span className="text-sm text-muted-foreground">পিসের সংখ্যা</span>
+                    <span className="font-medium text-sm">{selectedEntry.pieceCount}</span>
                 </div>
-                 <div className="flex justify-between items-center">
-                    <span className="text-muted-foreground">দর (প্রতি পিস)</span>
-                    <span className="font-medium">{formatCurrency(selectedEntry.rate)}</span>
+                 <div className="flex justify-between items-center border-b pb-2">
+                    <span className="text-sm text-muted-foreground">দর (প্রতি পিস)</span>
+                    <span className="font-medium text-sm">{formatCurrency(selectedEntry.rate)}</span>
                 </div>
-                 <div className="flex justify-between items-center bg-muted p-3 rounded-md">
-                    <span className="text-muted-foreground font-semibold">মোট টাকা</span>
-                    <span className="font-bold text-lg text-primary">{formatCurrency(selectedEntry.total)}</span>
+                 <div className="bg-muted p-4 rounded-md mt-4">
+                    <div className='flex justify-between items-center'>
+                      <span className="text-base font-semibold">মোট টাকা</span>
+                      <span className="font-bold text-xl text-primary">{formatCurrency(selectedEntry.total)}</span>
+                    </div>
                 </div>
             </div>
           )}
