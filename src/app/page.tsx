@@ -15,7 +15,7 @@ import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { GarmentFlowIcon } from '@/components/icons';
 import { useAuth, useUser, getUserByPhoneNumber, useFirestore, initiateEmailSignIn } from '@/firebase';
-import { FormEvent, useEffect, useState } from 'react';
+import { FormEvent, useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 
 export default function LoginPage() {
@@ -28,18 +28,6 @@ export default function LoginPage() {
   const [credential, setCredential] = useState('');
   const [password, setPassword] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  useEffect(() => {
-    if (!isUserLoading && user) {
-        user.getIdTokenResult().then((idTokenResult) => {
-          if (idTokenResult.claims.isAdmin) {
-            router.push('/admin/dashboard');
-          } else {
-            router.push('/dashboard');
-          }
-        });
-    }
-  }, [user, isUserLoading, router]);
 
   const handleLogin = async (e: FormEvent) => {
     e.preventDefault();
@@ -91,7 +79,13 @@ export default function LoginPage() {
 
     // Since we are not awaiting, we might want to reset the state differently,
     // perhaps based on a global auth error state. For now, we'll just stop submitting.
-    setIsSubmitting(false);
+     // In a real app, you might want to wait for the auth state to change
+    // or handle login failures gracefully before redirecting.
+    // For this app, the layouts will handle redirection based on auth state.
+    setTimeout(() => {
+        router.push('/dashboard');
+        setIsSubmitting(false);
+    }, 1500);
   };
 
   if (isUserLoading || user) {
