@@ -179,6 +179,10 @@ export default function AllEntriesPage() {
        {/* This div is used for generating the PDF. It's hidden from view. */}
        <div ref={printRef} className="p-4 bg-white absolute left-0 top-0 opacity-0 -z-50">
             <div className='text-center mb-4 border-b pb-4'>
+                <h1 className='text-2xl font-bold'>গার্মেন্টফ্লো</h1>
+                <p className='text-sm'>১২৩, প্রধান সড়ক, ঢাকা-১২১৬</p>
+            </div>
+            <div className='text-center my-4'>
                 <h2 className='text-xl font-bold'>সকল কাজের বিস্তারিত হিসাব</h2>
                 <p className='text-sm'>কর্মী: {user?.displayName}</p>
                 <p className='text-sm'>রিপোর্টের তারিখ: {new Date().toLocaleDateString('bn-BD')}</p>
