@@ -1,3 +1,4 @@
+
 'use client';
 
 import {
@@ -52,7 +53,7 @@ export default function TransactionsPage() {
         .then(() => {
             toast({
               title: 'অনুরোধ সফল হয়েছে',
-              description: `আপনার অগ্রিম টাকার অনুরোধ সফলভাবে পাঠানো হয়েছে।`,
+              description: `আপনার টাকার অনুরোধ সফলভাবে পাঠানো হয়েছে।`,
             });
             // Reset form
             setAmount(0);
@@ -78,9 +79,9 @@ export default function TransactionsPage() {
     <div className="flex justify-center items-start pt-8">
       <Card className="w-full max-w-lg">
         <CardHeader>
-          <CardTitle>অগ্রিম টাকার জন্য অনুরোধ</CardTitle>
+          <CardTitle>টাকার জন্য অনুরোধ</CardTitle>
           <CardDescription>
-            আপনার প্রয়োজনীয় অগ্রিম টাকার পরিমাণ এবং তারিখ উল্লেখ করুন।
+            আপনার প্রয়োজনীয় টাকার পরিমাণ এবং তারিখ উল্লেখ করুন।
           </CardDescription>
         </CardHeader>
         <CardContent>

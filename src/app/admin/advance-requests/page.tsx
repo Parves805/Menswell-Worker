@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useMemo } from 'react';
@@ -244,13 +245,13 @@ export default function AdvanceRequestsPage() {
       // Send a notification to the worker
       sendNotification(
         request.workerId,
-        'অগ্রিম টাকার অনুরোধ অনুমোদিত',
-        `আপনার ${formatCurrency(request.amount)} অগ্রিম টাকার অনুরোধটি অনুমোদিত হয়েছে।`
+        'টাকার অনুরোধ অনুমোদিত',
+        `আপনার ${formatCurrency(request.amount)} টাকার অনুরোধটি অনুমোদিত হয়েছে।`
       );
 
       toast({
         title: 'অনুরোধ অনুমোদিত হয়েছে',
-        description: `${request.workerName}-এর অগ্রিম অনুরোধ সফলভাবে যোগ করা হয়েছে এবং খরচ হিসেবে গণ্য করা হয়েছে।`,
+        description: `${request.workerName}-এর অনুরোধ সফলভাবে যোগ করা হয়েছে এবং খরচ হিসেবে গণ্য করা হয়েছে।`,
       });
     } catch (err) {
       console.error('Approval Error:', err);
@@ -282,14 +283,14 @@ export default function AdvanceRequestsPage() {
 
       sendNotification(
         request.workerId,
-        'অগ্রিম টাকার অনুরোধ বাতিল হয়েছে',
-        `আপনার ${formatCurrency(request.amount)} অগ্রিম টাকার অনুরোধটি বাতিল করা হয়েছে।`
+        'টাকার অনুরোধ বাতিল হয়েছে',
+        `আপনার ${formatCurrency(request.amount)} টাকার অনুরোধটি বাতিল করা হয়েছে।`
       );
 
       toast({
         variant: 'destructive',
         title: 'অনুরোধ বাতিল করা হয়েছে',
-        description: `${request.workerName}-এর অগ্রিম অনুরোধ বাতিল করা হয়েছে।`,
+        description: `${request.workerName}-এর অনুরোধ বাতিল করা হয়েছে।`,
       });
     } catch (err) {
       console.error('Rejection Error:', err);
@@ -306,9 +307,9 @@ export default function AdvanceRequestsPage() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>অগ্রিম টাকার অনুরোধ</CardTitle>
+        <CardTitle>টাকার অনুরোধ</CardTitle>
         <CardDescription>
-          কর্মীদের পাঠানো অগ্রিম টাকার অনুরোধগুলো অনুমোদন বা বাতিল করুন এবং ইতিহাস
+          কর্মীদের পাঠানো টাকার অনুরোধগুলো অনুমোদন বা বাতিল করুন এবং ইতিহাস
           দেখুন।
         </CardDescription>
       </CardHeader>

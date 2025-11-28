@@ -52,7 +52,7 @@ const mainNavItems: NavItem[] = [
   { title: 'কর্মী', href: '/admin/workers', icon: <Users /> },
   { title: 'উৎপাদন', href: '/admin/production', icon: <Scissors /> },
   { title: 'উৎপাদন অনুরোধ', href: '/admin/production-requests', icon: <CheckSquare /> },
-  { title: 'অ্যাডভান্স অনুরোধ', href: '/admin/advance-requests', icon: <Wallet /> },
+  { title: 'টাকার অনুরোধ', href: '/admin/advance-requests', icon: <Wallet /> },
   { title: 'কর্মীর খরচ', href: '/admin/worker-expenses', icon: <WalletCards /> },
   { title: 'ক্যাটাগরি', href: '/admin/categories', icon: <Shapes /> },
   { title: 'স্লাইডার', href: '/admin/slider', icon: <ImageIcon /> },
@@ -197,5 +197,3 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     </div>
   )
 }
-
-    

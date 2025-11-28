@@ -53,10 +53,10 @@ export default function AdvancesPage() {
         <div>
             <CardTitle className='flex items-center gap-2'>
                 <CircleDollarSign />
-                অগ্রিম পেমেন্টের ইতিহাস
+                টাকার অনুরোধের ইতিহাস
             </CardTitle>
             <CardDescription>
-                আপনার সমস্ত অগ্রিম পেমেন্টের বিস্তারিত হিসাব দেখুন।
+                আপনার সমস্ত অনুরোধের বিস্তারিত হিসাব দেখুন।
             </CardDescription>
         </div>
         <Link href="/request-advance">
