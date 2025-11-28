@@ -22,7 +22,8 @@ import { useCollection, useFirestore, useMemoFirebase, addDocumentNonBlocking } 
 import { collection, query, orderBy, getDocs } from 'firebase/firestore';
 import type { Worker, WorkerExpense } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
-import { WalletCards, PlusCircle } from 'lucide-react';
+import { PlusCircle } from 'lucide-react';
+import { TakaIcon } from '@/components/icons';
 import {
   Dialog,
   DialogContent,
@@ -227,7 +228,7 @@ export default function WorkerExpensesPage() {
       <Card>
         <CardHeader className="flex-row justify-between items-center">
             <div>
-                <CardTitle className="flex items-center gap-2"><WalletCards /> কর্মীর খরচ</CardTitle>
+                <CardTitle className="flex items-center gap-2"><TakaIcon /> কর্মীর খরচ</CardTitle>
                 <CardDescription>কর্মীদের প্রদান করা সমস্ত খরচের হিসাব দেখুন।</CardDescription>
             </div>
             <Button onClick={() => setIsDialogOpen(true)}>

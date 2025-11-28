@@ -16,7 +16,6 @@ import {
   CheckSquare,
   User,
   Image as ImageIcon,
-  WalletCards,
 } from 'lucide-react';
 import {
   SidebarProvider,
@@ -40,7 +39,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { GarmentFlowIcon } from '@/components/icons';
+import { GarmentFlowIcon, TakaIcon } from '@/components/icons';
 import type { NavItem } from '@/lib/types';
 import { useAuth, useUser } from '@/firebase';
 import { useRouter, usePathname } from 'next/navigation';
@@ -53,7 +52,7 @@ const mainNavItems: NavItem[] = [
   { title: 'উৎপাদন', href: '/admin/production', icon: <Scissors /> },
   { title: 'উৎপাদন অনুরোধ', href: '/admin/production-requests', icon: <CheckSquare /> },
   { title: 'টাকার অনুরোধ', href: '/admin/advance-requests', icon: <Wallet /> },
-  { title: 'কর্মীর খরচ', href: '/admin/worker-expenses', icon: <WalletCards /> },
+  { title: 'কর্মীর খরচ', href: '/admin/worker-expenses', icon: <TakaIcon /> },
   { title: 'ক্যাটাগরি', href: '/admin/categories', icon: <Shapes /> },
   { title: 'স্লাইডার', href: '/admin/slider', icon: <ImageIcon /> },
   { title: 'চ্যাট', href: '/admin/chat', icon: <MessageSquare /> },
