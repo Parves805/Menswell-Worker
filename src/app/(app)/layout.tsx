@@ -148,12 +148,6 @@ function AppLayoutContent({ children }: { children: React.ReactNode }) {
                   </Link>
               ))}
             </nav>
-             <Button variant="ghost" size="icon" className="rounded-full" asChild>
-                  <Link href="/notifications">
-                    <Bell className='h-5 w-5'/>
-                    <span className="sr-only">নোটিফিকেশন</span>
-                  </Link>
-              </Button>
             
           </div>
         </header>
