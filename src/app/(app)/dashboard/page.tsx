@@ -25,6 +25,7 @@ import { collection, query, where, Timestamp, orderBy } from 'firebase/firestore
 import React, { useState } from 'react';
 import { ProductionEntry, AdvancePayment, SliderImage } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 
 const formatCurrency = (amount: number) =>
   new Intl.NumberFormat('bn-BD', {
@@ -89,10 +90,18 @@ export default function DashboardPage() {
       
       <Card className="w-full bg-primary text-primary-foreground border-none">
         <CardHeader>
-          <CardTitle>স্বাগতম, {user?.displayName ?? 'কর্মী'}!</CardTitle>
-          <CardDescription className="text-primary-foreground/80">
-            আপনার কাজের সারসংক্ষেপ নিচে দেওয়া হলো।
-          </CardDescription>
+          <div className="flex items-center gap-4">
+             <Avatar className="h-14 w-14 border-2 border-white/50">
+                <AvatarImage src={user?.photoURL ?? "https://picsum.photos/seed/99/100/100"} alt="ব্যবহারকারীর ছবি" />
+                <AvatarFallback>{user?.displayName?.charAt(0) ?? 'ক'}</AvatarFallback>
+            </Avatar>
+            <div>
+                <CardTitle>স্বাগতম, {user?.displayName ?? 'কর্মী'}!</CardTitle>
+                <CardDescription className="text-primary-foreground/80">
+                    আপনার কাজের সারসংক্ষেপ নিচে দেওয়া হলো।
+                </CardDescription>
+            </div>
+          </div>
         </CardHeader>
         <CardContent>
           <div className="flex items-center justify-between">
