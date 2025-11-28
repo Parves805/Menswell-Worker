@@ -14,20 +14,8 @@ import {
   CircleDollarSign,
   Scissors,
   Bell,
+  Menu,
 } from 'lucide-react';
-import {
-  SidebarProvider,
-  Sidebar,
-  SidebarHeader,
-  SidebarContent,
-  SidebarMenu,
-  SidebarMenuItem,
-  SidebarMenuButton,
-  SidebarTrigger,
-  SidebarInset,
-  SidebarFooter,
-  useSidebar,
-} from '@/components/ui/sidebar';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -36,13 +24,19 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Button } from '@/components/ui/button';
+import { Button }sfrom '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { GarmentFlowIcon } from '@/components/icons';
 import type { NavItem } from '@/lib/types';
 import { useAuth, useUser } from '@/firebase';
 import { usePathname, useRouter } from 'next/navigation';
 import { BottomNav } from '@/components/BottomNav';
+import {
+  Sheet,
+  SheetContent,
+  SheetTrigger,
+} from "@/components/ui/sheet"
+import { cn } from '@/lib/utils';
 
 const mainNavItems: NavItem[] = [
   { title: 'হোম', href: '/dashboard', icon: <Home /> },
@@ -66,12 +60,11 @@ function AppLayoutContent({ children }: { children: React.ReactNode }) {
   const { user, isUserLoading } = useUser();
   const router = useRouter();
   const pathname = usePathname();
-  const { setOpenMobile } = useSidebar();
 
 
   // In a real app, these would come from Firestore settings
   const companyName = 'গার্মেন্টফ্লো';
-  const companyLogo = <GarmentFlowIcon className="size-5 text-white" />;
+  const companyLogo = <GarmentFlowIcon className="size-6 text-primary" />;
 
 
   React.useEffect(() => {
@@ -99,110 +92,99 @@ function AppLayoutContent({ children }: { children: React.ReactNode }) {
 
   // Render the full layout only when we are sure a user is logged in.
   return (
-    <>
-      <Sidebar side="left" collapsible="icon" className="data-[mobile=true]:bg-background data-[mobile=true]:text-foreground bg-primary text-primary-foreground">
-        <SidebarHeader>
-          <div className="flex items-center gap-2">
-            <Button variant="ghost" size="icon" className="shrink-0" asChild>
-              <Link href="/dashboard">
-                {companyLogo}
-              </Link>
-            </Button>
-            <h1 className="text-lg font-semibold tracking-tight">
-              {companyName}
-            </h1>
-          </div>
-        </SidebarHeader>
-        <SidebarContent>
-          <SidebarMenu>
-            {mainNavItems.map((item) => (
-              <SidebarMenuItem key={item.title}>
-                <Link href={item.href} className="w-full" onClick={() => setOpenMobile(false)}>
-                  <SidebarMenuButton
-                    tooltip={item.title}
-                    className="hover:bg-primary-dark data-[active=true]:bg-primary-dark data-[active=true]:text-white data-[active=true]:border-l-4 border-white text-white/80"
-                    isActive={pathname === item.href}
-                    asChild
-                  >
-                    <div className="flex items-center gap-2">
-                        {React.cloneElement(item.icon, { className: "text-white/80 data-[active=true]:text-white"})}
-                        <span>{item.title}</span>
-                    </div>
-                  </SidebarMenuButton>
-                </Link>
-              </SidebarMenuItem>
-            ))}
-          </SidebarMenu>
-        </SidebarContent>
-        <SidebarFooter>
-          <SidebarMenu>
-            <SidebarMenuItem>
-              <Link href="/profile" onClick={() => setOpenMobile(false)}>
-                <SidebarMenuButton
-                  tooltip="প্রোফাইল"
-                  isActive={pathname === '/profile'}
-                  className="hover:bg-primary-dark data-[active=true]:bg-primary-dark data-[active=true]:text-white data-[active=true]:border-l-4 border-white text-white/80"
+    <div className='flex min-h-screen w-full flex-col'>
+       <header className="sticky top-0 flex h-16 items-center gap-4 border-b bg-background px-4 md:px-6 z-30">
+          <nav className="hidden flex-col gap-6 text-lg font-medium md:flex md:flex-row md:items-center md:gap-5 md:text-sm lg:gap-6">
+            <Link
+              href="/dashboard"
+              className="flex items-center gap-2 text-lg font-semibold md:text-base"
+            >
+              {companyLogo}
+              <span className="sr-only">{companyName}</span>
+            </Link>
+            {mainNavItems.map(item => (
+                 <Link
+                    key={item.title}
+                    href={item.href}
+                    className={cn("transition-colors hover:text-foreground", pathname.startsWith(item.href) ? "text-foreground" : "text-muted-foreground")}
                 >
-                  <User />
-                  <span>প্রোফাইল</span>
-                </SidebarMenuButton>
-              </Link>
-            </SidebarMenuItem>
-          </SidebarMenu>
-        </SidebarFooter>
-      </Sidebar>
-      <SidebarInset className="flex flex-col">
-        <header className="sticky top-0 z-10 flex h-16 items-center gap-4 border-b bg-background text-foreground px-4 sm:px-6">
-          <SidebarTrigger className="flex text-foreground hover:text-foreground md:hidden" />
-          <div className="relative flex-1">
-            {/* Search can be added back if needed */}
-          </div>
-           <Button variant="ghost" size="icon" asChild>
-                <Link href="/notifications">
-                  <Bell />
-                  <span className="sr-only">নোটিফিকেশন</span>
+                    {item.title}
                 </Link>
-            </Button>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="flex items-center gap-3 cursor-pointer p-1 h-auto rounded-full hover:bg-muted">
-                <Avatar className="h-9 w-9">
-                  <AvatarImage src={user.photoURL ?? "https://picsum.photos/seed/99/40/40"} alt="ব্যবহারকারীর ছবি" />
-                  <AvatarFallback>{user.email?.charAt(0).toUpperCase()}</AvatarFallback>
-                </Avatar>
-                <div className="hidden md:flex flex-col items-start">
-                    <span className="text-sm font-medium text-foreground">{user.displayName ?? "আয়েশা খানম"}</span>
-                    <span className="text-xs text-muted-foreground">সুইং অপারেটর</span>
-                </div>
+            ))}
+          </nav>
+           <Sheet>
+            <SheetTrigger asChild>
+              <Button
+                variant="outline"
+                size="icon"
+                className="shrink-0 md:hidden"
+              >
+                <Menu className="h-5 w-5" />
+                <span className="sr-only">Toggle navigation menu</span>
               </Button>
-
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuLabel>{user.displayName ?? user.email}</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem asChild><Link href="/profile">প্রোফাইল</Link></DropdownMenuItem>
-              <DropdownMenuItem asChild><Link href="/settings">সেটিংস</Link></DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={handleLogout}>
-                <LogOut className="mr-2 h-4 w-4" />
-                <span>লগআউট</span>
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+            </SheetTrigger>
+            <SheetContent side="left">
+              <nav className="grid gap-6 text-lg font-medium">
+                <Link
+                  href="/dashboard"
+                  className="flex items-center gap-2 text-lg font-semibold"
+                >
+                  {companyLogo}
+                  <span className="sr-only">{companyName}</span>
+                </Link>
+                 {mainNavItems.map(item => (
+                    <Link
+                        key={item.title}
+                        href={item.href}
+                        className={cn("flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:text-primary", pathname.startsWith(item.href) ? "text-primary bg-muted" : "text-muted-foreground")}
+                    >
+                      {React.cloneElement(item.icon, { className: "h-4 w-4"})}
+                      {item.title}
+                    </Link>
+                ))}
+              </nav>
+            </SheetContent>
+          </Sheet>
+          <div className="flex w-full items-center gap-4 md:ml-auto md:gap-2 lg:gap-4">
+            <div className='flex-1'></div>
+             <Button variant="ghost" size="icon" className="rounded-full" asChild>
+                  <Link href="/notifications">
+                    <Bell className='h-5 w-5'/>
+                    <span className="sr-only">নোটিফিকেশন</span>
+                  </Link>
+              </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="secondary" size="icon" className="rounded-full">
+                  <Avatar className="h-9 w-9">
+                    <AvatarImage src={user.photoURL ?? "https://picsum.photos/seed/99/40/40"} alt="ব্যবহারকারীর ছবি" />
+                    <AvatarFallback>{user.email?.charAt(0).toUpperCase()}</AvatarFallback>
+                  </Avatar>
+                  <span className="sr-only">Toggle user menu</span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuLabel>{user.displayName ?? user.email}</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem asChild><Link href="/profile">প্রোফাইল</Link></DropdownMenuItem>
+                <DropdownMenuItem asChild><Link href="/settings">সেটিংস</Link></DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={handleLogout}>
+                  <LogOut className="mr-2 h-4 w-4" />
+                  <span>লগআউট</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         </header>
-        <main className="flex-1 overflow-auto p-4 sm:p-6 pb-20 md:pb-6">{children}</main>
+        <main className="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-8 pb-20 md:pb-8">{children}</main>
         <BottomNav navItems={bottomNavItems} />
-      </SidebarInset>
-    </>
+    </div>
   );
 }
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (
-    <SidebarProvider>
-      <AppLayoutContent>{children}</AppLayoutContent>
-    </SidebarProvider>
+    <AppLayoutContent>{children}</AppLayoutContent>
   )
 }
-
-    
