@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -50,20 +49,6 @@ export function AddWorkerDialog({
   
   const isEditMode = !!workerToEdit;
 
-  useEffect(() => {
-    if (isEditMode && workerToEdit) {
-      setName(workerToEdit.name);
-      setEmail(workerToEdit.email);
-      setDesignation(workerToEdit.designation);
-      setDepartment(workerToEdit.department);
-      setContact(workerToEdit.contact);
-      setJoinDate(new Date(workerToEdit.joinDate));
-      setBasicSalary(workerToEdit.basicSalary);
-    } else {
-      resetForm();
-    }
-  }, [workerToEdit, isEditMode, isOpen]);
-  
   const resetForm = () => {
     setName('');
     setEmail('');
@@ -74,6 +59,22 @@ export function AddWorkerDialog({
     setJoinDate(new Date());
     setBasicSalary('');
   }
+
+  useEffect(() => {
+    if (isEditMode && workerToEdit) {
+      setName(workerToEdit.name);
+      setEmail(workerToEdit.email);
+      setDesignation(workerToEdit.designation);
+      setDepartment(workerToEdit.department);
+      setContact(workerToEdit.contact);
+      setJoinDate(new Date(workerToEdit.joinDate));
+      setBasicSalary(workerToEdit.basicSalary);
+      setPassword(''); // Password field is not for editing
+    } else {
+      resetForm();
+    }
+  }, [workerToEdit, isEditMode, isOpen]);
+  
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -153,7 +154,12 @@ export function AddWorkerDialog({
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onOpenChange}>
+    <Dialog open={isOpen} onOpenChange={(open) => {
+        onOpenChange(open);
+        if (!open) {
+          resetForm();
+        }
+      }}>
       <DialogContent className="sm:max-w-xl">
         <DialogHeader>
           <DialogTitle>{isEditMode ? 'কর্মীর তথ্য সম্পাদনা' : 'নতুন কর্মী যোগ করুন'}</DialogTitle>
@@ -169,7 +175,7 @@ export function AddWorkerDialog({
             </div>
              <div className="space-y-2">
                 <Label htmlFor="email">ইমেইল</Label>
-                <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+                <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required disabled={isEditMode} />
             </div>
           </div>
 
@@ -207,7 +213,7 @@ export function AddWorkerDialog({
                 <Input id="basicSalary" type="number" value={basicSalary} onChange={(e) => setBasicSalary(e.target.value)} required />
             </div>
 
-          <DialogFooter className="pt-4">
+          <DialogFooter className="pt-4 sticky bottom-0 bg-background pb-0 -mb-4">
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>বাতিল করুন</Button>
             <Button type="submit" disabled={isSubmitting}>
               {isSubmitting ? 'প্রসেসিং...' : (isEditMode ? 'সংরক্ষণ করুন' : 'কর্মী যোগ করুন')}

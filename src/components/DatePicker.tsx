@@ -5,6 +5,7 @@ import { format } from 'date-fns';
 import { bn } from 'date-fns/locale';
 import { Calendar as CalendarIcon } from 'lucide-react';
 import { SelectSingleEventHandler } from 'react-day-picker';
+import { isValid } from 'date-fns';
 
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -35,6 +36,8 @@ export function DatePicker({ name, value, onSelect }: DatePickerProps) {
       }
   }
 
+  const isValidDate = (d: any): d is Date => d instanceof Date && isValid(d);
+
   return (
     <Popover>
       <PopoverTrigger asChild>
@@ -46,7 +49,7 @@ export function DatePicker({ name, value, onSelect }: DatePickerProps) {
           )}
         >
           <CalendarIcon className="mr-2 h-4 w-4" />
-          {date ? format(date, 'PPP', { locale: bn }) : <span>একটি তারিখ নির্বাচন করুন</span>}
+          {isValidDate(date) ? format(date, 'PPP', { locale: bn }) : <span>একটি তারিখ নির্বাচন করুন</span>}
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-auto p-0">
@@ -59,7 +62,7 @@ export function DatePicker({ name, value, onSelect }: DatePickerProps) {
         />
       </PopoverContent>
       {/* Hidden input to hold the date value for form submission */}
-      {date && <input type="hidden" name={name} value={date.toISOString()} />}
+      {isValidDate(date) && <input type="hidden" name={name} value={date.toISOString()} />}
     </Popover>
   );
 }
