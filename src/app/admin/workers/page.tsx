@@ -2,6 +2,7 @@
 'use client';
 
 import React from 'react';
+import Link from 'next/link';
 import {
   Card,
   CardContent,
@@ -94,7 +95,9 @@ export default function WorkersPage() {
                     </div>
                 </CardContent>
                 <CardFooter className="bg-muted/30 p-3">
-                    <Button variant="secondary" className="w-full">প্রোফাইল দেখুন</Button>
+                    <Button variant="secondary" className="w-full" asChild>
+                        <Link href={`/admin/workers/${worker.id}`}>প্রোফাইল দেখুন</Link>
+                    </Button>
                 </CardFooter>
             </Card>
           ))}
