@@ -175,7 +175,7 @@ export default function DashboardPage() {
                   <div className="relative aspect-[16/7] w-full">
                     <Image
                       src={image.imageUrl}
-                      alt={image.title}
+                      alt={image.title || 'Slider image'}
                       fill
                       className="object-cover"
                     />
