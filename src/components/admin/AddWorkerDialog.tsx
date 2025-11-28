@@ -43,7 +43,6 @@ export function AddWorkerDialog({
   const [department, setDepartment] = useState('');
   const [contact, setContact] = useState('');
   const [joinDate, setJoinDate] = useState<Date | undefined>(new Date());
-  const [basicSalary, setBasicSalary] = useState<number | string>('');
   
   const [isSubmitting, setIsSubmitting] = useState(false);
   
@@ -57,7 +56,6 @@ export function AddWorkerDialog({
     setDepartment('');
     setContact('');
     setJoinDate(new Date());
-    setBasicSalary('');
   }
 
   useEffect(() => {
@@ -68,7 +66,6 @@ export function AddWorkerDialog({
       setDepartment(workerToEdit.department);
       setContact(workerToEdit.contact);
       setJoinDate(new Date(workerToEdit.joinDate));
-      setBasicSalary(workerToEdit.basicSalary);
       setPassword(''); // Password field is not for editing
     } else {
       resetForm();
@@ -82,7 +79,7 @@ export function AddWorkerDialog({
         toast({ variant: 'destructive', title: 'ত্রুটি', description: 'ডাটাবেস সংযোগ পাওয়া যায়নি।' });
         return;
     }
-     if (!name || !email || !designation || !department || !contact || !joinDate || basicSalary === '') {
+     if (!name || !email || !designation || !department || !contact || !joinDate) {
       toast({ variant: 'destructive', title: 'ফর্ম অসম্পূর্ণ', description: 'অনুগ্রহ করে সমস্ত ঘর পূরণ করুন।' });
       return;
     }
@@ -104,7 +101,6 @@ export function AddWorkerDialog({
                 department,
                 contact,
                 joinDate: joinDate.toISOString(),
-                basicSalary: Number(basicSalary),
             };
             await updateDocumentNonBlocking(workerDocRef, updatedData);
             // NOTE: Updating email/password in Firebase Auth requires re-authentication and is not handled here.
@@ -127,9 +123,9 @@ export function AddWorkerDialog({
                 department,
                 contact,
                 joinDate: joinDate.toISOString(),
-                basicSalary: Number(basicSalary),
                 status: 'active',
                 photo: `https://picsum.photos/seed/${newUser.uid}/400/400`,
+                basicSalary: 0, // Defaulting to 0 as it's removed from form
             };
 
             await setDocumentNonBlocking(workerDocRef, workerData, { merge: false });
@@ -208,11 +204,6 @@ export function AddWorkerDialog({
             </div>
           </div>
           
-           <div className="space-y-2">
-                <Label htmlFor="basicSalary">মূল বেতন</Label>
-                <Input id="basicSalary" type="number" value={basicSalary} onChange={(e) => setBasicSalary(e.target.value)} required />
-            </div>
-
           <DialogFooter className="pt-4 sticky bottom-0 bg-background pb-0 -mb-4">
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>বাতিল করুন</Button>
             <Button type="submit" disabled={isSubmitting}>

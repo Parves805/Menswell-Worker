@@ -109,11 +109,6 @@ export default function WorkerProfilePage() {
                 label="মোবাইল নম্বর"
                 value={workerData.contact}
              />
-             <StatCard 
-                icon={<TakaIcon className="h-8 w-8 text-primary" />}
-                label="মূল বেতন"
-                value={formatCurrency(workerData.basicSalary)}
-             />
           </div>
 
         </CardContent>
