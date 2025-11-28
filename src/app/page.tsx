@@ -19,6 +19,7 @@ import { useAuth, useUser, getUserByPhoneNumber, useFirestore, initiateEmailSign
 import { FormEvent, useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { Eye, EyeOff } from 'lucide-react';
+import type { FirebaseError } from 'firebase/app';
 
 const USER_CREDENTIAL_KEY = 'garmentflow_user_credential';
 
@@ -69,6 +70,7 @@ export default function LoginPage() {
 
     let emailToLogin = credential;
 
+    // If credential is not an email, assume it's a phone number
     if (!credential.includes('@')) {
       try {
         const worker = await getUserByPhoneNumber(firestore, credential);
@@ -88,15 +90,35 @@ export default function LoginPage() {
       }
     }
     
-    initiateEmailSignIn(auth, emailToLogin, password);
+    const handleAuthError = (error: FirebaseError) => {
+        setIsSubmitting(false);
+        if (error.code === 'auth/invalid-credential') {
+            toast({
+                variant: 'destructive',
+                title: 'লগইন ব্যর্থ হয়েছে',
+                description: 'ভুল ইমেইল অথবা পাসওয়ার্ড। অনুগ্রহ করে আবার চেষ্টা করুন।',
+            });
+        } else {
+            toast({
+                variant: 'destructive',
+                title: 'লগইন ব্যর্থ হয়েছে',
+                description: error.message || 'একটি অজানা ত্রুটি ঘটেছে।',
+            });
+        }
+    };
+    
+    initiateEmailSignIn(auth, emailToLogin, password, handleAuthError);
 
     toast({
         title: 'লগইন করার চেষ্টা করা হচ্ছে...',
         description: 'সফল হলে আপনাকে ড্যাশবোর্ডে নিয়ে যাওয়া হবে।',
     });
 
+    // Fallback to re-enable button if onAuthStateChanged doesn't fire
     setTimeout(() => {
-        setIsSubmitting(false);
+        if (!user) { // Only re-enable if still not logged in
+            setIsSubmitting(false);
+        }
     }, 5000);
   };
   
