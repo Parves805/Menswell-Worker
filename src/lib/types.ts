@@ -1,6 +1,7 @@
 
 
 
+
 export type NavItem = {
   title: string;
   href: string;
@@ -92,7 +93,7 @@ export type SalaryDetails = {
 export type AdvancePayment = {
   id: string;
   workerId: string;
-  workerName?: string; // Made optional as it might not be needed for worker view
+  workerName?: string;
   date: string;
   amount: number;
   deducted?: boolean;
@@ -180,3 +181,4 @@ export type ActivityLog = {
     
 
     
+

@@ -9,7 +9,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Users, Scissors, CircleDollarSign, Wallet2 } from 'lucide-react';
+import { Users, Scissors, Wallet2, Landmark } from 'lucide-react';
 import Link from 'next/link';
 import React from 'react';
 import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
@@ -124,18 +124,20 @@ export default function AdminDashboardPage() {
             <p className="text-xs text-muted-foreground">আজ সকল কর্মীর মোট কাজ</p>
           </CardContent>
         </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">কর্মীর খরচ প্রদান</CardTitle>
-            <CircleDollarSign className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-destructive">
-              {formatCurrency(totalWorkerExpenses)}
-            </div>
-            <p className="text-xs text-muted-foreground">চলতি মাসে মোট প্রদান</p>
-          </CardContent>
-        </Card>
+        <Link href="/admin/advance-payments" className="transform transition-transform duration-200 hover:scale-105 group">
+          <Card className="transition-colors group-hover:border-primary">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">অগ্রিম প্রদান</CardTitle>
+              <Landmark className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-destructive">
+                {formatCurrency(totalWorkerExpenses)}
+              </div>
+              <p className="text-xs text-muted-foreground">চলতি মাসে মোট প্রদান</p>
+            </CardContent>
+          </Card>
+        </Link>
          <Link href="/admin/expenses" className="transform transition-transform duration-200 hover:scale-105 group">
             <Card className="transition-colors group-hover:border-primary">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
