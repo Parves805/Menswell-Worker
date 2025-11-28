@@ -83,6 +83,8 @@ export function AddProductionEntryDialog({
       if (category) {
         setRate(category.rate);
       }
+    } else {
+      setRate(0);
     }
   }, [selectedCategoryId, categories]);
 
@@ -158,7 +160,7 @@ export function AddProductionEntryDialog({
         <form onSubmit={handleSubmit} className="space-y-4 pt-4">
           <div className="space-y-2">
             <Label htmlFor="date">তারিখ</Label>
-            <DatePicker name="date" />
+            <DatePicker name="date" value={date} onSelect={setDate} />
           </div>
 
           {!workerId && (
