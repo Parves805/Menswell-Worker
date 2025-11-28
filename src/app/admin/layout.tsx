@@ -122,7 +122,7 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
   
   return (
     <div className="admin-panel">
-        <Sidebar side="left" collapsible="icon">
+        <Sidebar side="left" collapsible="icon" variant="inset">
           <SidebarHeader>
             <div className="flex items-center gap-2">
               <Button variant="ghost" size="icon" className="shrink-0" asChild>
@@ -131,7 +131,7 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
                 </Link>
               </Button>
               <h1 className="text-lg font-semibold tracking-tight">
-                অ্যাডমিন প্যানেল
+                অ্যাডমিন
               </h1>
             </div>
           </SidebarHeader>
@@ -142,12 +142,11 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
                   <Link href={item.href} className="w-full" onClick={() => setOpenMobile(false)}>
                     <SidebarMenuButton
                       tooltip={item.title}
-                      className="hover:bg-primary/10 data-[active=true]:bg-primary/15 data-[active=true]:text-primary"
                       isActive={pathname.startsWith(item.href)}
                       asChild
                     >
                       <div className="flex items-center gap-2">
-                          {React.cloneElement(item.icon, { className: "text-muted-foreground data-[active=true]:text-primary"})}
+                          {item.icon}
                           <span>{item.title}</span>
                       </div>
                     </SidebarMenuButton>
