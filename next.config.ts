@@ -65,6 +65,12 @@ const nextConfig: NextConfig = {
         port: '',
         pathname: '/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'images.livemint.com',
+        port: '',
+        pathname: '/**',
+      },
     ],
   },
 };
