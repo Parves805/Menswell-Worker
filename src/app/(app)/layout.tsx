@@ -92,24 +92,16 @@ function AppLayoutContent({ children }: { children: React.ReactNode }) {
   return (
     <div className='flex min-h-screen w-full flex-col'>
        <header className="sticky top-0 flex h-16 items-center gap-4 border-b bg-background px-4 md:px-6 z-30">
-          <nav className="hidden flex-col gap-6 text-lg font-medium md:flex md:flex-row md:items-center md:gap-5 md:text-sm lg:gap-6">
-            <Link
-              href="/dashboard"
-              className="flex items-center gap-2 text-lg font-semibold md:text-base"
-            >
-              {companyLogo}
-              <span className="sr-only">{companyName}</span>
-            </Link>
-            {mainNavItems.map(item => (
-                 <Link
-                    key={item.title}
-                    href={item.href}
-                    className={cn("transition-colors hover:text-foreground", pathname.startsWith(item.href) ? "text-foreground" : "text-muted-foreground")}
-                >
-                    {item.title}
-                </Link>
-            ))}
-          </nav>
+          <div className="flex items-center gap-2">
+             <Link
+                href="/dashboard"
+                className="flex items-center gap-2 text-lg font-semibold md:text-base"
+              >
+                {companyLogo}
+                <span className="sr-only">{companyName}</span>
+              </Link>
+          </div>
+          
            <Sheet>
             <SheetTrigger asChild>
               <Button
@@ -128,7 +120,7 @@ function AppLayoutContent({ children }: { children: React.ReactNode }) {
                   className="flex items-center gap-2 text-lg font-semibold"
                 >
                   {companyLogo}
-                  <span className="sr-only">{companyName}</span>
+                  <span>{companyName}</span>
                 </Link>
                  {mainNavItems.map(item => (
                     <Link
@@ -145,6 +137,17 @@ function AppLayoutContent({ children }: { children: React.ReactNode }) {
           </Sheet>
           <div className="flex w-full items-center gap-4 md:ml-auto md:gap-2 lg:gap-4">
             <div className='flex-1'></div>
+             <nav className="hidden flex-col gap-6 text-lg font-medium md:flex md:flex-row md:items-center md:gap-5 md:text-sm lg:gap-6">
+              {mainNavItems.map(item => (
+                   <Link
+                      key={item.title}
+                      href={item.href}
+                      className={cn("transition-colors hover:text-foreground", pathname.startsWith(item.href) ? "text-foreground" : "text-muted-foreground")}
+                  >
+                      {item.title}
+                  </Link>
+              ))}
+            </nav>
              <Button variant="ghost" size="icon" className="rounded-full" asChild>
                   <Link href="/notifications">
                     <Bell className='h-5 w-5'/>
