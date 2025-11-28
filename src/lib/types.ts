@@ -1,4 +1,5 @@
 
+
 export type NavItem = {
   title: string;
   href: string;
@@ -16,6 +17,8 @@ export type Worker = {
   joinDate: string;
   basicSalary: number;
   contact: string;
+  email: string;
+  status: 'active' | 'blocked';
 };
 
 export type AttendanceStatus = 'Present' | 'Absent' | 'Late' | 'On Leave';

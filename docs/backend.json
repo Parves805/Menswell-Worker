@@ -14,6 +14,11 @@
           "type": "string",
           "description": "The name of the worker."
         },
+        "email": {
+          "type": "string",
+          "description": "The worker's email address for login.",
+          "format": "email"
+        },
         "designation": {
           "type": "string",
           "description": "The worker's job title or position."
@@ -42,16 +47,23 @@
         "qrCode": {
           "type": "string",
           "description": "The QR code generated for the worker (e.g., URL or encoded data)."
+        },
+        "status": {
+          "type": "string",
+          "description": "The current status of the worker's account.",
+          "enum": ["active", "blocked"]
         }
       },
       "required": [
         "id",
         "name",
+        "email",
         "designation",
         "department",
         "joinDate",
         "basicSalary",
-        "contact"
+        "contact",
+        "status"
       ]
     },
     "Attendance": {

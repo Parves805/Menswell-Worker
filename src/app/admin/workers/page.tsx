@@ -13,29 +13,127 @@ import {
 } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
-import { MoreHorizontal, Calendar, Phone, Briefcase } from 'lucide-react';
-import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
-import { collection, query, orderBy } from 'firebase/firestore';
+import { MoreHorizontal, Calendar, Phone, Briefcase, PlusCircle, Trash2, Edit, UserCheck, UserX } from 'lucide-react';
+import {
+  useCollection,
+  useFirestore,
+  useMemoFirebase,
+  updateDocumentNonBlocking,
+  deleteDocumentNonBlocking,
+} from '@/firebase';
+import { collection, query, orderBy, doc } from 'firebase/firestore';
 import type { Worker } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { AddWorkerDialog } from '@/components/admin/AddWorkerDialog';
+import { useToast } from '@/hooks/use-toast';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 
 export default function WorkersPage() {
   const firestore = useFirestore();
+  const { toast } = useToast();
+  const [isAddDialogOpen, setIsAddDialogOpen] = React.useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = React.useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = React.useState(false);
+  const [selectedWorker, setSelectedWorker] = React.useState<Worker | null>(null);
 
   const workersQuery = useMemoFirebase(
     () => (firestore ? query(collection(firestore, 'workers'), orderBy('name')) : null),
     [firestore]
   );
-  const { data: workers, isLoading } = useCollection<Worker>(workersQuery);
+  const { data: workers, isLoading, forceRefetch } = useCollection<Worker>(workersQuery);
+
+  const handleStatusChange = (worker: Worker) => {
+    if (!firestore) return;
+    const newStatus = worker.status === 'active' ? 'blocked' : 'active';
+    const workerDocRef = doc(firestore, 'workers', worker.id);
+    updateDocumentNonBlocking(workerDocRef, { status: newStatus });
+    toast({
+      title: `কর্মী ${newStatus === 'active' ? 'সক্রিয়' : 'ব্লক'} হয়েছে`,
+      description: `${worker.name}-এর স্ট্যাটাস পরিবর্তন করা হয়েছে।`,
+    });
+  };
+  
+  const prepareToDelete = (worker: Worker) => {
+    setSelectedWorker(worker);
+    setIsDeleteDialogOpen(true);
+  }
+
+  const handleDeleteWorker = () => {
+    if (!firestore || !selectedWorker) return;
+    const workerDocRef = doc(firestore, 'workers', selectedWorker.id);
+    deleteDocumentNonBlocking(workerDocRef);
+    toast({
+      variant: 'destructive',
+      title: 'কর্মী মুছে ফেলা হয়েছে',
+      description: `${selectedWorker.name}-কে সিস্টেম থেকে সরিয়ে দেওয়া হয়েছে।`,
+    });
+    setIsDeleteDialogOpen(false);
+    setSelectedWorker(null);
+  };
+  
+  const handleOpenEditDialog = (worker: Worker) => {
+      setSelectedWorker(worker);
+      setIsEditDialogOpen(true);
+  }
+
+  const getStatusVariant = (status: 'active' | 'blocked') => {
+      return status === 'active' ? 'default' : 'destructive';
+  }
+
 
   return (
     <div>
-       <div className="mb-6">
-        <h1 className="text-2xl font-bold tracking-tight">কর্মী পরিচালনা</h1>
-        <p className="text-muted-foreground">
-          আপনার ফ্যাক্টরির সকল কর্মীদের তালিকা এবং তথ্য দেখুন।
-        </p>
+      <AddWorkerDialog isOpen={isAddDialogOpen} onOpenChange={setIsAddDialogOpen} onWorkerAdded={forceRefetch}/>
+      {/* Edit Dialog - For future implementation */}
+      <AddWorkerDialog isOpen={isEditDialogOpen} onOpenChange={setIsEditDialogOpen} onWorkerAdded={forceRefetch} workerToEdit={selectedWorker ?? undefined} />
+
+       <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>আপনি কি নিশ্চিত?</AlertDialogTitle>
+            <AlertDialogDescription>
+              এই পদক্ষেপটি необрати। এটি স্থায়ীভাবে কর্মীকে সিস্টেম থেকে মুছে ফেলবে।
+               আপনি কি "{selectedWorker?.name}"-কে মুছে ফেলতে চান?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>বাতিল করুন</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteWorker} className="bg-destructive hover:bg-destructive/90">
+              মুছে ফেলুন
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+       <div className="mb-6 flex items-center justify-between">
+        <div>
+            <h1 className="text-2xl font-bold tracking-tight">কর্মী পরিচালনা</h1>
+            <p className="text-muted-foreground">
+            আপনার ফ্যাক্টরির সকল কর্মীদের তালিকা এবং তথ্য দেখুন।
+            </p>
+        </div>
+        <Button onClick={() => setIsAddDialogOpen(true)}>
+            <PlusCircle />
+            নতুন কর্মী যোগ করুন
+        </Button>
       </div>
 
       {isLoading && (
@@ -67,9 +165,28 @@ export default function WorkersPage() {
             <Card key={worker.id} className="flex flex-col overflow-hidden">
                 <CardHeader className="items-center text-center bg-muted/30 p-6 relative">
                      <div className="absolute top-2 right-2">
-                        <Button variant="ghost" size="icon" className="h-8 w-8">
-                            <MoreHorizontal className="h-4 w-4" />
-                        </Button>
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" size="icon" className="h-8 w-8">
+                                    <MoreHorizontal className="h-4 w-4" />
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                                <DropdownMenuItem onClick={() => handleOpenEditDialog(worker)}>
+                                    <Edit className="mr-2 h-4 w-4" />
+                                    <span>সম্পাদনা</span>
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => handleStatusChange(worker)}>
+                                    {worker.status === 'active' ? <UserX className="mr-2 h-4 w-4" /> : <UserCheck className="mr-2 h-4 w-4" />}
+                                    <span>{worker.status === 'active' ? 'ব্লক করুন' : 'সক্রিয় করুন'}</span>
+                                </DropdownMenuItem>
+                                <DropdownMenuSeparator />
+                                 <DropdownMenuItem className="text-red-500 focus:bg-red-50 focus:text-red-600" onClick={() => prepareToDelete(worker)}>
+                                    <Trash2 className="mr-2 h-4 w-4" />
+                                    <span>মুছে ফেলুন</span>
+                                </DropdownMenuItem>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
                     </div>
                     <Avatar className="h-24 w-24 border-4 border-background shadow-md">
                         <AvatarImage src={worker.photo} alt={worker.name} />
@@ -78,6 +195,9 @@ export default function WorkersPage() {
                     <div className='mt-2'>
                         <CardTitle className="text-lg">{worker.name}</CardTitle>
                         <CardDescription>{worker.designation}</CardDescription>
+                         <Badge variant={getStatusVariant(worker.status)} className="mt-2">
+                            {worker.status === 'active' ? 'সক্রিয়' : 'ব্লকড'}
+                        </Badge>
                     </div>
                 </CardHeader>
                 <CardContent className="flex-grow p-6 space-y-3 text-sm">

@@ -10,7 +10,8 @@ import {
 } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useDoc, useFirestore, useMemoFirebase } from '@/firebase';
-import { Briefcase, Calendar, Phone, TakaIcon, Scissors, Hourglass, CircleDollarSign } from 'lucide-react';
+import { Briefcase, Calendar, Phone, Scissors, Hourglass, CircleDollarSign } from 'lucide-react';
+import { TakaIcon } from '@/components/icons';
 import { Separator } from '@/components/ui/separator';
 import { doc } from 'firebase/firestore';
 import { useParams } from 'next/navigation';

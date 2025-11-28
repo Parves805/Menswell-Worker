@@ -20,6 +20,7 @@ import { FormEvent, useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { Eye, EyeOff } from 'lucide-react';
 import type { FirebaseError } from 'firebase/app';
+import type { Worker } from '@/lib/types';
 
 const USER_CREDENTIAL_KEY = 'garmentflow_user_credential';
 
@@ -69,17 +70,52 @@ export default function LoginPage() {
     setIsSubmitting(true);
 
     let emailToLogin = credential;
+    let workerToLogin: Worker | null = null;
 
-    // If credential is not an email, assume it's a phone number
-    if (!credential.includes('@')) {
-      try {
-        const worker = await getUserByPhoneNumber(firestore, credential);
-        if (worker && 'email' in worker && typeof worker.email === 'string') {
-          emailToLogin = worker.email;
+    try {
+        if (!credential.includes('@')) {
+            const worker = await getUserByPhoneNumber(firestore, credential);
+            if (worker && 'email' in worker && typeof worker.email === 'string') {
+              emailToLogin = worker.email;
+              workerToLogin = worker as Worker;
+            } else {
+              throw new Error('এই ফোন নম্বরের সাথে কোনো ইমেইল যুক্ত নেই।');
+            }
         } else {
-          throw new Error('এই ফোন নম্বরের সাথে কোনো ইমেইল যুক্ত নেই।');
+             // If logging in with email, we might still need the worker doc
+             const workerByEmail = await getUserByPhoneNumber(firestore, credential); // Reusing function, assumes unique email
+             if(workerByEmail) workerToLogin = workerByEmail as Worker;
         }
-      } catch (error: any) {
+
+        if (workerToLogin && workerToLogin.status === 'blocked') {
+            throw new Error('আপনার অ্যাকাউন্টটি ব্লক করা হয়েছে। অনুগ্রহ করে অ্যাডমিনের সাথে যোগাযোগ করুন।');
+        }
+
+        const handleAuthError = (error: FirebaseError) => {
+            setIsSubmitting(false);
+            if (error.code === 'auth/invalid-credential') {
+                toast({
+                    variant: 'destructive',
+                    title: 'লগইন ব্যর্থ হয়েছে',
+                    description: 'ভুল ইমেইল অথবা পাসওয়ার্ড। অনুগ্রহ করে আবার চেষ্টা করুন।',
+                });
+            } else {
+                toast({
+                    variant: 'destructive',
+                    title: 'লগইন ব্যর্থ হয়েছে',
+                    description: error.message || 'একটি অজানা ত্রুটি ঘটেছে।',
+                });
+            }
+        };
+        
+        initiateEmailSignIn(auth, emailToLogin, password, handleAuthError);
+
+        toast({
+            title: 'লগইন করার চেষ্টা করা হচ্ছে...',
+            description: 'সফল হলে আপনাকে ড্যাশবোর্ডে নিয়ে যাওয়া হবে।',
+        });
+
+    } catch (error: any) {
         toast({
           variant: 'destructive',
           title: 'লগইন ব্যর্থ হয়েছে',
@@ -87,32 +123,7 @@ export default function LoginPage() {
         });
         setIsSubmitting(false);
         return;
-      }
     }
-    
-    const handleAuthError = (error: FirebaseError) => {
-        setIsSubmitting(false);
-        if (error.code === 'auth/invalid-credential') {
-            toast({
-                variant: 'destructive',
-                title: 'লগইন ব্যর্থ হয়েছে',
-                description: 'ভুল ইমেইল অথবা পাসওয়ার্ড। অনুগ্রহ করে আবার চেষ্টা করুন।',
-            });
-        } else {
-            toast({
-                variant: 'destructive',
-                title: 'লগইন ব্যর্থ হয়েছে',
-                description: error.message || 'একটি অজানা ত্রুটি ঘটেছে।',
-            });
-        }
-    };
-    
-    initiateEmailSignIn(auth, emailToLogin, password, handleAuthError);
-
-    toast({
-        title: 'লগইন করার চেষ্টা করা হচ্ছে...',
-        description: 'সফল হলে আপনাকে ড্যাশবোর্ডে নিয়ে যাওয়া হবে।',
-    });
 
     // Fallback to re-enable button if onAuthStateChanged doesn't fire
     setTimeout(() => {
