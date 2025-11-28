@@ -22,7 +22,7 @@ import {
 import { RecentProductionTable } from '@/components/RecentProductionTable';
 import { useUser, useFirestore, useCollection, useMemoFirebase } from '@/firebase';
 import { collection, query, where, Timestamp, orderBy } from 'firebase/firestore';
-import React from 'react';
+import React, { useState } from 'react';
 import { ProductionEntry, AdvancePayment, SliderImage } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
 
@@ -36,6 +36,7 @@ const formatCurrency = (amount: number) =>
 export default function DashboardPage() {
   const { user } = useUser();
   const firestore = useFirestore();
+  const [showEarnings, setShowEarnings] = useState(false);
 
   const allEntriesQuery = useMemoFirebase(() => {
     if (!user || !firestore) return null;
@@ -76,6 +77,13 @@ export default function DashboardPage() {
       return unpaidAdvances.reduce((sum, payment) => sum + payment.amount, 0);
   }, [unpaidAdvances]);
 
+  const handleToggleEarnings = () => {
+    setShowEarnings(true);
+    setTimeout(() => {
+        setShowEarnings(false);
+    }, 3000);
+  }
+
   return (
     <div className="flex flex-col gap-6">
       
@@ -88,11 +96,11 @@ export default function DashboardPage() {
         </CardHeader>
         <CardContent>
           <div className="flex items-center justify-between">
-            <div>
+            <div onClick={handleToggleEarnings} className="cursor-pointer">
               <p className="text-sm">মোট আয়</p>
               {isLoadingAllEntries ? <Skeleton className="h-9 w-36 mt-1 bg-white/20" /> : (
                 <p className="text-3xl font-bold">
-                    {formatCurrency(totalEarnings)}
+                    {showEarnings ? formatCurrency(totalEarnings) : '৳ ****'}
                 </p>
               )}
             </div>
