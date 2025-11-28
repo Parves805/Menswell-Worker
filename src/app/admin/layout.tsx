@@ -16,6 +16,7 @@ import {
   CheckSquare,
   User,
   Image as ImageIcon,
+  WalletCards,
 } from 'lucide-react';
 import {
   SidebarProvider,
@@ -52,6 +53,7 @@ const mainNavItems: NavItem[] = [
   { title: 'উৎপাদন', href: '/admin/production', icon: <Scissors /> },
   { title: 'উৎপাদন অনুরোধ', href: '/admin/production-requests', icon: <CheckSquare /> },
   { title: 'অ্যাডভান্স অনুরোধ', href: '/admin/advance-requests', icon: <Wallet /> },
+  { title: 'কর্মীর খরচ', href: '/admin/worker-expenses', icon: <WalletCards /> },
   { title: 'ক্যাটাগরি', href: '/admin/categories', icon: <Shapes /> },
   { title: 'স্লাইডার', href: '/admin/slider', icon: <ImageIcon /> },
   { title: 'চ্যাট', href: '/admin/chat', icon: <MessageSquare /> },
@@ -195,3 +197,5 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     </div>
   )
 }
+
+    

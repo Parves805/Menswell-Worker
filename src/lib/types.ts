@@ -127,6 +127,15 @@ export type Expense = {
   amount: number;
 }
 
+export type WorkerExpense = {
+  id: string;
+  workerId: string;
+  workerName: string;
+  date: string;
+  description: string;
+  amount: number;
+}
+
 
 export type AppSettings = {
     productionCategories: Category[];
@@ -151,6 +160,8 @@ export type SliderImage = {
   link?: string;
   createdAt: any; // Firestore ServerTimestamp or Date
 }
+    
+
     
 
     
