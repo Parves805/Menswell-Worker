@@ -40,10 +40,11 @@ import {
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { GarmentFlowIcon, TakaIcon } from '@/components/icons';
-import type { NavItem } from '@/lib/types';
-import { useAuth, useUser } from '@/firebase';
+import type { NavItem, AppSettings } from '@/lib/types';
+import { useAuth, useUser, useDoc, useFirestore, useMemoFirebase } from '@/firebase';
 import { useRouter, usePathname } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
+import { doc } from 'firebase/firestore';
 
 
 const mainNavItems: NavItem[] = [
@@ -67,6 +68,13 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const { toast } = useToast();
   const { setOpenMobile } = useSidebar();
+  const firestore = useFirestore();
+
+  const settingsDocRef = useMemoFirebase(() => 
+    firestore ? doc(firestore, 'settings', 'global') : null,
+    [firestore]
+  );
+  const { data: settings } = useDoc<AppSettings>(settingsDocRef);
 
   React.useEffect(() => {
     if (isUserLoading || pathname === '/admin/login') {
@@ -111,6 +119,13 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
     );
   }
   
+  const companyLogo = settings?.logoUrl ? (
+    <Avatar className="size-6 rounded-none">
+        <AvatarImage src={settings.logoUrl} alt="Company Logo" className='object-contain' />
+        <AvatarFallback className="bg-transparent"><GarmentFlowIcon className="size-6" /></AvatarFallback>
+    </Avatar>
+    ) : <GarmentFlowIcon className="size-6" />;
+  
   return (
     <>
       <Sidebar side="left" collapsible="icon">
@@ -118,7 +133,7 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
           <div className="flex items-center gap-2">
             <Button variant="ghost" size="icon" className="shrink-0" asChild>
               <Link href="/admin/dashboard">
-                <GarmentFlowIcon className="size-5" />
+                {companyLogo}
               </Link>
             </Button>
             <h1 className="text-lg font-semibold tracking-tight">
@@ -130,8 +145,8 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
           <SidebarMenu>
             {mainNavItems.map((item) => {
               const isActive = item.href === '/admin/dashboard' 
-                ? pathname.startsWith(item.href) 
-                : pathname === item.href;
+                ? pathname === item.href
+                : pathname.startsWith(item.href);
               return (
                 <SidebarMenuItem key={item.title}>
                   <Link href={item.href} className="w-full" onClick={() => setOpenMobile(false)}>
@@ -196,3 +211,5 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     </div>
   )
 }
+
+    

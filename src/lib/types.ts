@@ -1,5 +1,6 @@
 
 
+
 export type NavItem = {
   title: string;
   href: string;
@@ -138,8 +139,10 @@ export type WorkerExpense = {
 
 
 export type AppSettings = {
-    productionCategories: Category[];
-    allowWorkerProfilePictureChange: boolean;
+    id?: string;
+    companyName: string;
+    logoUrl: string;
+    themeColor: string;
 };
 
 export type Notification = {
@@ -160,6 +163,8 @@ export type SliderImage = {
   link?: string;
   createdAt: any; // Firestore ServerTimestamp or Date
 }
+    
+
     
 
     

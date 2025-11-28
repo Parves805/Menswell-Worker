@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import * as React from 'react';
@@ -26,8 +27,8 @@ import {
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { GarmentFlowIcon } from '@/components/icons';
-import type { NavItem } from '@/lib/types';
-import { useAuth, useUser } from '@/firebase';
+import type { NavItem, AppSettings } from '@/lib/types';
+import { useAuth, useUser, useDoc, useFirestore, useMemoFirebase } from '@/firebase';
 import { usePathname, useRouter } from 'next/navigation';
 import { BottomNav } from '@/components/BottomNav';
 import {
@@ -36,6 +37,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet"
 import { cn } from '@/lib/utils';
+import { doc } from 'firebase/firestore';
 
 const mainNavItems: NavItem[] = [
   { title: 'হোম', href: '/dashboard', icon: <Home /> },
@@ -58,11 +60,21 @@ function AppLayoutContent({ children }: { children: React.ReactNode }) {
   const { user, isUserLoading } = useUser();
   const router = useRouter();
   const pathname = usePathname();
+  const firestore = useFirestore();
 
-
-  // In a real app, these would come from Firestore settings
-  const companyName = 'গার্মেন্টফ্লো';
-  const companyLogo = <GarmentFlowIcon className="size-6 text-primary" />;
+  const settingsDocRef = useMemoFirebase(() => 
+    firestore ? doc(firestore, 'settings', 'global') : null,
+    [firestore]
+  );
+  const { data: settings } = useDoc<AppSettings>(settingsDocRef);
+  
+  const companyName = settings?.companyName || 'গার্মেন্টফ্লো';
+  const companyLogo = settings?.logoUrl ? (
+    <Avatar className="size-6 rounded-none">
+        <AvatarImage src={settings.logoUrl} alt="Company Logo" className='object-contain' />
+        <AvatarFallback className="bg-transparent"><GarmentFlowIcon className="size-6 text-primary" /></AvatarFallback>
+    </Avatar>
+    ) : <GarmentFlowIcon className="size-6 text-primary" />;
 
 
   React.useEffect(() => {
@@ -161,3 +173,5 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     <AppLayoutContent>{children}</AppLayoutContent>
   )
 }
+
+    

@@ -1,3 +1,4 @@
+
 /**
  * @fileoverview Firestore Security Rules for the GarmentFlow application.
  *
@@ -16,13 +17,14 @@
  * - /productionEntryRequests/{requestId}: Stores worker requests for production entries.
  * - /advancePaymentRequests/{requestId}: Stores worker requests for advance payments.
  * - /sliderImages/{sliderImageId}: Stores images for the user dashboard slider.
+ * - /settings/{settingId}: Stores global application settings.
  *
  * Key Security Decisions:
  * - Workers can only read and write their own profile and related data (including notifications).
  * - Workers can create chat messages in their own chat path.
  * - Admins (identified by email 'admin@example.com') have broad read/write access.
  * - Listing other worker's data is allowed for any signed-in user for the admin panel.
- * - Categories and Slider Images are readable by any signed-in user, but only writable by admins.
+ * - Categories, Slider Images and Settings are readable by any signed-in user, but only writable by admins.
  * - Production/Advance Entry Requests can be created by the worker who owns it. Admins can read/write all requests.
  *
  * Path-Based Authorization:
@@ -182,5 +184,16 @@ service cloud.firestore {
     match /activityLogs/{activityLogId} {
       allow read, write: if isAdmin();
     }
+    
+    /**
+     * @description Rules for the /settings/{settingId} collection.
+     * @path /settings/{settingId}
+     */
+    match /settings/{settingId} {
+        allow read: if isSignedIn();
+        allow write: if isAdmin();
+    }
   }
 }
+
+    
