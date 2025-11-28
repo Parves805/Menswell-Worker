@@ -64,6 +64,19 @@ function RequestsTable({
     }
   };
 
+  const getStatusInBangla = (status: 'pending' | 'approved' | 'rejected') => {
+    switch (status) {
+      case 'pending':
+        return 'বিচারাধীন';
+      case 'approved':
+        return 'অনুমোদিত';
+      case 'rejected':
+        return 'বাতিল';
+      default:
+        return status;
+    }
+  };
+
   return (
     <div className="rounded-md border">
       <Table>
@@ -118,7 +131,7 @@ function RequestsTable({
                 </TableCell>
                 <TableCell>
                   <Badge variant={getStatusVariant(request.status)}>
-                    {request.status}
+                    {getStatusInBangla(request.status)}
                   </Badge>
                 </TableCell>
                 <TableCell className="text-right">
