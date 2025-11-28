@@ -41,9 +41,7 @@ export default function DashboardPage() {
 
   const allEntriesQuery = useMemoFirebase(() => {
     if (!user || !firestore) return null;
-    return query(
-        collection(firestore, 'workers', user.uid, 'productionEntries')
-    );
+    return collection(firestore, 'workers', user.uid, 'productionEntries');
   }, [user, firestore]);
 
   const expensesQuery = useMemoFirebase(

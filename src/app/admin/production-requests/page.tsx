@@ -190,7 +190,7 @@ export default function ProductionRequestsPage() {
     [firestore]
   );
 
-  const { data: allRequests, isLoading, forceRefetch } =
+  const { data: allRequests, isLoading } =
     useCollection<ProductionEntryRequest>(requestsQuery);
 
   const filteredRequests = useMemo(() => {
@@ -259,7 +259,6 @@ export default function ProductionRequestsPage() {
         title: 'অনুরোধ অনুমোদিত হয়েছে',
         description: `${request.workerName}-এর এন্ট্রি সফলভাবে যোগ করা হয়েছে।`,
       });
-      forceRefetch();
     } catch (err) {
       console.error('Approval Error:', err);
       toast({
@@ -299,7 +298,6 @@ export default function ProductionRequestsPage() {
         title: 'অনুরোধ বাতিল করা হয়েছে',
         description: `${request.workerName}-এর এন্ট্রি বাতিল করা হয়েছে।`,
       });
-      forceRefetch();
     } catch (err) {
       console.error('Rejection Error:', err);
       toast({

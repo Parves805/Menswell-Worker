@@ -1,7 +1,7 @@
 
 'use client';
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import {
   Card,
   CardContent,
@@ -21,9 +21,10 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { MoreHorizontal, PlusCircle } from 'lucide-react';
 import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
-import { collection, query, getDocs } from 'firebase/firestore';
+import { collection, query, getDocs, orderBy } from 'firebase/firestore';
 import type { Worker, ProductionEntry as ProductionEntryType } from '@/lib/types';
 import { AddProductionEntryDialog } from '@/components/admin/AddProductionEntryDialog';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const formatCurrency = (amount: number) =>
   new Intl.NumberFormat('bn-BD', {
@@ -40,38 +41,44 @@ export default function ProductionPage() {
   const [isLoading, setIsLoading] = React.useState(true);
 
   const workersQuery = useMemoFirebase(
-    () => (firestore ? collection(firestore, 'workers') : null),
+    () => (firestore ? query(collection(firestore, 'workers'), orderBy('name')) : null),
     [firestore]
   );
   const { data: workers } = useCollection<Worker>(workersQuery);
 
-  const fetchProductionEntries = React.useCallback(async () => {
-    if (!firestore || !workers) return;
+  const fetchProductionEntries = useCallback(async () => {
+    if (!firestore || !workers) {
+      if(workers !== undefined) setIsLoading(false);
+      return;
+    }
 
     setIsLoading(true);
-    const allEntries: ProductionEntryType[] = [];
-    for (const worker of workers) {
-      const entriesQuery = query(collection(firestore, 'workers', worker.id, 'productionEntries'));
-      const querySnapshot = await getDocs(entriesQuery);
-      querySnapshot.forEach(doc => {
-        const data = doc.data();
-        allEntries.push({
-          id: doc.id,
-          workerId: worker.id,
-          ...data,
-        } as ProductionEntryType);
-      });
+    try {
+      const allEntries: ProductionEntryType[] = [];
+      for (const worker of workers) {
+        const entriesQuery = query(collection(firestore, 'workers', worker.id, 'productionEntries'));
+        const querySnapshot = await getDocs(entriesQuery);
+        querySnapshot.forEach(doc => {
+          const data = doc.data();
+          allEntries.push({
+            id: doc.id,
+            workerId: worker.id,
+            ...data,
+          } as ProductionEntryType);
+        });
+      }
+      setProductionEntries(allEntries.sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime()));
+    } catch(e) {
+      console.error("Failed to fetch production entries", e);
+    } finally {
+      setIsLoading(false);
     }
-    setProductionEntries(allEntries.sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime()));
-    setIsLoading(false);
   }, [firestore, workers]);
 
 
   React.useEffect(() => {
-    if(workers) {
-        fetchProductionEntries();
-    }
-  }, [workers, fetchProductionEntries]);
+    fetchProductionEntries();
+  }, [fetchProductionEntries]);
 
   const handleEntryAdded = () => {
     fetchProductionEntries();
@@ -113,11 +120,17 @@ export default function ProductionPage() {
               </TableHeader>
               <TableBody>
                 {isLoading && (
-                  <TableRow>
-                    <TableCell colSpan={7} className="h-24 text-center">
-                      এন্ট্রি লোড হচ্ছে...
-                    </TableCell>
-                  </TableRow>
+                  Array.from({ length: 5 }).map((_, i) => (
+                    <TableRow key={i}>
+                      <TableCell><Skeleton className="h-5 w-24" /></TableCell>
+                      <TableCell><Skeleton className="h-5 w-20" /></TableCell>
+                      <TableCell><Skeleton className="h-6 w-24" /></TableCell>
+                      <TableCell className="text-center"><Skeleton className="h-5 w-10 mx-auto" /></TableCell>
+                      <TableCell className="text-center"><Skeleton className="h-5 w-16 mx-auto" /></TableCell>
+                      <TableCell className="text-right"><Skeleton className="h-5 w-20 ml-auto" /></TableCell>
+                      <TableCell className="text-right"><Skeleton className="h-8 w-8 ml-auto" /></TableCell>
+                    </TableRow>
+                  ))
                 )}
                 {!isLoading && productionEntries.length === 0 && (
                   <TableRow>
