@@ -9,7 +9,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Scissors, CircleDollarSign, Hourglass, Wallet2 } from 'lucide-react';
+import { Scissors, CircleDollarSign } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import {
@@ -21,7 +21,7 @@ import {
 } from '@/components/ui/carousel';
 import { RecentProductionTable } from '@/components/RecentProductionTable';
 import { useUser, useFirestore, useCollection, useMemoFirebase } from '@/firebase';
-import { collection, query, where, Timestamp, orderBy } from 'firebase/firestore';
+import { collection, query, where, orderBy } from 'firebase/firestore';
 import React, { useState } from 'react';
 import { ProductionEntry, AdvancePayment, SliderImage } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -196,3 +196,5 @@ export default function DashboardPage() {
     </div>
   );
 }
+
+    
