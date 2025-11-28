@@ -16,6 +16,7 @@ import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
 import { collection, query, getDocs } from 'firebase/firestore';
 import { ProductionChart } from '@/components/admin/ProductionChart';
 import { ActivityFeed } from '@/components/admin/ActivityFeed';
+import type { Worker } from '@/lib/types';
 
 const formatCurrency = (amount: number) =>
   new Intl.NumberFormat('bn-BD', {
@@ -31,7 +32,7 @@ export default function AdminDashboardPage() {
     () => (firestore ? collection(firestore, 'workers') : null),
     [firestore]
   );
-  const { data: workers, isLoading: isLoadingWorkers } = useCollection(workersQuery);
+  const { data: workers, isLoading: isLoadingWorkers } = useCollection<Worker>(workersQuery);
   
   const expensesQuery = useMemoFirebase(
     () => (firestore ? collection(firestore, 'expenses') : null),
@@ -41,7 +42,7 @@ export default function AdminDashboardPage() {
 
   const [productionData, setProductionData] = React.useState<{ date: string; pieces: number }[]>([]);
   const [totalPieces, setTotalPieces] = React.useState(0);
-  const [totalAdvance, setTotalAdvance] = React.useState(0);
+  const [totalWorkerExpenses, setTotalWorkerExpenses] = React.useState(0);
   const [totalExpenses, setTotalExpenses] = React.useState(0);
 
   React.useEffect(() => {
@@ -49,12 +50,12 @@ export default function AdminDashboardPage() {
 
     const fetchData = async () => {
       let totalPcs = 0;
-      let totalAdv = 0;
+      let totalWorkerExp = 0;
       const prodData: { date: string, pieces: number }[] = [];
 
       for (const worker of workers) {
         const prodQuery = query(collection(firestore, 'workers', worker.id, 'productionEntries'));
-        const advQuery = query(collection(firestore, 'workers', worker.id, 'advancePayments'));
+        const workerExpQuery = query(collection(firestore, 'workers', worker.id, 'expenses'));
         
         const prodSnapshot = await getDocs(prodQuery);
         prodSnapshot.forEach(doc => {
@@ -69,13 +70,13 @@ export default function AdminDashboardPage() {
             }
         });
 
-        const advSnapshot = await getDocs(advQuery);
-        advSnapshot.forEach(doc => {
-            totalAdv += doc.data().amount || 0;
+        const workerExpSnapshot = await getDocs(workerExpQuery);
+        workerExpSnapshot.forEach(doc => {
+            totalWorkerExp += doc.data().amount || 0;
         });
       }
       setTotalPieces(totalPcs);
-      setTotalAdvance(totalAdv);
+      setTotalWorkerExpenses(totalWorkerExp);
       setProductionData(prodData.sort((a,b) => new Date(a.date).getTime() - new Date(b.date).getTime()));
     };
 
@@ -125,12 +126,12 @@ export default function AdminDashboardPage() {
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">মোট অগ্রিম প্রদান</CardTitle>
+            <CardTitle className="text-sm font-medium">কর্মীর খরচ প্রদান</CardTitle>
             <CircleDollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-destructive">
-              {formatCurrency(totalAdvance)}
+              {formatCurrency(totalWorkerExpenses)}
             </div>
             <p className="text-xs text-muted-foreground">চলতি মাসে মোট প্রদান</p>
           </CardContent>
@@ -138,7 +139,7 @@ export default function AdminDashboardPage() {
          <Link href="/admin/expenses" className="transform transition-transform duration-200 hover:scale-105 group">
             <Card className="transition-colors group-hover:border-primary">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">মোট খরচ</CardTitle>
+                    <CardTitle className="text-sm font-medium">অন্যান্য খরচ</CardTitle>
                     <Wallet2 className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>

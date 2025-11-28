@@ -6,6 +6,7 @@ export type NavItem = {
   href: string;
   icon: React.ReactNode;
   label?: string;
+  badge?: number;
 };
 
 export type Worker = {
@@ -71,6 +72,7 @@ export type AdvancePaymentRequest = {
   requestedAt: string;
   processedAt?: string;
   rejectionReason?: string;
+  description?: string;
 };
 
 
@@ -165,7 +167,15 @@ export type SliderImage = {
 }
     
 
-    
+export type ActivityLog = {
+    id: string;
+    userId: string;
+    userName: string;
+    userPhotoUrl: string;
+    timestamp: any; // Firestore ServerTimestamp or Date
+    activityType: string;
+    description: string;
+}
 
     
 

@@ -87,8 +87,8 @@ export default function AdvancesPage() {
                         <TableCell className="font-medium">{new Date(advance.date).toLocaleDateString('bn-BD')}</TableCell>
                         <TableCell className="text-right">{formatCurrency(advance.amount)}</TableCell>
                         <TableCell className="text-center">
-                            <Badge variant={advance.deductFromSalary ? "default" : "secondary"}>
-                                {advance.deductFromSalary ? 'কর্তন হয়েছে' : 'বিচারাধীন'}
+                            <Badge variant={advance.deducted ? "default" : "secondary"}>
+                                {advance.deducted ? 'কর্তন হয়েছে' : 'বিচারাধীন'}
                             </Badge>
                         </TableCell>
                     </TableRow>

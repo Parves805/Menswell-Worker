@@ -29,7 +29,7 @@ import {
   addDocumentNonBlocking,
 } from '@/firebase';
 import { collection, query, doc, orderBy } from 'firebase/firestore';
-import type { AdvancePaymentRequest } from '@/lib/types';
+import type { AdvancePaymentRequest, WorkerExpense } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
 
@@ -213,29 +213,20 @@ export default function AdvanceRequestsPage() {
     if (!firestore) return;
     setProcessingId(request.id);
 
-    // 1. Create the entry for the worker's advance payment record
-    const approvedAdvance = {
+    const workerExpense: Omit<WorkerExpense, 'id'> = {
       date: request.date,
       workerId: request.workerId,
+      workerName: request.workerName,
       amount: request.amount,
-      deducted: false, // This will be deducted from the next salary
+      description: request.description || `Approved expense request`,
     };
 
-    // 2. Create the entry for the company's expense record
-    const newExpense = {
-        date: request.date,
-        description: `Advance payment to ${request.workerName}`,
-        category: 'Advance Payment',
-        amount: request.amount,
-    };
-
-    const workerAdvanceColRef = collection(
+    const workerExpenseColRef = collection(
       firestore,
       'workers',
       request.workerId,
-      'advancePayments'
+      'expenses'
     );
-    const expensesColRef = collection(firestore, 'expenses');
     const requestDocRef = doc(
       firestore,
       'advancePaymentRequests',
@@ -243,35 +234,29 @@ export default function AdvanceRequestsPage() {
     );
 
     try {
-      // Add to worker's advance history
-      await addDocumentNonBlocking(workerAdvanceColRef, approvedAdvance);
-      
-      // Add to company's expenses
-      await addDocumentNonBlocking(expensesColRef, newExpense);
+      await addDocumentNonBlocking(workerExpenseColRef, workerExpense);
 
-      // Update the original request status
       updateDocumentNonBlocking(requestDocRef, {
         status: 'approved',
         processedAt: new Date().toISOString(),
       });
       
-      // Send a notification to the worker
       sendNotification(
         request.workerId,
-        'টাকার অনুরোধ অনুমোদিত',
-        `আপনার ${formatCurrency(request.amount)} টাকার অনুরোধটি অনুমোদিত হয়েছে।`
+        'খরচের অনুরোধ অনুমোদিত',
+        `আপনার ${formatCurrency(request.amount)} টাকার খরচের অনুরোধটি অনুমোদিত হয়েছে।`
       );
 
       toast({
         title: 'অনুরোধ অনুমোদিত হয়েছে',
-        description: `${request.workerName}-এর অনুরোধ সফলভাবে যোগ করা হয়েছে এবং খরচ হিসেবে গণ্য করা হয়েছে।`,
+        description: `${request.workerName}-এর খরচের অনুরোধ সফলভাবে যোগ করা হয়েছে।`,
       });
     } catch (err) {
       console.error('Approval Error:', err);
       toast({
         variant: 'destructive',
         title: 'অনুমোদন ব্যর্থ হয়েছে',
-        description: 'অগ্রিম অনুমোদন করার সময় একটি সমস্যা হয়েছে।',
+        description: 'খরচের অনুরোধ অনুমোদন করার সময় একটি সমস্যা হয়েছে।',
       });
     } finally {
       setProcessingId(null);
@@ -296,8 +281,8 @@ export default function AdvanceRequestsPage() {
 
       sendNotification(
         request.workerId,
-        'টাকার অনুরোধ বাতিল হয়েছে',
-        `আপনার ${formatCurrency(request.amount)} টাকার অনুরোধটি বাতিল করা হয়েছে।`
+        'খরচের অনুরোধ বাতিল হয়েছে',
+        `আপনার ${formatCurrency(request.amount)} টাকার খরচের অনুরোধটি বাতিল করা হয়েছে।`
       );
 
       toast({
@@ -320,9 +305,9 @@ export default function AdvanceRequestsPage() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>টাকার অনুরোধ</CardTitle>
+        <CardTitle>খরচের অনুরোধ</CardTitle>
         <CardDescription>
-          কর্মীদের পাঠানো টাকার অনুরোধগুলো অনুমোদন বা বাতিল করুন এবং ইতিহাস
+          কর্মীদের পাঠানো খরচের অনুরোধগুলো অনুমোদন বা বাতিল করুন এবং ইতিহাস
           দেখুন।
         </CardDescription>
       </CardHeader>

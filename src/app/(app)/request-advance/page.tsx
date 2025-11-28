@@ -1,3 +1,4 @@
+
 'use client';
 
 import {
@@ -44,6 +45,7 @@ export default function RequestAdvancePage() {
       amount: amount,
       status: 'pending',
       requestedAt: new Date().toISOString(),
+      description: `Worker expense request`,
     };
     
     const requestsColRef = collection(firestore, 'advancePaymentRequests');
@@ -52,7 +54,7 @@ export default function RequestAdvancePage() {
         .then(() => {
             toast({
               title: 'অনুরোধ সফল হয়েছে',
-              description: `আপনার অগ্রিম টাকার অনুরোধ সফলভাবে পাঠানো হয়েছে।`,
+              description: `আপনার খরচের অনুরোধ সফলভাবে পাঠানো হয়েছে।`,
             });
             // Reset form
             setAmount(0);
@@ -78,9 +80,9 @@ export default function RequestAdvancePage() {
     <div className="flex justify-center items-start pt-8">
       <Card className="w-full max-w-lg">
         <CardHeader>
-          <CardTitle>টাকার অনুরোধ</CardTitle>
+          <CardTitle>খরচের জন্য অনুরোধ</CardTitle>
           <CardDescription>
-            আপনার প্রয়োজনীয় অগ্রিম টাকার পরিমাণ এবং তারিখ উল্লেখ করুন।
+            আপনার প্রয়োজনীয় খরচের পরিমাণ এবং তারিখ উল্লেখ করুন।
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -117,5 +119,3 @@ export default function RequestAdvancePage() {
     </div>
   );
 }
-
-    
