@@ -76,6 +76,12 @@ const nextConfig: NextConfig = {
         hostname: 'lightcastlepartners.com',
         port: '',
         pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'sourcingjournal.com',
+        port: '',
+        pathname: '/**',
       }
     ],
   },
