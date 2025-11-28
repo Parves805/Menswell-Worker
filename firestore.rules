@@ -20,7 +20,7 @@
  * Key Security Decisions:
  * - Workers can only read and write their own profile and related data (including notifications).
  * - Workers can create chat messages in their own chat path.
- * - Admins (identified by a custom claim `isAdmin: true`) have broad read/write access.
+ * - Admins (identified by email 'admin@example.com') have broad read/write access.
  * - Listing other worker's data is allowed for any signed-in user for the admin panel.
  * - Categories and Slider Images are readable by any signed-in user, but only writable by admins.
  * - Production/Advance Entry Requests can be created by the worker who owns it. Admins can read/write all requests.
@@ -41,10 +41,10 @@ service cloud.firestore {
     }
     
     /**
-     * @description Checks if the user has an 'isAdmin' custom claim.
+     * @description Checks if the user is an admin by their email.
      */
     function isAdmin() {
-      return isSignedIn() && request.auth.token.isAdmin == true;
+      return isSignedIn() && request.auth.token.email == 'admin@example.com';
     }
 
     /**
@@ -84,9 +84,10 @@ service cloud.firestore {
     match /workers/{workerId} {
       allow get: if isOwner(workerId) || isAdmin();
       allow list: if isSignedIn();
+      // Allow any authenticated user to create their own worker document.
       allow create: if isOwner(workerId) && request.resource.data.id == workerId;
-      allow update: if isExistingOwner(workerId) && request.resource.data.id == resource.data.id;
-      allow delete: if isExistingOwner(workerId);
+      allow update: if isOwner(workerId) || isAdmin();
+      allow delete: if isAdmin();
     }
 
     /**
@@ -98,17 +99,11 @@ service cloud.firestore {
     }
     
     /**
-     * @description Rules for the /chats collection and its subcollections.
-     * @path /chats/{workerId}/messages/{messageId}
+     * @description Rules for the /chats/{workerId}/{path=**} collection.
+     * Allows workers to read/write to their own chat path, and admins to read/write to any.
      */
     match /chats/{workerId}/{path=**} {
-        // Admins can write (create/update/delete) to any chat path.
-        // Workers can write (create/update/delete) only to their own chat path.
-        allow write: if isAdmin() || isOwner(workerId);
-        
-        // Admins can read from any chat path.
-        // Workers can only read from their own chat path.
-        allow read: if isAdmin() || isOwner(workerId);
+        allow read, write: if isOwner(workerId) || isAdmin();
     }
 
     /**
@@ -118,7 +113,7 @@ service cloud.firestore {
      */
     match /categories/{categoryId} {
       allow read: if isSignedIn();
-      allow write: if isSignedIn();
+      allow write: if isAdmin();
     }
 
     /**
@@ -128,7 +123,7 @@ service cloud.firestore {
      */
     match /sliderImages/{sliderImageId} {
         allow read: if isSignedIn();
-        allow write: if isSignedIn(); // DEV ONLY: was isAdmin()
+        allow write: if isAdmin();
     }
     
     /**
@@ -147,7 +142,7 @@ service cloud.firestore {
       
       // Admins can update (approve/reject) any request.
       // Workers cannot update their own requests.
-      allow update: if isSignedIn();
+      allow update: if isAdmin();
       
       // Admins can delete requests. Workers cannot.
       allow delete: if isAdmin();
@@ -173,10 +168,10 @@ service cloud.firestore {
     /**
      * @description Rules for the /expenses/{expenseId} collection.
      * @path /expenses/{expenseId}
-     * @principle Allows any signed in user to CUD. Should be restricted to admins.
+     * @principle Allows only admins to read and write.
      */
     match /expenses/{expenseId} {
-      allow read, write: if isSignedIn();
+      allow read, write: if isAdmin();
     }
 
     /**

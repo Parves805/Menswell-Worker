@@ -29,28 +29,26 @@ export default function SignUpPage() {
   const router = useRouter();
   const { toast } = useToast();
 
-  // Pre-fill for admin creation
-  const [email, setEmail] = useState('admin@example.com');
-  const [password, setPassword] = useState('password');
-  const [name, setName] = useState('Admin');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [name, setName] = useState('');
+  const [phone, setPhone] = useState('');
   
   const [showPassword, setShowPassword] = useState(false);
-  const [phone, setPhone] = useState('01234567890'); // Dummy phone
   const [isSubmitting, setIsSubmitting] = useState(false);
   
-  const isAdminCreation = true; // Forcing admin creation mode
 
   useEffect(() => {
     // If a regular user is already logged in, redirect them
-    if (!isUserLoading && user && !isAdminCreation) {
+    if (!isUserLoading && user) {
       router.push('/dashboard');
     }
-  }, [user, isUserLoading, router, isAdminCreation]);
+  }, [user, isUserLoading, router]);
 
 
   const handleSignUp = async (e: FormEvent) => {
     e.preventDefault();
-    if (!auth || !firestore || !name || !email || !password) {
+    if (!auth || !firestore || !name || !email || !password || !phone) {
         toast({
             variant: "destructive",
             title: "ফর্ম পূরণ করুন",
@@ -67,6 +65,7 @@ export default function SignUpPage() {
       // Update Firebase Auth profile
       await updateProfile(newUser, {
         displayName: name,
+        photoURL: `https://picsum.photos/seed/${newUser.uid}/400/400`
       });
 
       // Save additional worker info to Firestore
@@ -77,30 +76,27 @@ export default function SignUpPage() {
         contact: phone,
         email: email,
         joinDate: new Date().toISOString(),
-        designation: 'Admin',
-        department: 'Management',
-        basicSalary: 0,
-        photo: `https://picsum.photos/seed/${newUser.uid}/200/200`
+        designation: 'সুইং অপারেটর',
+        department: 'সেলাই',
+        status: 'active',
+        photo: `https://picsum.photos/seed/${newUser.uid}/400/400`,
       };
       
-      setDocumentNonBlocking(workerDocRef, workerData, { merge: false });
+      await setDocumentNonBlocking(workerDocRef, workerData, { merge: false });
 
       toast({
         title: "নিবন্ধন সফল হয়েছে",
-        description: "অ্যাডমিন অ্যাকাউন্ট সফলভাবে তৈরি হয়েছে। এখন লগইন করুন।",
+        description: "আপনার অ্যাকাউন্ট সফলভাবে তৈরি হয়েছে। এখন লগইন করুন।",
       });
 
-      // Redirect admin to admin login page after creation
-      router.push('/admin/login');
+      // Redirect user to login page after creation
+      router.push('/');
       
     } catch (error: any) {
       console.error('Sign Up Error:', error);
        let description = "একটি অজানা ত্রুটি ঘটেছে।";
         if (error.code === 'auth/email-already-in-use') {
             description = "এই ইমেইল ঠিকানাটি ইতিমধ্যে ব্যবহৃত হয়েছে। অনুগ্রহ করে লগইন করুন।";
-             if (isAdminCreation) {
-                router.push('/admin/login');
-            }
         } else if (error.code === 'auth/weak-password') {
             description = "পাসওয়ার্ডটি খুব দুর্বল। অনুগ্রহ করে আরও শক্তিশালী পাসওয়ার্ড ব্যবহার করুন।";
         } else if (error.code === 'auth/invalid-email') {
@@ -116,7 +112,7 @@ export default function SignUpPage() {
     }
   };
 
-  if (isUserLoading || (user && !isAdminCreation)) {
+  if (isUserLoading || user) {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center">
         <p>লোড হচ্ছে...</p>
@@ -131,10 +127,10 @@ export default function SignUpPage() {
         <CardHeader className="items-center text-center">
           <GarmentFlowIcon className="mb-4 h-12 w-12 text-primary" />
           <CardTitle className="text-2xl font-bold">
-            অ্যাডমিন অ্যাকাউন্ট তৈরি করুন
+            নতুন অ্যাকাউন্ট তৈরি করুন
           </CardTitle>
           <CardDescription>
-            অ্যাডমিন প্যানেলে প্রবেশ করার জন্য অ্যাকাউন্ট তৈরি করুন।
+            আপনার তথ্য দিয়ে একটি নতুন অ্যাকাউন্ট তৈরি করুন।
           </CardDescription>
         </CardHeader>
         <form onSubmit={handleSignUp}>
@@ -145,11 +141,10 @@ export default function SignUpPage() {
                 <Input
                   id="name"
                   type="text"
+                  placeholder="আপনার পুরো নাম"
                   required
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  readOnly
-                  className={'bg-muted'}
                 />
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -158,22 +153,21 @@ export default function SignUpPage() {
                     <Input
                     id="email"
                     type="email"
+                    placeholder="আপনার ইমেইল"
                     required
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    readOnly
-                    className={'bg-muted'}
                     />
                 </div>
                 <div className="grid gap-2">
-                    <Label htmlFor="phone">মোবাইল নম্বর (ঐচ্ছিক)</Label>
+                    <Label htmlFor="phone">মোবাইল নম্বর</Label>
                     <Input
                     id="phone"
                     type="tel"
+                    placeholder="আপনার মোবাইল নম্বর"
+                    required
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
-                    readOnly
-                    className={'bg-muted'}
                     />
                 </div>
               </div>
@@ -185,9 +179,8 @@ export default function SignUpPage() {
                     type={showPassword ? 'text' : 'password'}
                     required
                     value={password}
+                    placeholder="একটি শক্তিশালী পাসওয়ার্ড দিন"
                     onChange={(e) => setPassword(e.target.value)}
-                    readOnly
-                    className={'bg-muted'}
                   />
                   <Button
                     type="button"
@@ -207,8 +200,14 @@ export default function SignUpPage() {
           </CardContent>
           <CardFooter className="flex flex-col gap-4">
             <Button type="submit" className="w-full" disabled={isSubmitting}>
-              {isSubmitting ? "অ্যাকাউন্ট তৈরি করা হচ্ছে..." : "অ্যাডমিন অ্যাকাউন্ট নিবন্ধন করুন"}
+              {isSubmitting ? "অ্যাকাউন্ট তৈরি করা হচ্ছে..." : "নিবন্ধন করুন"}
             </Button>
+             <p className="text-center text-sm text-muted-foreground">
+              ইতিমধ্যে একটি অ্যাকাউন্ট আছে?{' '}
+              <Link href="/" className="underline">
+                লগইন করুন
+              </Link>
+            </p>
           </CardFooter>
         </form>
       </Card>
