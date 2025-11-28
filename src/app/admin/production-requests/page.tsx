@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useMemo } from 'react';
@@ -189,7 +190,7 @@ export default function ProductionRequestsPage() {
     [firestore]
   );
 
-  const { data: allRequests, isLoading } =
+  const { data: allRequests, isLoading, forceRefetch } =
     useCollection<ProductionEntryRequest>(requestsQuery);
 
   const filteredRequests = useMemo(() => {
@@ -214,26 +215,10 @@ export default function ProductionRequestsPage() {
     setProcessingId(request.id);
 
     try {
-      // Step 1: Fetch category data to get the image URL
       const categoryDocRef = doc(firestore, 'categories', request.categoryId);
       const categoryDoc = await getDoc(categoryDocRef);
-      const categoryData = categoryDoc.data() as Category;
+      const categoryData = categoryDoc.data() as Category | undefined;
 
-      // Step 2: Validate the image URL and prepare the entry data
-      let imageUrl = 'https://picsum.photos/seed/placeholder/400/300'; // Default placeholder
-      if (categoryData?.imageUrl) {
-        try {
-          // A simple check to see if the URL is a valid image by trying to fetch its headers
-          const response = await fetch(categoryData.imageUrl, { method: 'HEAD' });
-          if (response.ok && response.headers.get('Content-Type')?.startsWith('image/')) {
-            imageUrl = categoryData.imageUrl;
-          }
-        } catch (e) {
-          // If fetch fails (CORS, network error, etc.), use the placeholder
-          console.warn(`Could not validate image URL ${categoryData.imageUrl}. Using placeholder.`);
-        }
-      }
-      
       const approvedEntry = {
         date: request.date,
         workerId: request.workerId,
@@ -243,10 +228,9 @@ export default function ProductionRequestsPage() {
         pieceCount: request.pieceCount,
         rate: request.rate,
         total: request.total,
-        categoryImageUrl: imageUrl,
+        categoryImageUrl: categoryData?.imageUrl || 'https://picsum.photos/seed/placeholder/400/300',
       };
       
-      // Step 3: Add the approved entry to the worker's subcollection
       const workerEntriesRef = collection(
         firestore,
         'workers',
@@ -255,7 +239,6 @@ export default function ProductionRequestsPage() {
       );
       await addDocumentNonBlocking(workerEntriesRef, approvedEntry);
 
-      // Step 4: Update the original request's status
       const requestDocRef = doc(
         firestore,
         'productionEntryRequests',
@@ -266,7 +249,6 @@ export default function ProductionRequestsPage() {
         processedAt: new Date().toISOString(),
       });
       
-      // Step 5: Send a notification to the worker
       sendNotification(
         request.workerId,
         'কাজের অনুরোধ অনুমোদিত',
@@ -277,6 +259,7 @@ export default function ProductionRequestsPage() {
         title: 'অনুরোধ অনুমোদিত হয়েছে',
         description: `${request.workerName}-এর এন্ট্রি সফলভাবে যোগ করা হয়েছে।`,
       });
+      forceRefetch();
     } catch (err) {
       console.error('Approval Error:', err);
       toast({
@@ -316,6 +299,7 @@ export default function ProductionRequestsPage() {
         title: 'অনুরোধ বাতিল করা হয়েছে',
         description: `${request.workerName}-এর এন্ট্রি বাতিল করা হয়েছে।`,
       });
+      forceRefetch();
     } catch (err) {
       console.error('Rejection Error:', err);
       toast({

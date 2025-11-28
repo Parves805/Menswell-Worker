@@ -1,3 +1,4 @@
+
 'use client';
 
 import React from 'react';
@@ -21,7 +22,7 @@ import { Button } from '@/components/ui/button';
 import { MoreHorizontal, PlusCircle } from 'lucide-react';
 import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
 import { collection, query, getDocs } from 'firebase/firestore';
-import type { Worker } from '@/lib/types';
+import type { Worker, ProductionEntry as ProductionEntryType } from '@/lib/types';
 import { AddProductionEntryDialog } from '@/components/admin/AddProductionEntryDialog';
 
 const formatCurrency = (amount: number) =>
@@ -31,21 +32,11 @@ const formatCurrency = (amount: number) =>
     minimumFractionDigits: 2,
   }).format(amount);
 
-interface ProductionEntry {
-  id: string;
-  date: string;
-  workerId: string;
-  workerName: string;
-  category: string;
-  pieceCount: number;
-  rate: number;
-  total: number;
-}
 
 export default function ProductionPage() {
   const firestore = useFirestore();
   const [isDialogOpen, setIsDialogOpen] = React.useState(false);
-  const [productionEntries, setProductionEntries] = React.useState<ProductionEntry[]>([]);
+  const [productionEntries, setProductionEntries] = React.useState<ProductionEntryType[]>([]);
   const [isLoading, setIsLoading] = React.useState(true);
 
   const workersQuery = useMemoFirebase(
@@ -58,7 +49,7 @@ export default function ProductionPage() {
     if (!firestore || !workers) return;
 
     setIsLoading(true);
-    const allEntries: ProductionEntry[] = [];
+    const allEntries: ProductionEntryType[] = [];
     for (const worker of workers) {
       const entriesQuery = query(collection(firestore, 'workers', worker.id, 'productionEntries'));
       const querySnapshot = await getDocs(entriesQuery);
@@ -67,13 +58,8 @@ export default function ProductionPage() {
         allEntries.push({
           id: doc.id,
           workerId: worker.id,
-          workerName: worker.name,
-          date: new Date(data.date).toLocaleDateString('bn-BD'),
-          category: data.categoryName || 'N/A',
-          pieceCount: data.pieceCount,
-          rate: data.rate,
-          total: data.total,
-        });
+          ...data,
+        } as ProductionEntryType);
       });
     }
     setProductionEntries(allEntries.sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime()));
@@ -82,11 +68,12 @@ export default function ProductionPage() {
 
 
   React.useEffect(() => {
-    fetchProductionEntries();
-  }, [fetchProductionEntries]);
+    if(workers) {
+        fetchProductionEntries();
+    }
+  }, [workers, fetchProductionEntries]);
 
   const handleEntryAdded = () => {
-    // Refetch all data to ensure consistency
     fetchProductionEntries();
   };
 
@@ -121,7 +108,7 @@ export default function ProductionPage() {
                   <TableHead className="text-center">পিস</TableHead>
                   <TableHead className="text-center">দর</TableHead>
                   <TableHead className="text-right">মোট টাকা</TableHead>
-                  <TableHead className="text-right">פעולה</TableHead>
+                  <TableHead className="text-right">কার্যকলাপ</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -142,9 +129,9 @@ export default function ProductionPage() {
                 {!isLoading && productionEntries.map((entry) => (
                     <TableRow key={entry.id}>
                       <TableCell className="font-medium">{entry.workerName}</TableCell>
-                      <TableCell>{entry.date}</TableCell>
+                      <TableCell>{new Date(entry.date).toLocaleDateString('bn-BD')}</TableCell>
                       <TableCell>
-                          <Badge variant="outline">{entry.category}</Badge>
+                          <Badge variant="outline">{entry.categoryName}</Badge>
                       </TableCell>
                       <TableCell className="text-center">{entry.pieceCount}</TableCell>
                       <TableCell className="text-center">{formatCurrency(entry.rate)}</TableCell>
