@@ -1,7 +1,7 @@
 
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import {
   Card,
   CardContent,
@@ -185,22 +185,30 @@ export default function WorkerExpensesPage() {
     useMemoFirebase(() => firestore ? collection(firestore, 'workers') : null, [firestore])
   );
 
-  const fetchExpenses = React.useCallback(async () => {
-    if (!firestore || !workers) return;
+  const fetchExpenses = useCallback(async () => {
+    if (!firestore || !workers) {
+      if (workers !== undefined) setIsLoading(false);
+      return;
+    };
     setIsLoading(true);
-    const expenses: WorkerExpense[] = [];
-    for (const worker of workers) {
-      const expenseQuery = query(
-        collection(firestore, 'workers', worker.id, 'expenses'),
-        orderBy('date', 'desc')
-      );
-      const querySnapshot = await getDocs(expenseQuery);
-      querySnapshot.forEach(doc => {
-        expenses.push({ id: doc.id, ...doc.data() } as WorkerExpense);
-      });
+    try {
+        const expenses: WorkerExpense[] = [];
+        for (const worker of workers) {
+        const expenseQuery = query(
+            collection(firestore, 'workers', worker.id, 'expenses'),
+            orderBy('date', 'desc')
+        );
+        const querySnapshot = await getDocs(expenseQuery);
+        querySnapshot.forEach(doc => {
+            expenses.push({ id: doc.id, ...doc.data() } as WorkerExpense);
+        });
+        }
+        setAllExpenses(expenses.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()));
+    } catch(e) {
+        console.error("Failed to fetch worker expenses", e);
+    } finally {
+        setIsLoading(false);
     }
-    setAllExpenses(expenses.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()));
-    setIsLoading(false);
   }, [firestore, workers]);
 
   React.useEffect(() => {
@@ -279,5 +287,3 @@ export default function WorkerExpensesPage() {
     </div>
   );
 }
-
-    
