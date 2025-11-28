@@ -102,7 +102,7 @@ export default function WorkersPage() {
   return (
     <div>
       <AddWorkerDialog isOpen={isAddDialogOpen} onOpenChange={setIsAddDialogOpen} onWorkerAdded={forceRefetch}/>
-      {/* Edit Dialog - For future implementation */}
+      
       <AddWorkerDialog isOpen={isEditDialogOpen} onOpenChange={setIsEditDialogOpen} onWorkerAdded={forceRefetch} workerToEdit={selectedWorker ?? undefined} />
 
        <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>

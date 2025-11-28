@@ -157,7 +157,7 @@ export function AddWorkerDialog({
     <Dialog open={isOpen} onOpenChange={(open) => {
         onOpenChange(open);
         if (!open) {
-          resetForm();
+          onOpenChange(false);
         }
       }}>
       <DialogContent className="sm:max-w-xl">
