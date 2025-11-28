@@ -122,7 +122,7 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
   
   return (
     <div className="admin-panel">
-        <Sidebar side="left" collapsible="icon" variant="inset">
+        <Sidebar side="left" collapsible="icon">
           <SidebarHeader>
             <div className="flex items-center gap-2">
               <Button variant="ghost" size="icon" className="shrink-0" asChild>
