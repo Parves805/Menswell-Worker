@@ -102,7 +102,20 @@ function AppLayoutContent({ children }: { children: React.ReactNode }) {
               </Link>
           </div>
           
-           <Sheet>
+          <div className="flex w-full items-center gap-4 md:ml-auto md:gap-2 lg:gap-4">
+            <div className='flex-1'></div>
+             <nav className="hidden flex-col gap-6 text-lg font-medium md:flex md:flex-row md:items-center md:gap-5 md:text-sm lg:gap-6">
+              {mainNavItems.map(item => (
+                   <Link
+                      key={item.title}
+                      href={item.href}
+                      className={cn("transition-colors hover:text-foreground", pathname.startsWith(item.href) ? "text-foreground" : "text-muted-foreground")}
+                  >
+                      {item.title}
+                  </Link>
+              ))}
+            </nav>
+            <Sheet>
             <SheetTrigger asChild>
               <Button
                 variant="outline"
@@ -135,20 +148,6 @@ function AppLayoutContent({ children }: { children: React.ReactNode }) {
               </nav>
             </SheetContent>
           </Sheet>
-          <div className="flex w-full items-center gap-4 md:ml-auto md:gap-2 lg:gap-4">
-            <div className='flex-1'></div>
-             <nav className="hidden flex-col gap-6 text-lg font-medium md:flex md:flex-row md:items-center md:gap-5 md:text-sm lg:gap-6">
-              {mainNavItems.map(item => (
-                   <Link
-                      key={item.title}
-                      href={item.href}
-                      className={cn("transition-colors hover:text-foreground", pathname.startsWith(item.href) ? "text-foreground" : "text-muted-foreground")}
-                  >
-                      {item.title}
-                  </Link>
-              ))}
-            </nav>
-            
           </div>
         </header>
         <main className="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-8 pb-20 md:pb-8">{children}</main>
