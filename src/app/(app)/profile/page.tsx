@@ -13,13 +13,24 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useUser, useFirestore, useAuth, useDoc, useMemoFirebase, updateDocumentNonBlocking } from '@/firebase';
-import { Camera, Eye, EyeOff } from 'lucide-react';
+import { Camera, Eye, EyeOff, LogOut } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import { useRef, useState, ChangeEvent } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { updateProfile } from 'firebase/auth';
 import { doc } from 'firebase/firestore';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 export default function ProfilePage() {
   const { user } = useUser();
@@ -38,6 +49,13 @@ export default function ProfilePage() {
   }, [firestore, user]);
 
   const { data: workerData, isLoading: isLoadingWorker } = useDoc<{ contact: string, photo: string }>(workerDocRef);
+
+  const handleLogout = () => {
+    if (auth) {
+      auth.signOut();
+      // The redirect will be handled by the layout's useEffect
+    }
+  };
 
   if (!user || isLoadingWorker) {
     return <p>লোড হচ্ছে...</p>;
@@ -216,6 +234,37 @@ export default function ProfilePage() {
             </div>
           <Button>পাসওয়ার্ড আপডেট করুন</Button>
         </CardContent>
+      </Card>
+
+      <Card>
+          <CardHeader>
+              <CardTitle>অ্যাকাউন্ট অ্যাকশন</CardTitle>
+              <CardDescription>
+                আপনার অ্যাকাউন্ট থেকে লগ আউট করুন।
+              </CardDescription>
+          </CardHeader>
+          <CardContent>
+              <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                      <Button variant="destructive">
+                          <LogOut className="mr-2 h-4 w-4" />
+                          লগ আউট করুন
+                      </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                      <AlertDialogHeader>
+                          <AlertDialogTitle>আপনি কি নিশ্চিত?</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            আপনি কি আপনার অ্যাকাউন্ট থেকে লগ আউট করতে চান? আপনাকে আবার লগইন করতে হবে।
+                          </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                          <AlertDialogCancel>বাতিল করুন</AlertDialogCancel>
+                          <AlertDialogAction onClick={handleLogout}>চালিয়ে যান</AlertDialogAction>
+                      </AlertDialogFooter>
+                  </AlertDialogContent>
+              </AlertDialog>
+          </CardContent>
       </Card>
     </div>
   );
