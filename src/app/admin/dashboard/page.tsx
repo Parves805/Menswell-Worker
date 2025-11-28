@@ -9,7 +9,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Users, Scissors, CircleDollarSign, Hourglass, Wallet2 } from 'lucide-react';
+import { Users, Scissors, CircleDollarSign, Wallet2 } from 'lucide-react';
 import Link from 'next/link';
 import React from 'react';
 import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
@@ -41,7 +41,6 @@ export default function AdminDashboardPage() {
 
   const [productionData, setProductionData] = React.useState<{ date: string; pieces: number }[]>([]);
   const [totalPieces, setTotalPieces] = React.useState(0);
-  const [totalOvertime, setTotalOvertime] = React.useState(0);
   const [totalAdvance, setTotalAdvance] = React.useState(0);
   const [totalExpenses, setTotalExpenses] = React.useState(0);
 
@@ -50,7 +49,6 @@ export default function AdminDashboardPage() {
 
     const fetchData = async () => {
       let totalPcs = 0;
-      let totalOt = 0;
       let totalAdv = 0;
       const prodData: { date: string, pieces: number }[] = [];
 
@@ -62,7 +60,6 @@ export default function AdminDashboardPage() {
         prodSnapshot.forEach(doc => {
             const data = doc.data();
             totalPcs += data.pieceCount || 0;
-            totalOt += data.overtimeHours || 0;
             const dateStr = new Date(data.date).toLocaleDateString('en-CA');
             const existingEntry = prodData.find(e => e.date === dateStr);
             if (existingEntry) {
@@ -78,7 +75,6 @@ export default function AdminDashboardPage() {
         });
       }
       setTotalPieces(totalPcs);
-      setTotalOvertime(totalOt);
       setTotalAdvance(totalAdv);
       setProductionData(prodData.sort((a,b) => new Date(a.date).getTime() - new Date(b.date).getTime()));
     };
@@ -106,7 +102,7 @@ export default function AdminDashboardPage() {
         </Link>
       </div>
       
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">মোট কর্মী</CardTitle>
@@ -123,18 +119,8 @@ export default function AdminDashboardPage() {
             <Scissors className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{totalPieces} পিস</div>
+            <div className="text-2xl font-bold">{totalPieces.toLocaleString('bn-BD')} পিস</div>
             <p className="text-xs text-muted-foreground">আজ সকল কর্মীর মোট কাজ</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">মোট ওভারটাইম</CardTitle>
-            <Hourglass className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{totalOvertime} ঘণ্টা</div>
-             <p className="text-xs text-muted-foreground">আজকের মোট ওভারটাইম</p>
           </CardContent>
         </Card>
         <Card>
