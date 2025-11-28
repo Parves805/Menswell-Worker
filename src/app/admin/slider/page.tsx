@@ -35,7 +35,6 @@ import {
     TableRow,
 } from '@/components/ui/table';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Textarea } from '@/components/ui/textarea';
 
 function AddSliderDialog({
   isOpen,
@@ -44,39 +43,31 @@ function AddSliderDialog({
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
 }) {
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
   const [imageUrl, setImageUrl] = useState('');
-  const [link, setLink] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
   const firestore = useFirestore();
 
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();
-    if (!title || !imageUrl || !firestore) {
-      toast({ variant: 'destructive', title: 'ফর্ম অসম্পূর্ণ', description: 'অনুগ্রহ করে শিরোনাম এবং ছবির URL দিন।' });
+    if (!imageUrl || !firestore) {
+      toast({ variant: 'destructive', title: 'ফর্ম অসম্পূর্ণ', description: 'অনুগ্রহ করে ছবির URL দিন।' });
       return;
     }
     setIsSubmitting(true);
     
     const newSlider = {
-      title,
-      description,
+      title: 'Slider Image', // Adding a default title
       imageUrl,
-      link,
       createdAt: serverTimestamp(),
     };
 
     addDocumentNonBlocking(collection(firestore, 'sliderImages'), newSlider)
       .then(docRef => {
         if (docRef) {
-            toast({ title: 'স্লাইড যোগ হয়েছে', description: `স্লাইড "${title}" সফলভাবে যোগ করা হয়েছে।` });
+            toast({ title: 'স্লাইড যোগ হয়েছে', description: `স্লাইড সফলভাবে যোগ করা হয়েছে।` });
             onOpenChange(false);
-            setTitle('');
-            setDescription('');
             setImageUrl('');
-            setLink('');
         }
       })
       .catch((error) => {
@@ -100,20 +91,8 @@ function AddSliderDialog({
           </DialogHeader>
           <div className="grid gap-4 py-4">
             <div className="space-y-2">
-              <Label htmlFor="title">শিরোনাম</Label>
-              <Input id="title" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="স্লাইডের শিরোনাম" required />
-            </div>
-             <div className="space-y-2">
-              <Label htmlFor="description">ছোট বর্ণনা</Label>
-              <Textarea id="description" value={description} onChange={(e) => setDescription(e.target.value)} placeholder="স্লাইড সম্পর্কে সংক্ষিপ্ত বর্ণনা" />
-            </div>
-            <div className="space-y-2">
               <Label htmlFor="imageUrl">ছবির URL</Label>
               <Input id="imageUrl" value={imageUrl} onChange={(e) => setImageUrl(e.target.value)} placeholder="https://example.com/image.jpg" required />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="link">লিঙ্ক (ঐচ্ছিক)</Label>
-              <Input id="link" value={link} onChange={(e) => setLink(e.target.value)} placeholder="https://example.com" />
             </div>
           </div>
           <DialogFooter>
@@ -174,8 +153,7 @@ export default function SliderPage() {
               <TableHeader>
                 <TableRow>
                   <TableHead className="w-[80px]">ছবি</TableHead>
-                  <TableHead>শিরোনাম</TableHead>
-                  <TableHead>বর্ণনা</TableHead>
+                  <TableHead>ছবির URL</TableHead>
                   <TableHead className="text-right">কার্যকলাপ</TableHead>
                 </TableRow>
               </TableHeader>
@@ -183,8 +161,7 @@ export default function SliderPage() {
                 {isLoading && Array.from({length: 3}).map((_, i) => (
                     <TableRow key={i}>
                         <TableCell><Skeleton className="h-12 w-20 rounded-md" /></TableCell>
-                        <TableCell><Skeleton className="h-5 w-32" /></TableCell>
-                        <TableCell><Skeleton className="h-5 w-48" /></TableCell>
+                        <TableCell><Skeleton className="h-5 w-full" /></TableCell>
                         <TableCell className="text-right"><Skeleton className="h-8 w-8 ml-auto" /></TableCell>
                     </TableRow>
                 ))}
@@ -196,8 +173,7 @@ export default function SliderPage() {
                                 <AvatarFallback className="rounded-md"><ImageIcon /></AvatarFallback>
                             </Avatar>
                         </TableCell>
-                        <TableCell className="font-medium">{slider.title}</TableCell>
-                        <TableCell className="text-muted-foreground">{slider.description}</TableCell>
+                        <TableCell className="font-medium text-muted-foreground truncate max-w-xs">{slider.imageUrl}</TableCell>
                         <TableCell className="text-right">
                             <Button variant="ghost" size="icon" onClick={() => handleDeleteSlider(slider.id)}>
                                 <Trash2 className="h-4 w-4 text-destructive" />
@@ -207,7 +183,7 @@ export default function SliderPage() {
                 ))}
                 {!isLoading && (!sliderImages || sliderImages.length === 0) && (
                      <TableRow>
-                        <TableCell colSpan={4} className="h-24 text-center">
+                        <TableCell colSpan={3} className="h-24 text-center">
                         কোনো স্লাইড পাওয়া যায়নি।
                         </TableCell>
                     </TableRow>

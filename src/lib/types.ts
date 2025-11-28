@@ -145,7 +145,7 @@ export type Notification = {
 
 export type SliderImage = {
   id: string;
-  title: string;
+  title?: string;
   description?: string;
   imageUrl: string;
   link?: string;

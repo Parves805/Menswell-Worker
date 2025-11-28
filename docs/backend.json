@@ -1,3 +1,4 @@
+
 {
   "entities": {
     "Worker": {
@@ -585,7 +586,7 @@
           "format": "date-time"
         }
       },
-      "required": ["id", "title", "imageUrl", "createdAt"]
+      "required": ["id", "imageUrl", "createdAt"]
     }
   },
   "auth": {
