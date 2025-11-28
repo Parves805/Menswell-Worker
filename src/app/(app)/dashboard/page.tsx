@@ -37,34 +37,12 @@ export default function DashboardPage() {
   const { user } = useUser();
   const firestore = useFirestore();
 
-  const today = React.useMemo(() => {
-    const d = new Date();
-    d.setHours(0, 0, 0, 0);
-    return d;
-  }, []);
-
-  const tomorrow = React.useMemo(() => {
-    const d = new Date(today);
-    d.setDate(d.getDate() + 1);
-    return d;
-  }, [today]);
-
-
   const allEntriesQuery = useMemoFirebase(() => {
     if (!user || !firestore) return null;
     return query(
         collection(firestore, 'workers', user.uid, 'productionEntries')
     );
   }, [user, firestore]);
-
-  const todayEntriesQuery = useMemoFirebase(() => {
-    if (!user || !firestore) return null;
-    return query(
-        collection(firestore, 'workers', user.uid, 'productionEntries'),
-        where('date', '>=', Timestamp.fromDate(today)),
-        where('date', '<', Timestamp.fromDate(tomorrow))
-    );
-  }, [user, firestore, today, tomorrow]);
 
   const advancePaymentsQuery = useMemoFirebase(() => {
       if(!user || !firestore) return null;
@@ -80,23 +58,9 @@ export default function DashboardPage() {
   }, [firestore]);
   
   const { data: allEntries, isLoading: isLoadingAllEntries } = useCollection<ProductionEntry>(allEntriesQuery);
-  const { data: todayEntries, isLoading: isLoadingTodayEntries } = useCollection<ProductionEntry>(todayEntriesQuery);
   const { data: unpaidAdvances, isLoading: isLoadingAdvances } = useCollection<AdvancePayment>(advancePaymentsQuery);
   const { data: sliderImages, isLoading: isLoadingSlider } = useCollection<SliderImage>(sliderImagesQuery);
 
-  const { todayOvertime } = React.useMemo(() => {
-    if (!todayEntries) {
-      return { todayOvertime: 0 };
-    }
-    return todayEntries.reduce(
-      (acc, entry) => {
-        acc.todayOvertime += entry.overtimeHours || 0;
-        return acc;
-      },
-      { todayOvertime: 0 }
-    );
-  }, [todayEntries]);
-  
   const totalProduction = React.useMemo(() => {
     if (!allEntries) return 0;
     return allEntries.reduce((sum, entry) => sum + (entry.pieceCount || 0), 0);
@@ -178,7 +142,7 @@ export default function DashboardPage() {
         <CarouselNext className="absolute right-4 top-1/2 -translate-y-1/2 text-white bg-black/30 hover-bg-black/50 border-none" />
       </Carousel>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-4 md:grid-cols-2">
         <Link href="/all-entries" className="transform transition-transform duration-200 hover:scale-105 group">
           <Card className="transition-colors group-hover:border-primary">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -209,25 +173,9 @@ export default function DashboardPage() {
             </CardContent>
           </Card>
         </Link>
-        <Link href="/overtime" className="transform transition-transform duration-200 hover:scale-105 group">
-          <Card className="transition-colors group-hover:border-primary">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">আজকের ওভারটাইম</CardTitle>
-              <Hourglass className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-               {isLoadingTodayEntries ? <Skeleton className="h-7 w-20" /> : (
-                  <div className="text-2xl font-bold">{todayOvertime.toLocaleString('bn-BD')} ঘণ্টা</div>
-              )}
-               <p className="text-xs text-muted-foreground">আজকের মোট ওভারটাইম</p>
-            </CardContent>
-          </Card>
-        </Link>
       </div>
 
       <RecentProductionTable />
     </div>
   );
 }
-
-    

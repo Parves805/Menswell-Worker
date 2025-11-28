@@ -10,7 +10,6 @@ import {
   User,
   Wallet2,
   LogOut,
-  Hourglass,
   CircleDollarSign,
   Scissors,
   Bell,
@@ -43,7 +42,6 @@ const mainNavItems: NavItem[] = [
   { title: 'দৈনিক এন্ট্রি', href: '/entry', icon: <PlusSquare /> },
   { title: 'সকল এন্ট্রি', href: '/all-entries', icon: <Scissors /> },
   { title: 'অগ্রিম', href: '/advances', icon: <CircleDollarSign /> },
-  { title: 'ওভারটাইম', href: '/overtime', icon: <Hourglass /> },
   { title: 'চ্যাট', href: '/chat', icon: <MessageCircle /> },
 ];
 

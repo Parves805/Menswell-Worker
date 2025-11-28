@@ -36,7 +36,6 @@ export type ProductionEntry = {
   workerId: string;
   workerName: string;
   pieceCount: number;
-  overtimeHours?: number; // Made optional
   rate: number;
   total: number;
   categoryName: string;
@@ -152,6 +151,4 @@ export type SliderImage = {
   link?: string;
   createdAt: any; // Firestore ServerTimestamp or Date
 }
-    
-
     
