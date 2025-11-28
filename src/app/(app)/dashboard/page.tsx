@@ -9,7 +9,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Scissors, CircleDollarSign } from 'lucide-react';
+import { Scissors, CircleDollarSign, Wallet2 } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import {
@@ -23,7 +23,7 @@ import { RecentProductionTable } from '@/components/RecentProductionTable';
 import { useUser, useFirestore, useCollection, useMemoFirebase } from '@/firebase';
 import { collection, query, where, orderBy } from 'firebase/firestore';
 import React, { useState } from 'react';
-import { ProductionEntry, SliderImage, AdvancePayment } from '@/lib/types';
+import { ProductionEntry, SliderImage, AdvancePayment, WorkerExpense } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 
@@ -48,6 +48,11 @@ export default function DashboardPage() {
     () => (firestore && user ? collection(firestore, 'workers', user.uid, 'advancePayments') : null),
     [firestore, user]
   );
+  
+  const expensesQuery = useMemoFirebase(
+    () => (firestore && user ? collection(firestore, 'workers', user.uid, 'expenses') : null),
+    [firestore, user]
+  );
 
   const sliderImagesQuery = useMemoFirebase(() => {
     if (!firestore) return null;
@@ -56,6 +61,7 @@ export default function DashboardPage() {
   
   const { data: allEntries, isLoading: isLoadingAllEntries } = useCollection<ProductionEntry>(allEntriesQuery);
   const { data: advances, isLoading: isLoadingAdvances } = useCollection<AdvancePayment>(advancesQuery);
+  const { data: expenses, isLoading: isLoadingExpenses } = useCollection<WorkerExpense>(expensesQuery);
   const { data: sliderImages, isLoading: isLoadingSlider } = useCollection<SliderImage>(sliderImagesQuery);
 
   const totalProduction = React.useMemo(() => {
@@ -72,6 +78,12 @@ export default function DashboardPage() {
       if (!advances) return 0;
       return advances.reduce((sum, advance) => sum + advance.amount, 0);
   }, [advances]);
+
+  const totalExpenses = React.useMemo(() => {
+    if (!expenses) return 0;
+    return expenses.reduce((sum, expense) => sum + expense.amount, 0);
+  }, [expenses]);
+
 
   const handleToggleEarnings = () => {
     setShowEarnings(true);
@@ -152,7 +164,7 @@ export default function DashboardPage() {
         <CarouselNext className="absolute right-4 top-1/2 -translate-y-1/2 text-white bg-black/30 hover-bg-black/50 border-none" />
       </Carousel>
 
-      <div className="grid gap-4 md:grid-cols-2">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         <Link href="/all-entries" className="transform transition-transform duration-200 hover:scale-105 group">
           <Card className="transition-colors group-hover:border-primary">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -164,6 +176,22 @@ export default function DashboardPage() {
                   <div className="text-2xl font-bold">{totalProduction.toLocaleString('bn-BD')} পিস</div>
               )}
                <p className="text-xs text-muted-foreground">এখন পর্যন্ত মোট কাজ</p>
+            </CardContent>
+          </Card>
+        </Link>
+        <Link href="/advances" className="transform transition-transform duration-200 hover:scale-105 group">
+          <Card className="transition-colors group-hover:border-primary">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">মোট খরচ</CardTitle>
+              <Wallet2 className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+               {isLoadingExpenses ? <Skeleton className="h-7 w-28" /> : (
+                  <div className="text-2xl font-bold">
+                  {formatCurrency(totalExpenses)}
+                  </div>
+               )}
+              <p className="text-xs text-muted-foreground">অনুমোদিত মোট খরচের পরিমাণ</p>
             </CardContent>
           </Card>
         </Link>
