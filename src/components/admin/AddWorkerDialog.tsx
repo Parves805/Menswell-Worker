@@ -125,7 +125,6 @@ export function AddWorkerDialog({
                 joinDate: joinDate.toISOString(),
                 status: 'active',
                 photo: `https://picsum.photos/seed/${newUser.uid}/400/400`,
-                basicSalary: 0, // Defaulting to 0 as it's removed from form
             };
 
             await setDocumentNonBlocking(workerDocRef, workerData, { merge: false });
@@ -215,3 +214,5 @@ export function AddWorkerDialog({
     </Dialog>
   );
 }
+
+    

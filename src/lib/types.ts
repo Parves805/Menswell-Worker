@@ -15,7 +15,6 @@ export type Worker = {
   designation: string;
   department: string;
   joinDate: string;
-  basicSalary: number;
   contact: string;
   email: string;
   status: 'active' | 'blocked';
@@ -80,7 +79,6 @@ export type SalaryDetails = {
   workerId: string;
   workerName: string;
   month: string;
-  basicSalary: number;
   productionPay: number;
   overtimePay: number;
   bonus: number;
@@ -154,4 +152,6 @@ export type SliderImage = {
   link?: string;
   createdAt: any; // Firestore ServerTimestamp or Date
 }
+    
+
     
