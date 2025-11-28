@@ -20,18 +20,9 @@ export default function AdminRootPage() {
     }
 
     if (user) {
-      // If a user is logged in, we need to check if they are an admin.
-      user.getIdTokenResult(true).then((idTokenResult) => {
-        if (idTokenResult.claims.isAdmin) {
-          // If they are an admin, send them to the dashboard.
-          router.replace('/admin/dashboard');
-        } else {
-          // If they are not an admin, they don't belong in the admin section.
-          // Sign them out and send them to the admin login page.
-          // Note: The layout will handle the actual sign-out.
-          router.replace('/admin/login');
-        }
-      });
+      // If a user is logged in, the layout will verify if they are an admin.
+      // This page's only job is to redirect them to the dashboard.
+      router.replace('/admin/dashboard');
     } else {
       // If no user is logged in, send them to the admin login page.
       router.replace('/admin/login');

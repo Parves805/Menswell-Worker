@@ -68,6 +68,8 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
   const { setOpenMobile } = useSidebar();
 
   React.useEffect(() => {
+    // This effect is the single source of truth for admin authorization.
+    
     // Don't run auth checks on the login page itself, or while loading.
     if (isUserLoading || pathname === '/admin/login') {
       return;
@@ -79,16 +81,17 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
       return;
     }
 
-    // If there is a user, verify they are an admin.
+    // If a user is present, verify they are the designated admin.
     if (user.email !== 'admin@example.com') {
-      // If the user is not an admin, sign them out and show an error.
+      // If the logged-in user is not an admin, sign them out, show an error,
+      // and redirect to the login page.
       auth?.signOut();
       toast({
         variant: 'destructive',
         title: 'প্রবেশাধিকার নেই',
         description: 'শুধুমাত্র অ্যাডমিন এই প্যানেলে প্রবেশ করতে পারবেন।',
       });
-      // The onAuthStateChanged listener will then redirect to the login page.
+      router.replace('/admin/login');
     } else {
         // If user is an admin, remember their credential
         if(user.email) {
@@ -108,8 +111,8 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
     return <>{children}</>;
   }
 
-  // For all other pages, show a loading screen until auth state is confirmed.
-  if (isUserLoading || !user) {
+  // For all other pages, show a loading screen until auth state is confirmed and the user is verified.
+  if (isUserLoading || !user || user.email !== 'admin@example.com') {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <p>অ্যাডমিন প্যানেল লোড হচ্ছে...</p>
