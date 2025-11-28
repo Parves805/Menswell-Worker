@@ -9,7 +9,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Scissors, CircleDollarSign } from 'lucide-react';
+import { Scissors, Wallet2 } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import {
@@ -23,7 +23,7 @@ import { RecentProductionTable } from '@/components/RecentProductionTable';
 import { useUser, useFirestore, useCollection, useMemoFirebase } from '@/firebase';
 import { collection, query, where, orderBy } from 'firebase/firestore';
 import React, { useState } from 'react';
-import { ProductionEntry, AdvancePayment, SliderImage } from '@/lib/types';
+import { ProductionEntry, Expense, SliderImage } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 
@@ -46,13 +46,10 @@ export default function DashboardPage() {
     );
   }, [user, firestore]);
 
-  const advancePaymentsQuery = useMemoFirebase(() => {
-      if(!user || !firestore) return null;
-      return query(
-          collection(firestore, 'workers', user.uid, 'advancePayments'),
-          where('deducted', '==', false)
-      );
-  }, [user, firestore]);
+  const expensesQuery = useMemoFirebase(
+    () => (firestore ? collection(firestore, 'expenses') : null),
+    [firestore]
+  );
 
   const sliderImagesQuery = useMemoFirebase(() => {
     if (!firestore) return null;
@@ -60,7 +57,7 @@ export default function DashboardPage() {
   }, [firestore]);
   
   const { data: allEntries, isLoading: isLoadingAllEntries } = useCollection<ProductionEntry>(allEntriesQuery);
-  const { data: unpaidAdvances, isLoading: isLoadingAdvances } = useCollection<AdvancePayment>(advancePaymentsQuery);
+  const { data: expenses, isLoading: isLoadingExpenses } = useCollection<Expense>(expensesQuery);
   const { data: sliderImages, isLoading: isLoadingSlider } = useCollection<SliderImage>(sliderImagesQuery);
 
   const totalProduction = React.useMemo(() => {
@@ -73,10 +70,10 @@ export default function DashboardPage() {
     return allEntries.reduce((sum, entry) => sum + (entry.total || 0), 0);
   }, [allEntries]);
   
-  const advanceBalance = React.useMemo(() => {
-      if (!unpaidAdvances) return 0;
-      return unpaidAdvances.reduce((sum, payment) => sum + payment.amount, 0);
-  }, [unpaidAdvances]);
+  const totalExpenses = React.useMemo(() => {
+      if (!expenses) return 0;
+      return expenses.reduce((sum, expense) => sum + expense.amount, 0);
+  }, [expenses]);
 
   const handleToggleEarnings = () => {
     setShowEarnings(true);
@@ -172,19 +169,19 @@ export default function DashboardPage() {
             </CardContent>
           </Card>
         </Link>
-        <Link href="/advances" className="transform transition-transform duration-200 hover:scale-105 group">
+        <Link href="/admin/expenses" className="transform transition-transform duration-200 hover:scale-105 group">
           <Card className="transition-colors group-hover:border-primary">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">বকেয়া অগ্রিম</CardTitle>
-              <CircleDollarSign className="h-4 w-4 text-muted-foreground" />
+              <CardTitle className="text-sm font-medium">মোট খরচ</CardTitle>
+              <Wallet2 className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-               {isLoadingAdvances ? <Skeleton className="h-7 w-28" /> : (
+               {isLoadingExpenses ? <Skeleton className="h-7 w-28" /> : (
                   <div className="text-2xl font-bold text-destructive">
-                  {formatCurrency(advanceBalance)}
+                  {formatCurrency(totalExpenses)}
                   </div>
                )}
-              <p className="text-xs text-muted-foreground">পরবর্তী বেতন থেকে কর্তনযোগ্য</p>
+              <p className="text-xs text-muted-foreground">এখন পর্যন্ত মোট কোম্পানির খরচ</p>
             </CardContent>
           </Card>
         </Link>
@@ -194,5 +191,3 @@ export default function DashboardPage() {
     </div>
   );
 }
-
-    
