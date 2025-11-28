@@ -9,7 +9,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Scissors, Wallet2 } from 'lucide-react';
+import { Scissors, CircleDollarSign } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import {
@@ -23,7 +23,7 @@ import { RecentProductionTable } from '@/components/RecentProductionTable';
 import { useUser, useFirestore, useCollection, useMemoFirebase } from '@/firebase';
 import { collection, query, where, orderBy } from 'firebase/firestore';
 import React, { useState } from 'react';
-import { ProductionEntry, Expense, SliderImage } from '@/lib/types';
+import { ProductionEntry, SliderImage, AdvancePayment } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 
@@ -44,9 +44,9 @@ export default function DashboardPage() {
     return collection(firestore, 'workers', user.uid, 'productionEntries');
   }, [user, firestore]);
 
-  const expensesQuery = useMemoFirebase(
-    () => (firestore ? collection(firestore, 'expenses') : null),
-    [firestore]
+  const advancesQuery = useMemoFirebase(
+    () => (firestore && user ? collection(firestore, 'workers', user.uid, 'advancePayments') : null),
+    [firestore, user]
   );
 
   const sliderImagesQuery = useMemoFirebase(() => {
@@ -55,7 +55,7 @@ export default function DashboardPage() {
   }, [firestore]);
   
   const { data: allEntries, isLoading: isLoadingAllEntries } = useCollection<ProductionEntry>(allEntriesQuery);
-  const { data: expenses, isLoading: isLoadingExpenses } = useCollection<Expense>(expensesQuery);
+  const { data: advances, isLoading: isLoadingAdvances } = useCollection<AdvancePayment>(advancesQuery);
   const { data: sliderImages, isLoading: isLoadingSlider } = useCollection<SliderImage>(sliderImagesQuery);
 
   const totalProduction = React.useMemo(() => {
@@ -68,10 +68,10 @@ export default function DashboardPage() {
     return allEntries.reduce((sum, entry) => sum + (entry.total || 0), 0);
   }, [allEntries]);
   
-  const totalExpenses = React.useMemo(() => {
-      if (!expenses) return 0;
-      return expenses.reduce((sum, expense) => sum + expense.amount, 0);
-  }, [expenses]);
+  const totalAdvance = React.useMemo(() => {
+      if (!advances) return 0;
+      return advances.reduce((sum, advance) => sum + advance.amount, 0);
+  }, [advances]);
 
   const handleToggleEarnings = () => {
     setShowEarnings(true);
@@ -167,19 +167,19 @@ export default function DashboardPage() {
             </CardContent>
           </Card>
         </Link>
-        <Link href="/admin/expenses" className="transform transition-transform duration-200 hover:scale-105 group">
+        <Link href="/advances" className="transform transition-transform duration-200 hover:scale-105 group">
           <Card className="transition-colors group-hover:border-primary">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">মোট খরচ</CardTitle>
-              <Wallet2 className="h-4 w-4 text-muted-foreground" />
+              <CardTitle className="text-sm font-medium">মোট অগ্রিম</CardTitle>
+              <CircleDollarSign className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-               {isLoadingExpenses ? <Skeleton className="h-7 w-28" /> : (
+               {isLoadingAdvances ? <Skeleton className="h-7 w-28" /> : (
                   <div className="text-2xl font-bold text-destructive">
-                  {formatCurrency(totalExpenses)}
+                  {formatCurrency(totalAdvance)}
                   </div>
                )}
-              <p className="text-xs text-muted-foreground">এখন পর্যন্ত মোট কোম্পানির খরচ</p>
+              <p className="text-xs text-muted-foreground">এখন পর্যন্ত মোট গৃহীত অগ্রিম</p>
             </CardContent>
           </Card>
         </Link>

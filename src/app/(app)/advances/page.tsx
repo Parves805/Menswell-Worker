@@ -53,10 +53,10 @@ export default function AdvancesPage() {
         <div>
             <CardTitle className='flex items-center gap-2'>
                 <CircleDollarSign />
-                টাকার অনুরোধের ইতিহাস
+                অগ্রিমের ইতিহাস
             </CardTitle>
             <CardDescription>
-                আপনার সমস্ত অনুরোধের বিস্তারিত হিসাব দেখুন।
+                আপনার সমস্ত অগ্রিমের বিস্তারিত হিসাব দেখুন।
             </CardDescription>
         </div>
         <Link href="/request-advance">
@@ -87,8 +87,8 @@ export default function AdvancesPage() {
                         <TableCell className="font-medium">{new Date(advance.date).toLocaleDateString('bn-BD')}</TableCell>
                         <TableCell className="text-right">{formatCurrency(advance.amount)}</TableCell>
                         <TableCell className="text-center">
-                            <Badge variant={advance.deducted ? "default" : "secondary"}>
-                                {advance.deducted ? 'কর্তন হয়েছে' : 'বিচারাধীন'}
+                            <Badge variant={advance.deductFromSalary ? "default" : "secondary"}>
+                                {advance.deductFromSalary ? 'কর্তন হয়েছে' : 'বিচারাধীন'}
                             </Badge>
                         </TableCell>
                     </TableRow>
