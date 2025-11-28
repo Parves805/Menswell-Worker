@@ -68,23 +68,16 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
   const { setOpenMobile } = useSidebar();
 
   React.useEffect(() => {
-    // This effect is the single source of truth for admin authorization.
-    
-    // Don't run auth checks on the login page itself, or while loading.
     if (isUserLoading || pathname === '/admin/login') {
       return;
     }
 
     if (!user) {
-      // If there's no user and we're not on the login page, redirect there.
       router.replace('/admin/login');
       return;
     }
-
-    // If a user is present, verify they are the designated admin.
+    
     if (user.email !== 'admin@example.com') {
-      // If the logged-in user is not an admin, sign them out, show an error,
-      // and redirect to the login page.
       auth?.signOut();
       toast({
         variant: 'destructive',
@@ -93,7 +86,6 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
       });
       router.replace('/admin/login');
     } else {
-        // If user is an admin, remember their credential
         if(user.email) {
           localStorage.setItem('garmentflow_admin_credential', user.email);
         }
@@ -106,12 +98,10 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
     }
   };
 
-  // The login page manages its own state and doesn't need the full layout.
   if (pathname === '/admin/login') {
     return <>{children}</>;
   }
 
-  // For all other pages, show a loading screen until auth state is confirmed and the user is verified.
   if (isUserLoading || !user || user.email !== 'admin@example.com') {
     return (
       <div className="flex min-h-screen items-center justify-center">
@@ -137,22 +127,27 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
         </SidebarHeader>
         <SidebarContent>
           <SidebarMenu>
-            {mainNavItems.map((item) => (
-              <SidebarMenuItem key={item.title}>
-                <Link href={item.href} className="w-full" onClick={() => setOpenMobile(false)}>
-                  <SidebarMenuButton
-                    tooltip={item.title}
-                    isActive={pathname.startsWith(item.href)}
-                    asChild
-                  >
-                    <div className="flex items-center gap-2">
-                        {item.icon}
-                        <span>{item.title}</span>
-                    </div>
-                  </SidebarMenuButton>
-                </Link>
-              </SidebarMenuItem>
-            ))}
+            {mainNavItems.map((item) => {
+              const isActive = item.href === '/admin/dashboard' 
+                ? pathname.startsWith(item.href) 
+                : pathname === item.href;
+              return (
+                <SidebarMenuItem key={item.title}>
+                  <Link href={item.href} className="w-full" onClick={() => setOpenMobile(false)}>
+                    <SidebarMenuButton
+                      tooltip={item.title}
+                      isActive={isActive}
+                      asChild
+                    >
+                      <div className="flex items-center gap-2">
+                          {item.icon}
+                          <span>{item.title}</span>
+                      </div>
+                    </SidebarMenuButton>
+                  </Link>
+                </SidebarMenuItem>
+              );
+            })}
           </SidebarMenu>
         </SidebarContent>
       </Sidebar>
@@ -160,7 +155,6 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
         <header className="sticky top-0 z-10 flex h-16 items-center gap-4 border-b bg-background px-4 sm:px-6">
           <SidebarTrigger className="flex text-foreground hover:text-foreground md:hidden" />
           <div className="relative flex-1">
-            {/* Search can be added here if needed */}
           </div>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
