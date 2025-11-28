@@ -18,6 +18,7 @@ import { useAuth, useUser, initiateEmailSignIn } from '@/firebase';
 import { FormEvent, useEffect, useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { Eye, EyeOff } from 'lucide-react';
+import type { FirebaseError } from 'firebase/app';
 
 const ADMIN_CREDENTIAL_KEY = 'garmentflow_admin_credential';
 
@@ -63,7 +64,24 @@ export default function AdminLoginPage() {
     }
     setIsSubmitting(true);
     
-    initiateEmailSignIn(auth, email, password);
+    const handleAuthError = (error: FirebaseError) => {
+        setIsSubmitting(false);
+        if (error.code === 'auth/invalid-credential') {
+            toast({
+                variant: 'destructive',
+                title: 'লগইন ব্যর্থ হয়েছে',
+                description: 'ভুল ইমেইল অথবা পাসওয়ার্ড। অনুগ্রহ করে আবার চেষ্টা করুন।',
+            });
+        } else {
+            toast({
+                variant: 'destructive',
+                title: 'লগইন ব্যর্থ হয়েছে',
+                description: error.message || 'একটি অজানা ত্রুটি ঘটেছে।',
+            });
+        }
+    };
+
+    initiateEmailSignIn(auth, email, password, handleAuthError);
 
     toast({
       title: 'লগইন করার চেষ্টা করা হচ্ছে...',
