@@ -92,7 +92,7 @@ export default function ChatPage() {
              {msg.senderId === user?.uid && (
                <Avatar className="h-8 w-8">
                  <AvatarImage src={user.photoURL ?? 'https://picsum.photos/seed/99/40/40'} alt={user.displayName ?? 'User'} />
-                <AvatarFallback>{user.displayName?.charAt(0) ?? 'U'}</AvatarFallback>
+                <AvatarFallback>{user.displayName?.charAt(0) ?? 'ক'}</AvatarFallback>
               </Avatar>
             )}
           </div>

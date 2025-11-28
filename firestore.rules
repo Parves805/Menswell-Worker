@@ -98,20 +98,17 @@ service cloud.firestore {
     }
     
     /**
-     * @description Rules for the /chats/{workerId}/messages/{messageId} collection.
+     * @description Rules for the /chats collection and its subcollections.
      * @path /chats/{workerId}/messages/{messageId}
      */
-    match /chats/{workerId}/messages/{messageId} {
-        // Worker can read their own chat messages. Admin can read any chat message.
-        allow get, list: if isOwner(workerId) || isAdmin();
+    match /chats/{workerId}/{path=**} {
+        // Admins can write (create/update/delete) to any chat path.
+        // Workers can write (create/update/delete) only to their own chat path.
+        allow write: if isAdmin() || isOwner(workerId);
         
-        // Worker can create messages in their own chat.
-        // Admin can create messages in any worker's chat (e.g. to reply).
-        allow create: if (isOwner(workerId) && request.resource.data.senderId == workerId)
-                      || (isAdmin() && request.resource.data.senderId == 'admin');
-
-        // Messages are immutable once created.
-        allow update, delete: if false;
+        // Admins can read from any chat path.
+        // Workers can only read from their own chat path.
+        allow read: if isAdmin() || isOwner(workerId);
     }
 
     /**
