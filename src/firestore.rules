@@ -20,7 +20,7 @@
  * Key Security Decisions:
  * - Workers can only read and write their own profile and related data (including notifications).
  * - Workers can create chat messages in their own chat path.
- * - Admins (identified by a custom claim `isAdmin: true`) have broad read/write access.
+ * - Admins (identified by email 'admin@example.com') have broad read/write access.
  * - Listing other worker's data is allowed for any signed-in user for the admin panel.
  * - Categories and Slider Images are readable by any signed-in user, but only writable by admins.
  * - Production/Advance Entry Requests can be created by the worker who owns it. Admins can read/write all requests.
@@ -41,10 +41,10 @@ service cloud.firestore {
     }
     
     /**
-     * @description Checks if the user has an 'isAdmin' custom claim.
+     * @description Checks if the user is an admin by their email.
      */
     function isAdmin() {
-      return isSignedIn() && request.auth.token.isAdmin == true;
+      return isSignedIn() && request.auth.token.email == 'admin@example.com';
     }
 
     /**
@@ -131,7 +131,7 @@ service cloud.firestore {
      */
     match /sliderImages/{sliderImageId} {
         allow read: if isSignedIn();
-        allow write: if isSignedIn(); // DEV ONLY: was isAdmin()
+        allow write: if isAdmin();
     }
     
     /**
@@ -176,10 +176,10 @@ service cloud.firestore {
     /**
      * @description Rules for the /expenses/{expenseId} collection.
      * @path /expenses/{expenseId}
-     * @principle Allows any signed in user to CUD. Should be restricted to admins.
+     * @principle Allows only admins to read and write.
      */
     match /expenses/{expenseId} {
-      allow read, write: if isSignedIn();
+      allow read, write: if isAdmin();
     }
 
     /**

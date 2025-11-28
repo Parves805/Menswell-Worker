@@ -80,24 +80,21 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
     }
 
     // If there is a user, verify they are an admin.
-    user.getIdTokenResult(true).then((idTokenResult) => {
-      if (!idTokenResult.claims.isAdmin) {
-        // If the user is not an admin, sign them out and show an error.
-        auth?.signOut();
-        toast({
-            variant: 'destructive',
-            title: 'প্রবেশাধিকার নেই',
-            description: 'শুধুমাত্র অ্যাডমিন এই প্যানেলে প্রবেশ করতে পারবেন।',
-        });
-        // The onAuthStateChanged listener will then redirect to the login page.
-      } else {
+    if (user.email !== 'admin@example.com') {
+      // If the user is not an admin, sign them out and show an error.
+      auth?.signOut();
+      toast({
+        variant: 'destructive',
+        title: 'প্রবেশাধিকার নেই',
+        description: 'শুধুমাত্র অ্যাডমিন এই প্যানেলে প্রবেশ করতে পারবেন।',
+      });
+      // The onAuthStateChanged listener will then redirect to the login page.
+    } else {
         // If user is an admin, remember their credential
         if(user.email) {
           localStorage.setItem('garmentflow_admin_credential', user.email);
         }
-      }
-    });
-
+    }
   }, [user, isUserLoading, router, auth, toast, pathname]);
 
   const handleLogout = () => {
