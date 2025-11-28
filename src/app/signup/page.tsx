@@ -29,15 +29,20 @@ export default function SignUpPage() {
   const router = useRouter();
   const { toast } = useToast();
 
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  // Pre-fill for admin creation
+  const [email, setEmail] = useState('admin@example.com');
+  const [password, setPassword] = useState('password');
+  const [name, setName] = useState('Admin');
+  
   const [showPassword, setShowPassword] = useState(false);
-  const [name, setName] = useState('');
-  const [phone, setPhone] = useState('');
+  const [phone, setPhone] = useState('01234567890'); // Dummy phone
   const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  const isAdminCreation = email === 'admin@example.com';
 
   useEffect(() => {
-    if (!isUserLoading && user) {
+    // If a regular user is already logged in, redirect them
+    if (!isUserLoading && user && user.email !== 'admin@example.com') {
       router.push('/dashboard');
     }
   }, [user, isUserLoading, router]);
@@ -45,7 +50,7 @@ export default function SignUpPage() {
 
   const handleSignUp = async (e: FormEvent) => {
     e.preventDefault();
-    if (!auth || !firestore || !name || !email || !password || !phone) {
+    if (!auth || !firestore || !name || !email || !password) {
         toast({
             variant: "destructive",
             title: "ফর্ম পূরণ করুন",
@@ -72,26 +77,32 @@ export default function SignUpPage() {
         contact: phone,
         email: email,
         joinDate: new Date().toISOString(),
-        designation: 'Worker',
+        designation: isAdminCreation ? 'Admin' : 'Worker',
         department: 'N/A',
         basicSalary: 0,
         photo: `https://picsum.photos/seed/${newUser.uid}/200/200`
       };
       
-      // Use non-blocking write with improved error handling
       setDocumentNonBlocking(workerDocRef, workerData, { merge: false });
 
       toast({
         title: "নিবন্ধন সফল হয়েছে",
         description: "আপনাকে ড্যাশবোর্ডে নিয়ে যাওয়া হচ্ছে।",
       });
-      // The onAuthStateChanged listener in the provider will handle the redirect.
+
+      // Redirect admin to admin login page after creation
+      if (isAdminCreation) {
+        router.push('/admin/login');
+      }
       
     } catch (error: any) {
       console.error('Sign Up Error:', error);
        let description = "একটি অজানা ত্রুটি ঘটেছে।";
         if (error.code === 'auth/email-already-in-use') {
-            description = "এই ইমেইল ঠিকানাটি ইতিমধ্যে ব্যবহৃত হয়েছে।";
+            description = "এই ইমেইল ঠিকানাটি ইতিমধ্যে ব্যবহৃত হয়েছে। অনুগ্রহ করে লগইন করুন।";
+             if (isAdminCreation) {
+                router.push('/admin/login');
+            }
         } else if (error.code === 'auth/weak-password') {
             description = "পাসওয়ার্ডটি খুব দুর্বল। অনুগ্রহ করে আরও শক্তিশালী পাসওয়ার্ড ব্যবহার করুন।";
         } else if (error.code === 'auth/invalid-email') {
@@ -107,7 +118,7 @@ export default function SignUpPage() {
     }
   };
 
-  if (isUserLoading || user) {
+  if (isUserLoading || (user && !isAdminCreation)) {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center">
         <p>লোড হচ্ছে...</p>
@@ -121,8 +132,12 @@ export default function SignUpPage() {
       <Card className="w-full max-w-md shadow-2xl">
         <CardHeader className="items-center text-center">
           <GarmentFlowIcon className="mb-4 h-12 w-12 text-primary" />
-          <CardTitle className="text-2xl font-bold">অ্যাকাউন্ট তৈরি করুন</CardTitle>
-          <CardDescription>আপনার কর্মজীবন শুরু করতে নিবন্ধন করুন।</CardDescription>
+          <CardTitle className="text-2xl font-bold">
+            {isAdminCreation ? "অ্যাডমিন অ্যাকাউন্ট তৈরি করুন" : "অ্যাকাউন্ট তৈরি করুন"}
+          </CardTitle>
+          <CardDescription>
+            {isAdminCreation ? "অ্যাডমিন প্যানেলে প্রবেশ করার জন্য অ্যাকাউন্ট তৈরি করুন।" : "আপনার কর্মজীবন শুরু করতে নিবন্ধন করুন।"}
+          </CardDescription>
         </CardHeader>
         <form onSubmit={handleSignUp}>
           <CardContent>
@@ -136,6 +151,8 @@ export default function SignUpPage() {
                   required
                   value={name}
                   onChange={(e) => setName(e.target.value)}
+                  readOnly={isAdminCreation}
+                  className={isAdminCreation ? 'bg-muted' : ''}
                 />
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -148,6 +165,8 @@ export default function SignUpPage() {
                     required
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
+                    readOnly={isAdminCreation}
+                    className={isAdminCreation ? 'bg-muted' : ''}
                     />
                 </div>
                 <div className="grid gap-2">
@@ -159,6 +178,8 @@ export default function SignUpPage() {
                     required
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
+                     readOnly={isAdminCreation}
+                    className={isAdminCreation ? 'bg-muted' : ''}
                     />
                 </div>
               </div>
@@ -172,6 +193,8 @@ export default function SignUpPage() {
                     required
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
+                     readOnly={isAdminCreation}
+                    className={isAdminCreation ? 'bg-muted' : ''}
                   />
                   <Button
                     type="button"
@@ -191,14 +214,16 @@ export default function SignUpPage() {
           </CardContent>
           <CardFooter className="flex flex-col gap-4">
             <Button type="submit" className="w-full" disabled={isSubmitting}>
-              {isSubmitting ? "নিবন্ধন করা হচ্ছে..." : "নিবন্ধন করুন"}
+              {isSubmitting ? "অ্যাকাউন্ট তৈরি করা হচ্ছে..." : (isAdminCreation ? "অ্যাডমিন অ্যাকাউন্ট নিবন্ধন করুন" : "নিবন্ধন করুন")}
             </Button>
-            <p className="text-center text-sm text-muted-foreground">
-              ইতিমধ্যে একটি অ্যাকাউন্ট আছে?{' '}
-              <Link href="/" className="underline">
-                লগইন করুন
-              </Link>
-            </p>
+            {!isAdminCreation && (
+                 <p className="text-center text-sm text-muted-foreground">
+                    ইতিমধ্যে একটি অ্যাকাউন্ট আছে?{' '}
+                    <Link href="/" className="underline">
+                        লগইন করুন
+                    </Link>
+                 </p>
+            )}
           </CardFooter>
         </form>
       </Card>
