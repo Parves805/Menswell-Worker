@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useMemo, useRef } from 'react';
@@ -136,6 +137,7 @@ export default function ExpensesPage() {
   const firestore = useFirestore();
   const { user } = useUser();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [key, setKey] = useState(0); // Key to force re-fetch
   const printRef = useRef<HTMLDivElement>(null);
 
   const expensesQuery = useMemoFirebase(() => {
@@ -144,9 +146,9 @@ export default function ExpensesPage() {
       collection(firestore, 'expenses'),
       orderBy('date', 'desc')
     );
-  }, [firestore]);
+  }, [firestore, key]); // Depend on the key
 
-  const { data: allExpenses, isLoading, forceRefetch } = useCollection<Expense>(expensesQuery);
+  const { data: allExpenses, isLoading } = useCollection<Expense>(expensesQuery);
   
   const firstDayOfMonth = useMemo(() => {
     const date = new Date();
@@ -168,7 +170,7 @@ export default function ExpensesPage() {
 
 
   const handleExpenseAdded = () => {
-    forceRefetch();
+    setKey(prev => prev + 1); // Increment key to trigger refetch
   }
 
   const handleDownloadPdf = async () => {
@@ -330,3 +332,5 @@ export default function ExpensesPage() {
     </div>
   );
 }
+
+    

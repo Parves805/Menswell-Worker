@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -130,8 +131,9 @@ export function AddWorkerDialog({
             await setDocumentNonBlocking(workerDocRef, workerData, { merge: false });
             toast({ title: 'কর্মী যোগ হয়েছে', description: `${name} সফলভাবে যোগ হয়েছে এবং একটি অ্যাকাউন্ট তৈরি করা হয়েছে।` });
         }
-        onWorkerAdded();
+        
         onOpenChange(false);
+        onWorkerAdded();
         resetForm();
 
     } catch(error: any) {
