@@ -38,14 +38,14 @@ export default function SignUpPage() {
   const [phone, setPhone] = useState('01234567890'); // Dummy phone
   const [isSubmitting, setIsSubmitting] = useState(false);
   
-  const isAdminCreation = email === 'admin@example.com';
+  const isAdminCreation = true; // Forcing admin creation mode
 
   useEffect(() => {
     // If a regular user is already logged in, redirect them
-    if (!isUserLoading && user && user.email !== 'admin@example.com') {
+    if (!isUserLoading && user && !isAdminCreation) {
       router.push('/dashboard');
     }
-  }, [user, isUserLoading, router]);
+  }, [user, isUserLoading, router, isAdminCreation]);
 
 
   const handleSignUp = async (e: FormEvent) => {
@@ -77,8 +77,8 @@ export default function SignUpPage() {
         contact: phone,
         email: email,
         joinDate: new Date().toISOString(),
-        designation: isAdminCreation ? 'Admin' : 'Worker',
-        department: 'N/A',
+        designation: 'Admin',
+        department: 'Management',
         basicSalary: 0,
         photo: `https://picsum.photos/seed/${newUser.uid}/200/200`
       };
@@ -87,13 +87,11 @@ export default function SignUpPage() {
 
       toast({
         title: "নিবন্ধন সফল হয়েছে",
-        description: "আপনাকে ড্যাশবোর্ডে নিয়ে যাওয়া হচ্ছে।",
+        description: "অ্যাডমিন অ্যাকাউন্ট সফলভাবে তৈরি হয়েছে। এখন লগইন করুন।",
       });
 
       // Redirect admin to admin login page after creation
-      if (isAdminCreation) {
-        router.push('/admin/login');
-      }
+      router.push('/admin/login');
       
     } catch (error: any) {
       console.error('Sign Up Error:', error);
@@ -133,10 +131,10 @@ export default function SignUpPage() {
         <CardHeader className="items-center text-center">
           <GarmentFlowIcon className="mb-4 h-12 w-12 text-primary" />
           <CardTitle className="text-2xl font-bold">
-            {isAdminCreation ? "অ্যাডমিন অ্যাকাউন্ট তৈরি করুন" : "অ্যাকাউন্ট তৈরি করুন"}
+            অ্যাডমিন অ্যাকাউন্ট তৈরি করুন
           </CardTitle>
           <CardDescription>
-            {isAdminCreation ? "অ্যাডমিন প্যানেলে প্রবেশ করার জন্য অ্যাকাউন্ট তৈরি করুন।" : "আপনার কর্মজীবন শুরু করতে নিবন্ধন করুন।"}
+            অ্যাডমিন প্যানেলে প্রবেশ করার জন্য অ্যাকাউন্ট তৈরি করুন।
           </CardDescription>
         </CardHeader>
         <form onSubmit={handleSignUp}>
@@ -147,12 +145,11 @@ export default function SignUpPage() {
                 <Input
                   id="name"
                   type="text"
-                  placeholder="আপনার পুরো নাম"
                   required
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  readOnly={isAdminCreation}
-                  className={isAdminCreation ? 'bg-muted' : ''}
+                  readOnly
+                  className={'bg-muted'}
                 />
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -161,25 +158,22 @@ export default function SignUpPage() {
                     <Input
                     id="email"
                     type="email"
-                    placeholder="worker@example.com"
                     required
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    readOnly={isAdminCreation}
-                    className={isAdminCreation ? 'bg-muted' : ''}
+                    readOnly
+                    className={'bg-muted'}
                     />
                 </div>
                 <div className="grid gap-2">
-                    <Label htmlFor="phone">মোবাইল নম্বর</Label>
+                    <Label htmlFor="phone">মোবাইল নম্বর (ঐচ্ছিক)</Label>
                     <Input
                     id="phone"
                     type="tel"
-                    placeholder="+880123456789"
-                    required
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
-                     readOnly={isAdminCreation}
-                    className={isAdminCreation ? 'bg-muted' : ''}
+                    readOnly
+                    className={'bg-muted'}
                     />
                 </div>
               </div>
@@ -189,12 +183,11 @@ export default function SignUpPage() {
                   <Input
                     id="password"
                     type={showPassword ? 'text' : 'password'}
-                    placeholder="********"
                     required
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                     readOnly={isAdminCreation}
-                    className={isAdminCreation ? 'bg-muted' : ''}
+                    readOnly
+                    className={'bg-muted'}
                   />
                   <Button
                     type="button"
@@ -214,19 +207,13 @@ export default function SignUpPage() {
           </CardContent>
           <CardFooter className="flex flex-col gap-4">
             <Button type="submit" className="w-full" disabled={isSubmitting}>
-              {isSubmitting ? "অ্যাকাউন্ট তৈরি করা হচ্ছে..." : (isAdminCreation ? "অ্যাডমিন অ্যাকাউন্ট নিবন্ধন করুন" : "নিবন্ধন করুন")}
+              {isSubmitting ? "অ্যাকাউন্ট তৈরি করা হচ্ছে..." : "অ্যাডমিন অ্যাকাউন্ট নিবন্ধন করুন"}
             </Button>
-            {!isAdminCreation && (
-                 <p className="text-center text-sm text-muted-foreground">
-                    ইতিমধ্যে একটি অ্যাকাউন্ট আছে?{' '}
-                    <Link href="/" className="underline">
-                        লগইন করুন
-                    </Link>
-                 </p>
-            )}
           </CardFooter>
         </form>
       </Card>
     </div>
   );
 }
+
+    
