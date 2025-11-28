@@ -36,7 +36,6 @@ import { Label } from '@/components/ui/label';
 import { DatePicker } from '@/components/DatePicker';
 import { useToast } from '@/hooks/use-toast';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { logActivity } from '@/lib/activity-log';
 import { useUser } from '@/firebase';
 
 
@@ -99,9 +98,7 @@ function GiveAdvanceDialog({
         title: 'অগ্রিম প্রদান সফল হয়েছে',
         description: `${worker.name}-কে ${formatCurrency(amount)} সফলভাবে প্রদান করা হয়েছে।`,
       });
-      if (adminUser) {
-        logActivity(firestore, adminUser, `gave an advance of ${formatCurrency(amount)} to ${worker.name}`);
-      }
+      
       onAdvanceGiven();
       onOpenChange(false);
     } catch (error) {
