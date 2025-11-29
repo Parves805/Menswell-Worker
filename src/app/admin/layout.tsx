@@ -50,6 +50,8 @@ import { useToast } from '@/hooks/use-toast';
 import { doc } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
 
+const ADMIN_CREDENTIAL_KEY = 'garmentflow_admin_credential';
+
 
 const mainNavItems: NavItem[] = [
   { title: 'ড্যাশবোর্ড', href: '/admin/dashboard', icon: <Home /> },
@@ -108,6 +110,7 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
 
   const handleLogout = () => {
     if (auth) {
+      localStorage.removeItem(ADMIN_CREDENTIAL_KEY);
       auth.signOut().then(() => router.push('/admin/login'));
     }
   };
@@ -144,7 +147,7 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
               <h1 className="text-lg font-semibold tracking-tight">{settings.companyName}</h1>
             ) : (
                 <div className="flex items-center gap-2">
-                    <GarmentFlowIcon className="size-6" />
+                    <GarmentFlowIcon className="size-8 text-primary" />
                     <h1 className="text-lg font-semibold tracking-tight">অ্যাডমিন</h1>
                 </div>
             )}

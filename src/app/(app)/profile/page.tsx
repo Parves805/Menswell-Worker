@@ -32,6 +32,9 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 
+const USER_CREDENTIAL_KEY = 'garmentflow_user_credential';
+
+
 export default function ProfilePage() {
   const { user } = useUser();
   const auth = useAuth();
@@ -52,6 +55,7 @@ export default function ProfilePage() {
 
   const handleLogout = () => {
     if (auth) {
+      localStorage.removeItem(USER_CREDENTIAL_KEY);
       auth.signOut();
       // The redirect will be handled by the layout's useEffect
     }
