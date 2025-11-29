@@ -48,7 +48,7 @@ export default function AdvancesPage() {
 
   return (
     <Card>
-      <CardHeader className='flex-row justify-between items-center'>
+      <CardHeader>
         <div>
             <CardTitle className='flex items-center gap-2'>
                 <Wallet />
@@ -58,9 +58,6 @@ export default function AdvancesPage() {
                 আপনার সমস্ত অনুমোদিত খরচের বিস্তারিত হিসাব দেখুন।
             </CardDescription>
         </div>
-        <Link href="/request-advance">
-            <Button>নতুন অনুরোধ</Button>
-        </Link>
       </CardHeader>
       <CardContent>
         <div className="rounded-md border">
