@@ -262,7 +262,7 @@ export default function ExpensesPage() {
                   <p className="text-primary-foreground/80 max-w-prose">
                   আপনার সমস্ত খরচের বিস্তারিত হিসাব দেখুন এবং নতুন খরচ যোগ করুন।
                   </p>
-                  <div className='flex gap-2'>
+                  <div className='flex flex-wrap justify-center gap-2'>
                     <Button onClick={() => setIsDialogOpen(true)} variant="secondary" className='shadow-lg'>
                         <PlusCircle className="mr-2 h-4 w-4" />
                         নতুন খরচ

@@ -135,14 +135,14 @@ export default function SliderPage() {
         onOpenChange={setIsDialogOpen}
       />
       <Card>
-        <CardHeader className="flex-row justify-between items-center">
+        <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
                 <CardTitle>স্লাইডার ম্যানেজমেন্ট</CardTitle>
                 <CardDescription>
                     ব্যবহারকারী ড্যাশবোর্ডের স্লাইডার পরিচালনা করুন।
                 </CardDescription>
             </div>
-            <Button onClick={() => setIsDialogOpen(true)}>
+            <Button onClick={() => setIsDialogOpen(true)} className="w-full sm:w-auto">
                 <PlusCircle className="mr-2 h-4 w-4" />
                 নতুন স্লাইড যোগ করুন
             </Button>

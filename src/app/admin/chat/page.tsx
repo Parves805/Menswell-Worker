@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
@@ -9,10 +10,10 @@ import {
   query,
   orderBy,
 } from 'firebase/firestore';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Send, User, MessageSquare } from 'lucide-react';
+import { Send, User, MessageSquare, ArrowLeft } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import type { ChatMessage, Worker } from '@/lib/types';
 import { cn } from '@/lib/utils';
@@ -69,9 +70,13 @@ export default function AdminChatPage() {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 h-[calc(100vh-8rem)]">
         {/* Workers List */}
-        <Card className="lg:col-span-1 flex flex-col">
+        <Card className={cn(
+            "lg:col-span-1 flex flex-col transition-all duration-300",
+            selectedWorker && "hidden lg:flex"
+        )}>
             <CardHeader>
                 <CardTitle>কর্মীদের চ্যাট</CardTitle>
+                <CardDescription>যেকোনো কর্মীর সাথে চ্যাট করুন।</CardDescription>
             </CardHeader>
             <CardContent className="flex-1 p-0 overflow-y-auto">
                 <ScrollArea className="h-full">
@@ -100,7 +105,10 @@ export default function AdminChatPage() {
         </Card>
 
         {/* Chat Window */}
-        <Card className="lg:col-span-2 flex flex-col h-full">
+        <Card className={cn(
+            "lg:col-span-2 flex flex-col h-full transition-all duration-300",
+            !selectedWorker && "hidden lg:flex"
+        )}>
             {!selectedWorker ? (
                  <div className="flex flex-col items-center justify-center h-full text-center text-muted-foreground">
                     <MessageSquare className="w-12 h-12 mb-4"/>
@@ -109,17 +117,18 @@ export default function AdminChatPage() {
                 </div>
             ) : (
                 <>
-                <CardHeader className="border-b">
-                    <CardTitle className="flex items-center gap-3">
-                         <Avatar className="h-10 w-10">
-                            <AvatarImage src={selectedWorker.photo} alt={selectedWorker.name} />
-                            <AvatarFallback>{selectedWorker.name.charAt(0)}</AvatarFallback>
-                        </Avatar>
-                        <div>
-                         {selectedWorker.name}
-                         <p className="text-sm font-normal text-muted-foreground">{selectedWorker.designation}</p>
-                        </div>
-                    </CardTitle>
+                <CardHeader className="border-b flex-row items-center gap-3">
+                    <Button variant="ghost" size="icon" className="lg:hidden" onClick={() => setSelectedWorker(null)}>
+                        <ArrowLeft />
+                    </Button>
+                    <Avatar className="h-10 w-10">
+                        <AvatarImage src={selectedWorker.photo} alt={selectedWorker.name} />
+                        <AvatarFallback>{selectedWorker.name.charAt(0)}</AvatarFallback>
+                    </Avatar>
+                    <div>
+                        <CardTitle>{selectedWorker.name}</CardTitle>
+                        <p className="text-sm font-normal text-muted-foreground">{selectedWorker.designation}</p>
+                    </div>
                 </CardHeader>
                 <CardContent className="flex-1 overflow-y-auto p-4 space-y-4">
                     {isLoadingMessages && <p className="text-center text-muted-foreground">বার্তা লোড হচ্ছে...</p>}

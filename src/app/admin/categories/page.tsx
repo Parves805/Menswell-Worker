@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState } from 'react';
@@ -100,17 +101,17 @@ function AddCategoryDialog({
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="name" className="text-right">নাম</Label>
-              <Input id="name" value={name} onChange={(e) => setName(e.target.value)} className="col-span-3" placeholder="e.g., টি-শার্ট" required />
+            <div className="space-y-2">
+              <Label htmlFor="name">নাম</Label>
+              <Input id="name" value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g., টি-শার্ট" required />
             </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="rate" className="text-right">দর (প্রতি পিস)</Label>
-              <Input id="rate" type="number" value={rate} onChange={(e) => setRate(e.target.value)} className="col-span-3" placeholder="e.g., 5.50" required />
+            <div className="space-y-2">
+              <Label htmlFor="rate">দর (প্রতি পিস)</Label>
+              <Input id="rate" type="number" value={rate} onChange={(e) => setRate(e.target.value)} placeholder="e.g., 5.50" required />
             </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="imageUrl" className="text-right">ছবির URL</Label>
-              <Input id="imageUrl" value={imageUrl} onChange={(e) => setImageUrl(e.target.value)} className="col-span-3" placeholder="সঠিক ছবির URL দিন" required />
+            <div className="space-y-2">
+              <Label htmlFor="imageUrl">ছবির URL</Label>
+              <Input id="imageUrl" value={imageUrl} onChange={(e) => setImageUrl(e.target.value)} placeholder="সঠিক ছবির URL দিন" required />
             </div>
           </div>
           <DialogFooter>
@@ -153,14 +154,14 @@ export default function CategoriesPage() {
         onOpenChange={setIsDialogOpen}
       />
       <Card>
-        <CardHeader className="flex-row justify-between items-center">
+        <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
                 <CardTitle>উৎপাদন ক্যাটাগরি</CardTitle>
                 <CardDescription>
                     নতুন ক্যাটাগরি যোগ করুন এবং বর্তমানগুলো পরিচালনা করুন।
                 </CardDescription>
             </div>
-            <Button onClick={() => setIsDialogOpen(true)}>
+            <Button onClick={() => setIsDialogOpen(true)} className="w-full sm:w-auto">
                 <PlusCircle className="mr-2 h-4 w-4" />
                 নতুন ক্যাটাগরি যোগ করুন
             </Button>

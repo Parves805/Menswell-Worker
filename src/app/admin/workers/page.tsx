@@ -123,7 +123,7 @@ export default function WorkersPage() {
         </AlertDialogContent>
       </AlertDialog>
 
-       <div className="mb-6 flex items-center justify-between">
+       <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
         <div>
             <h1 className="text-2xl font-bold tracking-tight">কর্মী পরিচালনা</h1>
             <p className="text-muted-foreground">
@@ -131,7 +131,7 @@ export default function WorkersPage() {
             </p>
         </div>
         <Button onClick={() => setIsAddDialogOpen(true)}>
-            <PlusCircle />
+            <PlusCircle className="mr-2 h-4 w-4" />
             নতুন কর্মী যোগ করুন
         </Button>
       </div>
