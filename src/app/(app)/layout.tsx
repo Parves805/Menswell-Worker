@@ -100,7 +100,7 @@ function AppLayoutContent({ children }: { children: React.ReactNode }) {
                 className="flex items-center gap-3 text-lg font-semibold md:text-base"
               >
                 {settings?.logoUrl ? (
-                   <div className="relative h-8 w-32">
+                   <div className="relative h-10 w-40">
                     <Image 
                       src={settings.logoUrl} 
                       alt="Company Logo" 
@@ -150,7 +150,7 @@ function AppLayoutContent({ children }: { children: React.ReactNode }) {
                   className="flex items-center gap-2 text-lg font-semibold"
                 >
                     {settings?.logoUrl ? (
-                         <div className="relative h-8 w-32">
+                         <div className="relative h-10 w-40">
                             <Image 
                             src={settings.logoUrl} 
                             alt="Company Logo" 
