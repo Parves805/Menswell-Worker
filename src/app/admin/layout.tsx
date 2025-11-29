@@ -66,6 +66,7 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const { toast } = useToast();
   const firestore = useFirestore();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
 
   const settingsDocRef = useMemoFirebase(() => 
     firestore ? doc(firestore, 'settings', 'global') : null,
@@ -173,7 +174,7 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
       </aside>
       <div className="flex flex-col">
         <header className="flex h-14 items-center gap-4 border-b bg-muted/40 px-4 lg:h-[60px] lg:px-6">
-          <Sheet>
+          <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
             <SheetTrigger asChild>
               <Button
                 variant="outline"
@@ -186,7 +187,7 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
             </SheetTrigger>
             <SheetContent side="left" className="flex flex-col p-0">
               <div className="flex h-14 items-center border-b px-4 lg:h-[60px] lg:px-6">
-                <Link href="/admin/dashboard" className="flex items-center gap-2 font-semibold">
+                <Link href="/admin/dashboard" className="flex items-center gap-2 font-semibold" onClick={() => setIsMobileMenuOpen(false)}>
                    {renderLogoOrName()}
                 </Link>
               </div>
@@ -195,6 +196,7 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
                   <Link
                     key={item.title}
                     href={item.href}
+                    onClick={() => setIsMobileMenuOpen(false)}
                     className={cn(
                       'flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground hover:text-foreground',
                       pathname.startsWith(item.href) && 'bg-muted text-foreground'
@@ -208,11 +210,7 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
             </SheetContent>
           </Sheet>
 
-          <div className="w-full flex-1 flex items-center justify-center">
-            <div className="hidden md:block">
-              {renderLogoOrName()}
-            </div>
-          </div>
+          <div className="w-full flex-1" />
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
