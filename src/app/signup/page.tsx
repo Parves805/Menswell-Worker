@@ -15,12 +15,16 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { GarmentFlowIcon } from '@/components/icons';
-import { useAuth, useUser, useFirestore, setDocumentNonBlocking } from '@/firebase';
+import { useAuth, useUser, useFirestore, setDocumentNonBlocking, useDoc, useMemoFirebase } from '@/firebase';
 import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
 import { doc } from 'firebase/firestore';
 import { FormEvent, useEffect, useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { Eye, EyeOff } from 'lucide-react';
+import type { AppSettings } from '@/lib/types';
+import Image from 'next/image';
+import { Skeleton } from '@/components/ui/skeleton';
+
 
 export default function SignUpPage() {
   const auth = useAuth();
@@ -28,6 +32,13 @@ export default function SignUpPage() {
   const { user, isUserLoading } = useUser();
   const router = useRouter();
   const { toast } = useToast();
+
+  const settingsDocRef = useMemoFirebase(() => 
+    firestore ? doc(firestore, 'settings', 'global') : null,
+    [firestore]
+  );
+  const { data: settings, isLoading: isLoadingSettings } = useDoc<AppSettings>(settingsDocRef);
+
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -125,7 +136,22 @@ export default function SignUpPage() {
       <div className="absolute inset-0 -z-10 h-full w-full bg-background bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-[size:14px_24px]"></div>
       <Card className="w-full max-w-md shadow-2xl">
         <CardHeader className="items-center text-center">
-          <GarmentFlowIcon className="mb-4 h-12 w-12 text-primary" />
+           <div className="mb-4 h-12 flex items-center justify-center">
+            {isLoadingSettings ? (
+              <Skeleton className="h-12 w-48" />
+            ) : settings?.logoUrl ? (
+              <div className="relative h-12 w-48">
+                <Image 
+                  src={settings.logoUrl} 
+                  alt={settings.companyName || 'Company Logo'} 
+                  fill 
+                  className="object-contain"
+                />
+              </div>
+            ) : (
+               <GarmentFlowIcon className="h-12 w-12 text-primary" />
+            )}
+          </div>
           <CardTitle className="text-2xl font-bold">
             নতুন অ্যাকাউন্ট তৈরি করুন
           </CardTitle>
