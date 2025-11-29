@@ -51,7 +51,6 @@ const mainNavItems: NavItem[] = [
   { title: 'উৎপাদন অনুরোধ', href: '/admin/production-requests', icon: <CheckSquare /> },
   { title: 'টাকার অনুরোধ', href: '/admin/advance-requests', icon: <Wallet /> },
   { title: 'অগ্রিম প্রদান', href: '/admin/advance-payments', icon: <Landmark /> },
-  { title: 'কর্মীদের খরচ', href: '/admin/worker-expenses', icon: <TakaIcon /> },
   { title: 'ক্যাটাগরি', href: '/admin/categories', icon: <Shapes /> },
   { title: 'স্লাইডার', href: '/admin/slider', icon: <ImageIcon /> },
   { title: 'চ্যাট', href: '/admin/chat', icon: <MessageSquare /> },
@@ -174,18 +173,19 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
       </aside>
       <div className="flex flex-col">
         <header className="flex h-14 items-center justify-between gap-4 border-b bg-muted/40 px-4 lg:h-[60px] lg:px-6">
-          <div className="flex items-center gap-2 font-semibold md:hidden">
-            <Link href="/admin/dashboard">
-              {renderLogoOrName()}
-            </Link>
-          </div>
-
-          <div className="hidden w-full flex-1 md:block">
-            {/* This space can be used for a global search or other header elements on desktop */}
+          <Link
+            href="/admin/dashboard"
+            className="flex items-center gap-2 font-semibold md:hidden"
+          >
+            {renderLogoOrName()}
+          </Link>
+          
+          <div className="w-full flex-1">
+             {/* This space can be used for a global search or other header elements on desktop */}
           </div>
 
           <div className="flex items-center gap-2">
-            <DropdownMenu>
+             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="secondary" size="icon" className="rounded-full">
                   <Avatar>
