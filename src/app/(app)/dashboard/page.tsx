@@ -84,6 +84,10 @@ export default function DashboardPage() {
     if (!expenses) return 0;
     return expenses.reduce((sum, expense) => sum + expense.amount, 0);
   }, [expenses]);
+  
+  const netEarnings = React.useMemo(() => {
+    return totalEarnings - totalExpenses;
+  }, [totalEarnings, totalExpenses]);
 
 
   const handleToggleEarnings = () => {
@@ -92,6 +96,8 @@ export default function DashboardPage() {
         setShowEarnings(false);
     }, 3000);
   }
+
+  const isLoading = isLoadingAllEntries || isLoadingExpenses;
 
   return (
     <div className="flex flex-col gap-6">
@@ -115,9 +121,9 @@ export default function DashboardPage() {
           <div className="flex items-center justify-between">
             <div onClick={handleToggleEarnings} className="cursor-pointer">
               <p className="text-sm">মোট আয়</p>
-              {isLoadingAllEntries ? <Skeleton className="h-9 w-36 mt-1 bg-white/20" /> : (
+              {isLoading ? <Skeleton className="h-9 w-36 mt-1 bg-white/20" /> : (
                 <p className="text-3xl font-bold">
-                    {showEarnings ? formatCurrency(totalEarnings) : '৳ ****'}
+                    {showEarnings ? formatCurrency(netEarnings) : '৳ ****'}
                 </p>
               )}
             </div>
