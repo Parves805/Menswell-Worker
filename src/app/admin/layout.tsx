@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import * as React from 'react';
@@ -126,16 +127,19 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
       <Sidebar side="left" collapsible="icon">
         <SidebarHeader>
           <Link href="/admin/dashboard" className="flex items-center gap-2">
-            {settings?.logoUrl ? (
-               <Avatar className="size-6 rounded-none">
+            {settings?.logoUrl && (
+               <Avatar className="size-8 rounded-none">
                   <AvatarImage src={settings.logoUrl} alt="Company Logo" className='object-contain' />
                   <AvatarFallback className="bg-transparent"></AvatarFallback>
               </Avatar>
-            ) : (
-              !settings?.companyName && <GarmentFlowIcon className="size-6" />
             )}
              {settings?.companyName && <h1 className="text-lg font-semibold tracking-tight">{settings.companyName}</h1>}
-             {!settings?.logoUrl && !settings?.companyName && <h1 className="text-lg font-semibold tracking-tight">অ্যাডমিন</h1>}
+             {!settings?.logoUrl && !settings?.companyName && (
+                <>
+                    <GarmentFlowIcon className="size-6" />
+                    <h1 className="text-lg font-semibold tracking-tight">অ্যাডমিন</h1>
+                </>
+             )}
           </Link>
         </SidebarHeader>
         <SidebarContent>

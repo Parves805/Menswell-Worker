@@ -98,16 +98,19 @@ function AppLayoutContent({ children }: { children: React.ReactNode }) {
                 href="/dashboard"
                 className="flex items-center gap-3 text-lg font-semibold md:text-base"
               >
-                {settings?.logoUrl ? (
-                  <Avatar className="size-8 rounded-none">
+                {settings?.logoUrl && (
+                  <Avatar className="size-10 rounded-none">
                       <AvatarImage src={settings.logoUrl} alt="Company Logo" className='object-contain' />
                       <AvatarFallback className="bg-transparent"></AvatarFallback>
                   </Avatar>
-                ) : (
-                  !settings?.companyName && <GarmentFlowIcon className="size-8 text-primary" />
                 )}
                 {settings?.companyName && <span className="font-bold">{settings.companyName}</span>}
-                {!settings?.logoUrl && !settings?.companyName && <span className="font-bold">গার্মেন্টফ্লো</span>}
+                {!settings?.logoUrl && !settings?.companyName && (
+                    <>
+                        <GarmentFlowIcon className="size-8 text-primary" />
+                        <span className="font-bold">গার্মেন্টফ্লো</span>
+                    </>
+                )}
               </Link>
           </div>
           
@@ -141,16 +144,19 @@ function AppLayoutContent({ children }: { children: React.ReactNode }) {
                   href="/dashboard"
                   className="flex items-center gap-2 text-lg font-semibold"
                 >
-                  {settings?.logoUrl ? (
-                    <Avatar className="size-8 rounded-none">
-                        <AvatarImage src={settings.logoUrl} alt="Company Logo" className='object-contain' />
-                        <AvatarFallback className="bg-transparent"></AvatarFallback>
-                    </Avatar>
-                  ) : (
-                     !settings?.companyName && <GarmentFlowIcon className="size-8 text-primary" />
-                  )}
-                  {settings?.companyName && <span>{settings.companyName}</span>}
-                  {!settings?.logoUrl && !settings?.companyName && <span>গার্মেন্টফ্লো</span>}
+                    {settings?.logoUrl && (
+                        <Avatar className="size-10 rounded-none">
+                            <AvatarImage src={settings.logoUrl} alt="Company Logo" className='object-contain' />
+                            <AvatarFallback className="bg-transparent"></AvatarFallback>
+                        </Avatar>
+                    )}
+                    {settings?.companyName && <span className='font-bold'>{settings.companyName}</span>}
+                    {!settings?.logoUrl && !settings?.companyName && (
+                        <>
+                            <GarmentFlowIcon className="size-8 text-primary" />
+                            <span>গার্মেন্টফ্লো</span>
+                        </>
+                    )}
                 </Link>
                  {mainNavItems.map(item => (
                     <Link
