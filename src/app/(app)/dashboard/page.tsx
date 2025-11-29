@@ -76,8 +76,10 @@ export default function DashboardPage() {
   }, [allEntries]);
   
   const totalAdvance = React.useMemo(() => {
-      if (!advances) return 0;
-      return advances.reduce((sum, advance) => sum + advance.amount, 0);
+    if (!advances) return 0;
+    return advances
+        .filter(advance => !advance.isDeducted)
+        .reduce((sum, advance) => sum + advance.amount, 0);
   }, [advances]);
 
   const totalExpenses = React.useMemo(() => {
