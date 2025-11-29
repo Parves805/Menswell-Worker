@@ -4,7 +4,7 @@ import { Toaster } from '@/components/ui/toaster';
 import { FirebaseClientProvider } from '@/firebase';
 
 export const metadata: Metadata = {
-  title: 'গার্মেন্টফ্লো',
+  title: 'মেনসওয়েল',
   description: 'আপনার গার্মেন্টস ফ্যাক্টরি সহজে পরিচালনা করুন।',
 };
 

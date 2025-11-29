@@ -86,8 +86,6 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
   React.useEffect(() => {
     if (settings?.companyName) {
       document.title = `${settings.companyName} | অ্যাডমিন প্যানেল`;
-    } else {
-      document.title = 'অ্যাডমিন প্যানেল | গার্মেন্টফ্লো';
     }
   }, [settings]);
 
