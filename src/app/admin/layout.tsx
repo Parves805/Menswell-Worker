@@ -208,8 +208,10 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
             </SheetContent>
           </Sheet>
 
-          <div className="w-full flex-1">
-            {/* You can add a search bar here if needed */}
+          <div className="w-full flex-1 flex items-center justify-center">
+            <div className="hidden md:block">
+              {renderLogoOrName()}
+            </div>
           </div>
 
           <DropdownMenu>
