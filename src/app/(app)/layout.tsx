@@ -68,11 +68,11 @@ function AppLayoutContent({ children }: { children: React.ReactNode }) {
   
   const companyName = settings?.companyName || 'গার্মেন্টফ্লো';
   const companyLogo = settings?.logoUrl ? (
-    <Avatar className="size-6 rounded-none">
+    <Avatar className="size-8 rounded-none">
         <AvatarImage src={settings.logoUrl} alt="Company Logo" className='object-contain' />
-        <AvatarFallback className="bg-transparent"><GarmentFlowIcon className="size-6 text-primary" /></AvatarFallback>
+        <AvatarFallback className="bg-transparent"><GarmentFlowIcon className="size-8 text-primary" /></AvatarFallback>
     </Avatar>
-    ) : <GarmentFlowIcon className="size-6 text-primary" />;
+    ) : <GarmentFlowIcon className="size-8 text-primary" />;
 
 
   React.useEffect(() => {
@@ -105,10 +105,10 @@ function AppLayoutContent({ children }: { children: React.ReactNode }) {
           <div className="flex items-center gap-2">
              <Link
                 href="/dashboard"
-                className="flex items-center gap-2 text-lg font-semibold md:text-base"
+                className="flex items-center gap-3 text-lg font-semibold md:text-base"
               >
                 {companyLogo}
-                <span className="sr-only">{companyName}</span>
+                <span className="font-bold">{companyName}</span>
               </Link>
           </div>
           
