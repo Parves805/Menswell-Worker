@@ -93,10 +93,10 @@ function AppLayoutContent({ children }: { children: React.ReactNode }) {
   // Render the full layout only when we are sure a user is logged in.
   return (
     <div className='flex min-h-screen w-full flex-col'>
-       <header className="sticky top-0 flex h-16 items-center gap-4 border-b bg-background px-4 md:px-6 z-30">
+       <header className="sticky top-0 flex h-16 items-center gap-4 border-b bg-background pr-4 md:pr-6 z-30">
           <Link
             href="/dashboard"
-            className="flex items-center gap-3 text-lg font-semibold"
+            className="flex items-center gap-3 text-lg font-semibold pl-4"
           >
              {settings?.logoUrl ? (
                 <div className="relative h-12 w-48">
@@ -112,7 +112,7 @@ function AppLayoutContent({ children }: { children: React.ReactNode }) {
             ) : (
                 <>
                     <GarmentFlowIcon className="size-8 text-primary" />
-                    <span className="font-bold">গার্মেন্টফ্লো</span>
+                    <span>গার্মেন্টফ্লো</span>
                 </>
             )}
           </Link>
