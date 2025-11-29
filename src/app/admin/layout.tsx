@@ -139,12 +139,7 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
     if (settings?.companyName) {
         return <span className="font-bold">{settings.companyName}</span>;
     }
-    return (
-        <>
-            <GarmentFlowIcon className="size-8 text-primary" />
-            <span className="">অ্যাডমিন প্যানেল</span>
-        </>
-    );
+    return <Skeleton className="h-10 w-40" />;
   };
 
 

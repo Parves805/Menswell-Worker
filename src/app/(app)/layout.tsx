@@ -119,10 +119,7 @@ function AppLayoutContent({ children }: { children: React.ReactNode }) {
             ) : settings?.companyName ? (
                 <span className="font-bold">{settings.companyName}</span>
             ) : (
-                <div className="flex items-center gap-2">
-                    <GarmentFlowIcon className="size-8 text-primary" />
-                    <span>গার্মেন্টফ্লো</span>
-                </div>
+                <Skeleton className="h-12 w-48" />
             )}
           </Link>
           
@@ -168,10 +165,7 @@ function AppLayoutContent({ children }: { children: React.ReactNode }) {
                         ) : settings?.companyName ? (
                             <span className='font-bold'>{settings.companyName}</span>
                         ) : (
-                            <>
-                                <GarmentFlowIcon className="size-8 text-primary" />
-                                <span>গার্মেন্টফ্লো</span>
-                            </>
+                            <Skeleton className="h-10 w-40" />
                         )}
                     </Link>
                     {mainNavItems.map(item => (
