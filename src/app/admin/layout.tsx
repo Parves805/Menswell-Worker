@@ -126,7 +126,7 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
         <div className="flex h-full max-h-screen flex-col gap-2">
           <div className="flex h-14 items-center border-b px-4 lg:h-[60px] lg:px-6">
             <Link href="/admin/dashboard" className="flex items-center gap-2 font-semibold">
-              <GarmentFlowIcon className="size-6 text-primary" />
+               <GarmentFlowIcon className="size-8 text-primary" />
               <span className="">অ্যাডমিন প্যানেল</span>
             </Link>
           </div>
@@ -163,14 +163,13 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
               </Button>
             </SheetTrigger>
             <SheetContent side="left" className="flex flex-col p-0">
-              <nav className="grid gap-2 text-lg font-medium p-4">
-                <Link
-                  href="/admin/dashboard"
-                  className="flex items-center gap-2 text-lg font-semibold mb-4"
-                >
+              <div className="flex h-14 items-center border-b px-4 lg:h-[60px] lg:px-6">
+                <Link href="/admin/dashboard" className="flex items-center gap-2 font-semibold">
                   <GarmentFlowIcon className="size-8 text-primary" />
-                  <span>অ্যাডমিন প্যানেল</span>
+                  <span className="">অ্যাডমিন প্যানেল</span>
                 </Link>
+              </div>
+              <nav className="grid gap-2 text-lg font-medium p-4">
                 {mainNavItems.map((item) => (
                   <Link
                     key={item.title}
