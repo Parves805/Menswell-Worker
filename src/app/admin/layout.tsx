@@ -120,14 +120,41 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
     );
   }
   
+  const renderLogoOrName = () => {
+    if (isLoadingSettings) {
+        return <Skeleton className="h-10 w-40" />;
+    }
+    if (settings?.logoUrl) {
+        return (
+            <div className="relative h-10 w-40">
+                <Image 
+                    src={settings.logoUrl} 
+                    alt={settings.companyName || 'Company Logo'} 
+                    fill 
+                    className="object-contain"
+                />
+            </div>
+        );
+    }
+    if (settings?.companyName) {
+        return <span className="font-bold">{settings.companyName}</span>;
+    }
+    return (
+        <>
+            <GarmentFlowIcon className="size-8 text-primary" />
+            <span className="">অ্যাডমিন প্যানেল</span>
+        </>
+    );
+  };
+
+
   return (
     <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">
       <aside className="hidden border-r bg-muted/40 md:block">
         <div className="flex h-full max-h-screen flex-col gap-2">
           <div className="flex h-14 items-center border-b px-4 lg:h-[60px] lg:px-6">
             <Link href="/admin/dashboard" className="flex items-center gap-2 font-semibold">
-               <GarmentFlowIcon className="size-8 text-primary" />
-              <span className="">অ্যাডমিন প্যানেল</span>
+              {renderLogoOrName()}
             </Link>
           </div>
           <div className="flex-1 overflow-auto py-2">
@@ -165,8 +192,7 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
             <SheetContent side="left" className="flex flex-col p-0">
               <div className="flex h-14 items-center border-b px-4 lg:h-[60px] lg:px-6">
                 <Link href="/admin/dashboard" className="flex items-center gap-2 font-semibold">
-                  <GarmentFlowIcon className="size-8 text-primary" />
-                  <span className="">অ্যাডমিন প্যানেল</span>
+                   {renderLogoOrName()}
                 </Link>
               </div>
               <nav className="grid gap-2 text-lg font-medium p-4">
