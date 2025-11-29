@@ -125,10 +125,10 @@ export default function AdminDashboardPage() {
             <p className="text-xs text-muted-foreground">আজ সকল কর্মীর মোট কাজ</p>
           </CardContent>
         </Card>
-        <Link href="/admin/worker-expenses" className="transform transition-transform duration-200 hover:scale-105 group">
+        <Link href="/admin/advance-payments" className="transform transition-transform duration-200 hover:scale-105 group">
           <Card className="transition-colors group-hover:border-primary">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">কর্মীর খরচ প্রদান</CardTitle>
+              <CardTitle className="text-sm font-medium">অগ্রিম প্রদান</CardTitle>
               <TakaIcon className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
