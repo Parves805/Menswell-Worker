@@ -51,7 +51,6 @@ const mainNavItems: NavItem[] = [
   { title: 'উৎপাদন অনুরোধ', href: '/admin/production-requests', icon: <CheckSquare /> },
   { title: 'টাকার অনুরোধ', href: '/admin/advance-requests', icon: <Wallet /> },
   { title: 'অগ্রিম প্রদান', href: '/admin/advance-payments', icon: <Landmark /> },
-  { title: 'কর্মীর খরচ', href: '/admin/worker-expenses', icon: <Wallet /> },
   { title: 'ক্যাটাগরি', href: '/admin/categories', icon: <Shapes /> },
   { title: 'স্লাইডার', href: '/admin/slider', icon: <ImageIcon /> },
   { title: 'চ্যাট', href: '/admin/chat', icon: <MessageSquare /> },
