@@ -70,7 +70,7 @@ function AddWorkerExpenseDialog({
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const workersQuery = useMemoFirebase(
-    () => (firestore ? collection(firestore, 'workers') : null),
+    () => (firestore ? query(collection(firestore, 'workers'), orderBy('name')) : null),
     [firestore]
   );
   const { data: workers, isLoading: isLoadingWorkers } = useCollection<Worker>(workersQuery);
@@ -183,7 +183,7 @@ export default function WorkerExpensesPage() {
   const [isLoading, setIsLoading] = useState(true);
 
   const { data: workers } = useCollection<Worker>(
-    useMemoFirebase(() => firestore ? collection(firestore, 'workers') : null, [firestore])
+    useMemoFirebase(() => firestore ? query(collection(firestore, 'workers'), orderBy('name')) : null, [firestore])
   );
 
   const fetchExpenses = useCallback(async () => {
@@ -202,10 +202,7 @@ export default function WorkerExpensesPage() {
             const querySnapshot = await getDocs(expenseQuery);
             querySnapshot.forEach(doc => {
                 const expenseData = { id: doc.id, ...doc.data() } as WorkerExpense;
-                // Filter out expenses that are from approved requests
-                if (expenseData.description !== 'Approved expense request') {
-                    expenses.push(expenseData);
-                }
+                expenses.push(expenseData);
             });
         }
         setAllExpenses(expenses.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()));
@@ -217,8 +214,10 @@ export default function WorkerExpensesPage() {
   }, [firestore, workers]);
 
   useEffect(() => {
-    fetchExpenses();
-  }, [fetchExpenses]);
+    if (workers) {
+      fetchExpenses();
+    }
+  }, [workers, fetchExpenses]);
   
   const grandTotal = useMemo(() => {
     return allExpenses.reduce((sum, expense) => sum + expense.amount, 0);

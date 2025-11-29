@@ -86,8 +86,8 @@ service cloud.firestore {
       allow get: if isOwner(workerId) || isAdmin();
       allow list: if isSignedIn();
       allow create: if isOwner(workerId) && request.resource.data.id == workerId;
-      allow update: if isExistingOwner(workerId) && request.resource.data.id == resource.data.id;
-      allow delete: if isExistingOwner(workerId);
+      allow update: if isExistingOwner(workerId) && request.resource.data.id == resource.data.id || isAdmin();
+      allow delete: if isAdmin();
     }
 
     /**
