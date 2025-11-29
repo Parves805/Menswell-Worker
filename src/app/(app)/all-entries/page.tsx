@@ -18,9 +18,9 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
-import { useCollection, useFirestore, useUser, useMemoFirebase } from '@/firebase';
-import { collection, query, orderBy } from 'firebase/firestore';
-import type { ProductionEntry } from '@/lib/types';
+import { useCollection, useFirestore, useUser, useMemoFirebase, useDoc } from '@/firebase';
+import { collection, query, orderBy, doc } from 'firebase/firestore';
+import type { ProductionEntry, AppSettings } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Eye, Scissors, Download } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
@@ -48,6 +48,13 @@ export default function AllEntriesPage() {
   const { user } = useUser();
   const firestore = useFirestore();
   const printRef = useRef<HTMLDivElement>(null);
+
+  const settingsDocRef = useMemoFirebase(() =>
+    firestore ? doc(firestore, 'settings', 'global') : null,
+    [firestore]
+  );
+  const { data: settings } = useDoc<AppSettings>(settingsDocRef);
+
 
   const entriesQuery = useMemoFirebase(() => {
     if (!user || !firestore) return null;
@@ -182,8 +189,8 @@ export default function AllEntriesPage() {
     <div className="space-y-6">
        <div ref={printRef} className="p-4 bg-white absolute left-0 top-0 opacity-0 -z-50">
             <div className='text-center mb-4'>
-                <h1 className='text-2xl font-bold'>গার্মেন্টফ্লো</h1>
-                <p className='text-sm'>১২৩, প্রধান সড়ক, ঢাকা-১২১৬</p>
+                <h1 className='text-2xl font-bold'>{settings?.companyName || 'গার্মেন্টফ্লো'}</h1>
+                <p className='text-sm'>{settings?.address || '১২৩, প্রধান সড়ক, ঢাকা-১২১৬'}</p>
                 <h2 className='text-xl font-bold mt-2'>সকল কাজের বিস্তারিত হিসাব</h2>
                 <p className='text-sm'>কর্মী: {user?.displayName}</p>
                 <p className='text-sm'>রিপোর্টের তারিখ: {new Date().toLocaleDateString('bn-BD')}</p>

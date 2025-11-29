@@ -647,12 +647,15 @@
           "description": "URL for the company logo.",
           "format": "uri"
         },
+        "address": {
+          "type": "string",
+          "description": "The physical address of the company."
+        },
         "themeColor": {
             "type": "string",
             "description": "The primary theme color for the user panel (HEX code)."
         }
-      },
-      "required": ["id"]
+      }
     }
   },
   "auth": {

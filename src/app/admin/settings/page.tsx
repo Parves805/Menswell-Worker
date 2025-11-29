@@ -25,12 +25,14 @@ export default function SettingsPage() {
 
     const [companyName, setCompanyName] = React.useState('মেনসওয়েল');
     const [logoUrl, setLogoUrl] = React.useState('');
+    const [address, setAddress] = React.useState('');
     const [themeColor, setThemeColor] = React.useState('#16A34A'); // Default green
 
     useEffect(() => {
         if (savedSettings) {
             setCompanyName(savedSettings.companyName || 'মেনসওয়েল');
             setLogoUrl(savedSettings.logoUrl || '');
+            setAddress(savedSettings.address || '');
             setThemeColor(savedSettings.themeColor || '#16A34A');
         }
     }, [savedSettings]);
@@ -55,6 +57,7 @@ export default function SettingsPage() {
         const newSettings = {
             companyName,
             logoUrl,
+            address,
             themeColor,
         };
 
@@ -128,6 +131,16 @@ export default function SettingsPage() {
                             placeholder="আপনার লোগোর ছবির লিঙ্ক দিন"
                             value={logoUrl}
                             onChange={(e) => setLogoUrl(e.target.value)}
+                            disabled={isLoading}
+                        />
+                    </div>
+                    <div className="space-y-2">
+                        <Label htmlFor="address">কোম্পানির ঠিকানা</Label>
+                        <Input 
+                            id="address" 
+                            placeholder="আপনার কোম্পানির ঠিকানা দিন"
+                            value={address}
+                            onChange={(e) => setAddress(e.target.value)}
                             disabled={isLoading}
                         />
                     </div>

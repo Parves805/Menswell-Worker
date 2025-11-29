@@ -18,9 +18,9 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
-import { useCollection, useFirestore, useMemoFirebase, addDocumentNonBlocking } from '@/firebase';
-import { collection, query, orderBy, getDocs } from 'firebase/firestore';
-import type { Worker, WorkerExpense } from '@/lib/types';
+import { useCollection, useFirestore, useMemoFirebase, addDocumentNonBlocking, useUser, useDoc } from '@/firebase';
+import { collection, query, orderBy, doc } from 'firebase/firestore';
+import type { Expense, AppSettings } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Wallet2, PlusCircle, Download } from 'lucide-react';
 import {
@@ -37,13 +37,7 @@ import { DatePicker } from '@/components/DatePicker';
 import { useToast } from '@/hooks/use-toast';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+
 
 const formatCurrency = (amount: number) =>
   new Intl.NumberFormat('bn-BD', {
@@ -52,24 +46,18 @@ const formatCurrency = (amount: number) =>
     minimumFractionDigits: 2,
   }).format(amount);
 
-function AddWorkerExpenseDialog({ open, onOpenChange, onExpenseAdded }: { open: boolean, onOpenChange: (open: boolean) => void, onExpenseAdded: () => void }) {
+function AddExpenseDialog({ open, onOpenChange, onExpenseAdded }: { open: boolean, onOpenChange: (open: boolean) => void, onExpenseAdded: () => void }) {
   const { toast } = useToast();
   const firestore = useFirestore();
   const [date, setDate] = useState<Date | undefined>(new Date());
   const [description, setDescription] = useState('');
-  const [selectedWorkerId, setSelectedWorkerId] = useState('');
+  const [category, setCategory] = useState('');
   const [amount, setAmount] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const workersQuery = useMemoFirebase(
-    () => (firestore ? collection(firestore, 'workers') : null),
-    [firestore]
-  );
-  const { data: workers, isLoading: isLoadingWorkers } = useCollection<Worker>(workersQuery);
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!date || !description || !selectedWorkerId || amount <= 0 || !firestore) {
+    if (!date || !description || !category || amount <= 0 || !firestore) {
       toast({
         variant: 'destructive',
         title: 'ফর্ম অসম্পূর্ণ',
@@ -78,33 +66,25 @@ function AddWorkerExpenseDialog({ open, onOpenChange, onExpenseAdded }: { open: 
       return;
     }
     setIsSubmitting(true);
-
-    const worker = workers?.find(w => w.id === selectedWorkerId);
-    if (!worker) {
-        toast({ variant: 'destructive', title: 'কর্মী পাওয়া যায়নি' });
-        setIsSubmitting(false);
-        return;
-    }
     
-    const newExpense: Omit<WorkerExpense, 'id'> = {
+    const newExpense = {
       date: date.toISOString(),
       description,
+      category,
       amount,
-      workerId: selectedWorkerId,
-      workerName: worker.name,
     };
 
     try {
-      const expenseColRef = collection(firestore, 'workers', selectedWorkerId, 'expenses');
-      await addDocumentNonBlocking(expenseColRef, newExpense);
+      await addDocumentNonBlocking(collection(firestore, 'expenses'), newExpense);
       toast({
         title: 'খরচ যোগ হয়েছে',
-        description: `${worker.name}-এর জন্য আপনার খরচ সফলভাবে যোগ করা হয়েছে।`,
+        description: 'আপনার নতুন খরচ সফলভাবে যোগ করা হয়েছে।',
       });
+      // Reset form and close dialog
       setDescription('');
+      setCategory('');
       setAmount(0);
       setDate(new Date());
-      setSelectedWorkerId('');
       onExpenseAdded();
       onOpenChange(false);
     } catch (error) {
@@ -122,8 +102,8 @@ function AddWorkerExpenseDialog({ open, onOpenChange, onExpenseAdded }: { open: 
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>কর্মীর খরচ যোগ করুন</DialogTitle>
-          <DialogDescription>একজন কর্মীর জন্য একটি নতুন খরচ যোগ করুন।</DialogDescription>
+          <DialogTitle>নতুন খরচ যোগ করুন</DialogTitle>
+          <DialogDescription>আপনার কোম্পানির একটি নতুন খরচ যোগ করুন।</DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
@@ -131,23 +111,12 @@ function AddWorkerExpenseDialog({ open, onOpenChange, onExpenseAdded }: { open: 
             <DatePicker value={date} onSelect={setDate} />
           </div>
           <div className="space-y-2">
-              <Label htmlFor="worker">কর্মী</Label>
-              <Select name="worker" required onValueChange={setSelectedWorkerId} value={selectedWorkerId}>
-                <SelectTrigger id="worker">
-                  <SelectValue placeholder="কর্মী নির্বাচন করুন" />
-                </SelectTrigger>
-                <SelectContent>
-                  {isLoadingWorkers ? (
-                    <SelectItem value="loading" disabled>লোড হচ্ছে...</SelectItem>
-                  ) : (
-                    workers?.map(w => <SelectItem key={w.id} value={w.id}>{w.name}</SelectItem>)
-                  )}
-                </SelectContent>
-              </Select>
-            </div>
-          <div className="space-y-2">
             <Label htmlFor="description">বিবরণ</Label>
             <Input id="description" value={description} onChange={(e) => setDescription(e.target.value)} required />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="category">ক্যাটাগরি</Label>
+            <Input id="category" value={category} onChange={(e) => setCategory(e.target.value)} placeholder="e.g., কাঁচামাল" required />
           </div>
           <div className="space-y-2">
             <Label htmlFor="amount">পরিমাণ</Label>
@@ -166,57 +135,49 @@ function AddWorkerExpenseDialog({ open, onOpenChange, onExpenseAdded }: { open: 
 
 export default function ExpensesPage() {
   const firestore = useFirestore();
+  const { user } = useUser();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [key, setKey] = useState(0); // Key to force re-fetch
+  const [key, setKey] = useState(0); // To force re-fetch
   const printRef = useRef<HTMLDivElement>(null);
-  
-  const [allExpenses, setAllExpenses] = useState<WorkerExpense[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
 
-  const { data: workers } = useCollection<Worker>(
-    useMemoFirebase(() => firestore ? collection(firestore, 'workers') : null, [firestore])
+  const settingsDocRef = useMemoFirebase(() =>
+    firestore ? doc(firestore, 'settings', 'global') : null,
+    [firestore]
   );
+  const { data: settings } = useDoc<AppSettings>(settingsDocRef);
 
-  const fetchExpenses = useCallback(async () => {
-    if (!firestore || !workers) {
-      if (workers !== undefined) setIsLoading(false);
-      return;
-    };
-    setIsLoading(true);
-    try {
-        const expenses: WorkerExpense[] = [];
-        for (const worker of workers) {
-            const expenseQuery = query(
-                collection(firestore, 'workers', worker.id, 'expenses'),
-                orderBy('date', 'desc')
-            );
-            const querySnapshot = await getDocs(expenseQuery);
-            querySnapshot.forEach(doc => {
-              const expenseData = { id: doc.id, ...doc.data() } as WorkerExpense;
-              if (expenseData.description !== 'Approved expense request') {
-                expenses.push(expenseData);
-              }
-            });
-        }
-        setAllExpenses(expenses.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()));
-    } catch(e) {
-        console.error("Failed to fetch worker expenses", e);
-    } finally {
-        setIsLoading(false);
-    }
-  }, [firestore, workers]);
 
-  useEffect(() => {
-    fetchExpenses();
-  }, [fetchExpenses, key]);
+  const firstDayOfMonth = useMemo(() => {
+    const date = new Date();
+    return new Date(date.getFullYear(), date.getMonth(), 1);
+  }, []);
+
+  const expensesQuery = useMemoFirebase(() => {
+    if (!firestore) return null;
+    return query(
+      collection(firestore, 'expenses'),
+      orderBy('date', 'desc')
+    );
+  }, [firestore, key]);
+
+  const { data: allExpenses, isLoading } = useCollection<Expense>(expensesQuery);
+  
+  const monthlyTotal = useMemo(() => {
+    if (!allExpenses) return 0;
+    const currentMonthExpenses = allExpenses.filter(
+        expense => new Date(expense.date) >= firstDayOfMonth
+    );
+    return currentMonthExpenses.reduce((sum, expense) => sum + expense.amount, 0);
+  }, [allExpenses, firstDayOfMonth]);
   
   const grandTotal = useMemo(() => {
+    if (!allExpenses) return 0;
     return allExpenses.reduce((sum, expense) => sum + expense.amount, 0);
   }, [allExpenses]);
 
 
   const handleExpenseAdded = () => {
-    setKey(prev => prev + 1); // Increment key to trigger refetch
+    setKey(prev => prev + 1);
   }
 
   const handleDownloadPdf = async () => {
@@ -261,9 +222,9 @@ export default function ExpensesPage() {
     <div className='space-y-6'>
       <div ref={printRef} className="p-4 bg-white absolute left-0 top-0 opacity-0 -z-50">
             <div className='text-center mb-2'>
-                <h1 className='text-2xl font-bold'>গার্মেন্টফ্লো</h1>
-                <p className='text-sm'>১২৩, প্রধান সড়ক, ঢাকা-১২১৬</p>
-                <h2 className='text-xl font-bold mt-2'>কর্মীদের খরচের বিস্তারিত হিসাব</h2>
+                <h1 className='text-2xl font-bold'>{settings?.companyName || 'গার্মেন্টফ্লো'}</h1>
+                <p className='text-sm'>{settings?.address || '১২৩, প্রধান সড়ক, ঢাকা-১২১৬'}</p>
+                <h2 className='text-xl font-bold mt-2'>খরচের বিস্তারিত হিসাব</h2>
                 <p className='text-sm'>রিপোর্টের তারিখ: {new Date().toLocaleDateString('bn-BD')}</p>
             </div>
             
@@ -271,8 +232,8 @@ export default function ExpensesPage() {
                 <TableHeader>
                     <TableRow className='bg-primary text-primary-foreground'>
                         <TableHead className='text-primary-foreground'>তারিখ</TableHead>
-                        <TableHead className='text-primary-foreground'>কর্মী</TableHead>
                         <TableHead className='text-primary-foreground'>বিবরণ</TableHead>
+                        <TableHead className='text-primary-foreground'>ক্যাটাগরি</TableHead>
                         <TableHead className="text-right text-primary-foreground">পরিমাণ</TableHead>
                     </TableRow>
                 </TableHeader>
@@ -280,8 +241,8 @@ export default function ExpensesPage() {
                     {allExpenses?.map(expense => (
                         <TableRow key={expense.id}>
                             <TableCell>{new Date(expense.date).toLocaleDateString('bn-BD')}</TableCell>
-                            <TableCell>{expense.workerName}</TableCell>
                             <TableCell>{expense.description}</TableCell>
+                            <TableCell>{expense.category}</TableCell>
                             <TableCell className="text-right">{formatCurrency(expense.amount)}</TableCell>
                         </TableRow>
                     ))}
@@ -292,35 +253,47 @@ export default function ExpensesPage() {
                 </TableBody>
             </Table>
        </div>
-      <AddWorkerExpenseDialog open={isDialogOpen} onOpenChange={setIsDialogOpen} onExpenseAdded={handleExpenseAdded} />
+      <AddExpenseDialog open={isDialogOpen} onOpenChange={setIsDialogOpen} onExpenseAdded={handleExpenseAdded} />
 
-       <Card>
-          <CardHeader className="flex-row justify-between items-center">
-              <div>
-                  <CardTitle className="text-2xl font-bold flex items-center gap-2"><Wallet2 /> কর্মীদের খরচ</CardTitle>
-                  <CardDescription>
-                  কর্মীদের প্রদান করা খরচের বিস্তারিত হিসাব দেখুন এবং নতুন খরচ যোগ করুন।
-                  </CardDescription>
+       <Card className="w-full bg-primary text-primary-foreground border-none">
+          <CardContent className="pt-6">
+              <div className="flex flex-col items-center gap-4 text-center">
+                  <h1 className="text-2xl font-bold flex items-center gap-2"><Wallet2 /> খরচের বিবরণ</h1>
+                  <p className="text-primary-foreground/80 max-w-prose">
+                  আপনার সমস্ত খরচের বিস্তারিত হিসাব দেখুন এবং নতুন খরচ যোগ করুন।
+                  </p>
+                  <div className='flex gap-2'>
+                    <Button onClick={() => setIsDialogOpen(true)} variant="secondary" className='shadow-lg'>
+                        <PlusCircle className="mr-2 h-4 w-4" />
+                        নতুন খরচ
+                    </Button>
+                    <Button onClick={handleDownloadPdf} variant="secondary" className='shadow-lg'>
+                        <Download className="mr-2 h-4 w-4" />
+                        PDF ডাউনলোড
+                    </Button>
+                </div>
               </div>
-              <div className='flex gap-2'>
-                <Button onClick={() => setIsDialogOpen(true)} variant="default">
-                    <PlusCircle className="mr-2 h-4 w-4" />
-                    খরচ যোগ করুন
-                </Button>
-                <Button onClick={handleDownloadPdf} variant="outline">
-                    <Download className="mr-2 h-4 w-4" />
-                    PDF ডাউনলোড
-                </Button>
-              </div>
-          </CardHeader>
-          <CardContent>
+          </CardContent>
+      </Card>
+
+      <Card>
+          <CardContent className='pt-6'>
+              <Card className="mb-6">
+                <CardHeader className="pb-2">
+                  <CardDescription>চলতি মাসের মোট খরচ</CardDescription>
+                  <CardTitle className="text-3xl text-primary">
+                    {isLoading ? <Skeleton className="h-8 w-40" /> : formatCurrency(monthlyTotal)}
+                  </CardTitle>
+                </CardHeader>
+              </Card>
+
               <div className="rounded-md border">
                   <Table>
                   <TableHeader>
                       <TableRow>
                           <TableHead>তারিখ</TableHead>
-                          <TableHead>কর্মী</TableHead>
                           <TableHead>বিবরণ</TableHead>
+                          <TableHead>ক্যাটাগরি</TableHead>
                           <TableHead className="text-right">পরিমাণ</TableHead>
                       </TableRow>
                   </TableHeader>
@@ -328,8 +301,8 @@ export default function ExpensesPage() {
                       {isLoading && Array.from({length: 5}).map((_, i) => (
                           <TableRow key={i}>
                               <TableCell><Skeleton className="h-5 w-24" /></TableCell>
-                              <TableCell><Skeleton className="h-5 w-32" /></TableCell>
                               <TableCell><Skeleton className="h-5 w-40" /></TableCell>
+                              <TableCell><Skeleton className="h-5 w-20" /></TableCell>
                               <TableCell className="text-right"><Skeleton className="h-5 w-20 ml-auto" /></TableCell>
                           </TableRow>
                       ))}
@@ -337,8 +310,8 @@ export default function ExpensesPage() {
                       allExpenses.map((expense) => (
                           <TableRow key={expense.id}>
                               <TableCell className="font-medium">{new Date(expense.date).toLocaleDateString('bn-BD')}</TableCell>
-                              <TableCell>{expense.workerName}</TableCell>
                               <TableCell>{expense.description}</TableCell>
+                              <TableCell>{expense.category}</TableCell>
                               <TableCell className="text-right">{formatCurrency(expense.amount)}</TableCell>
                           </TableRow>
                       ))
@@ -351,7 +324,7 @@ export default function ExpensesPage() {
                           </TableRow>
                       )
                       )}
-                        {!isLoading && allExpenses.length > 0 && (
+                        {!isLoading && allExpenses && (
                              <TableRow className='font-bold bg-muted'>
                                 <TableCell colSpan={3}>সর্বমোট</TableCell>
                                 <TableCell className="text-right text-primary">{formatCurrency(grandTotal)}</TableCell>

@@ -5,6 +5,7 @@
 
 
 
+
 export type NavItem = {
   title: string;
   href: string;
@@ -151,6 +152,7 @@ export type AppSettings = {
     id?: string;
     companyName?: string;
     logoUrl?: string;
+    address?: string;
     themeColor: string;
 };
 
@@ -187,6 +189,7 @@ export type ActivityLog = {
     
 
     
+
 
 
 
