@@ -36,42 +36,38 @@ export default function AdminDashboardPage() {
   );
   const { data: workers, isLoading: isLoadingWorkers } = useCollection<Worker>(workersQuery);
   
-  const expensesQuery = useMemoFirebase(
-    () => (firestore ? collection(firestore, 'expenses') : null),
-    [firestore]
-  );
-  const { data: expenses, isLoading: isLoadingExpenses } = useCollection(expensesQuery);
-
   const [productionData, setProductionData] = React.useState<{ date: string; pieces: number }[]>([]);
   const [isLoadingProduction, setIsLoadingProduction] = React.useState(true);
   const [totalPieces, setTotalPieces] = React.useState(0);
   const [totalAdvances, setTotalAdvances] = React.useState(0);
   const [isLoadingAdvances, setIsLoadingAdvances] = React.useState(true);
+  const [totalWorkerExpenses, setTotalWorkerExpenses] = React.useState(0);
+  const [isLoadingWorkerExpenses, setIsLoadingWorkerExpenses] = React.useState(true);
   
-  const totalCompanyExpenses = React.useMemo(() => {
-    if(expenses) {
-        return expenses.reduce((sum, expense) => sum + (expense.amount || 0), 0);
-    }
-    return 0;
-  }, [expenses]);
-
-
   React.useEffect(() => {
     if (!firestore || !workers) return;
 
     const fetchData = async () => {
       setIsLoadingProduction(true);
       setIsLoadingAdvances(true);
+      setIsLoadingWorkerExpenses(true);
 
       let totalPcs = 0;
       let totalAdv = 0;
+      let totalWorkerExp = 0;
       const prodData: { date: string, pieces: number }[] = [];
 
       for (const worker of workers) {
         const prodQuery = query(collection(firestore, 'workers', worker.id, 'productionEntries'));
         const advanceQuery = query(collection(firestore, 'workers', worker.id, 'advancePayments'));
+        const expenseQuery = query(collection(firestore, 'workers', worker.id, 'expenses'));
         
-        const prodSnapshot = await getDocs(prodQuery);
+        const [prodSnapshot, advanceSnapshot, expenseSnapshot] = await Promise.all([
+            getDocs(prodQuery),
+            getDocs(advanceQuery),
+            getDocs(expenseQuery)
+        ]);
+
         prodSnapshot.forEach(doc => {
             const data = doc.data();
             totalPcs += data.pieceCount || 0;
@@ -84,17 +80,22 @@ export default function AdminDashboardPage() {
             }
         });
         
-        const advanceSnapshot = await getDocs(advanceQuery);
         advanceSnapshot.forEach(doc => {
             totalAdv += doc.data().amount || 0;
+        });
+
+        expenseSnapshot.forEach(doc => {
+            totalWorkerExp += doc.data().amount || 0;
         });
       }
       setTotalPieces(totalPcs);
       setTotalAdvances(totalAdv);
+      setTotalWorkerExpenses(totalWorkerExp);
       setProductionData(prodData.sort((a,b) => new Date(a.date).getTime() - new Date(b.date).getTime()));
       
       setIsLoadingProduction(false);
       setIsLoadingAdvances(false);
+      setIsLoadingWorkerExpenses(false);
     };
 
     fetchData();
@@ -134,16 +135,18 @@ export default function AdminDashboardPage() {
             <p className="text-xs text-muted-foreground">আজ সকল কর্মীর মোট কাজ</p>
           </CardContent>
         </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">অন্যান্য খরচ</CardTitle>
-            <Wallet2 className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            {isLoadingExpenses ? <Skeleton className="h-7 w-28" /> : <div className="text-2xl font-bold">{formatCurrency(totalCompanyExpenses)}</div>}
-            <p className="text-xs text-muted-foreground">এখন পর্যন্ত মোট খরচ</p>
-          </CardContent>
-        </Card>
+        <Link href="/admin/expenses" className="transform transition-transform duration-200 hover:scale-105 group">
+          <Card className="transition-colors group-hover:border-primary">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">কর্মীদের মোট খরচ</CardTitle>
+              <Wallet2 className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              {isLoadingWorkerExpenses ? <Skeleton className="h-7 w-28" /> : <div className="text-2xl font-bold">{formatCurrency(totalWorkerExpenses)}</div>}
+              <p className="text-xs text-muted-foreground">এখন পর্যন্ত মোট খরচ</p>
+            </CardContent>
+          </Card>
+        </Link>
         <Link href="/admin/advance-payments" className="transform transition-transform duration-200 hover:scale-105 group">
           <Card className="transition-colors group-hover:border-primary">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">

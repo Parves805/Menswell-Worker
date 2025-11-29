@@ -1,3 +1,4 @@
+
 /**
  * @fileoverview Firestore Security Rules for the GarmentFlow application.
  *
@@ -90,7 +91,7 @@ service cloud.firestore {
     }
 
     /**
-     * @description Rules for worker-specific subcollections (e.g., productionEntries, notifications).
+     * @description Rules for worker-specific subcollections (e.g., productionEntries, notifications, expenses).
      * This rule provides secure, path-based access control.
      */
     match /workers/{workerId}/{subcollection}/{docId} {
