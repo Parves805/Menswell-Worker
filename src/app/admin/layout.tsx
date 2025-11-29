@@ -60,7 +60,7 @@ const mainNavItems: NavItem[] = [
   { title: 'উৎপাদন অনুরোধ', href: '/admin/production-requests', icon: <CheckSquare /> },
   { title: 'টাকার অনুরোধ', href: '/admin/advance-requests', icon: <Wallet /> },
   { title: 'অগ্রিম প্রদান', href: '/admin/advance-payments', icon: <Landmark /> },
-  { title: 'কর্মীদের খরচ', href: '/admin/expenses', icon: <TakaIcon /> },
+  { title: 'কর্মীদের খরচ', href: '/admin/worker-expenses', icon: <TakaIcon /> },
   { title: 'ক্যাটাগরি', href: '/admin/categories', icon: <Shapes /> },
   { title: 'স্লাইডার', href: '/admin/slider', icon: <ImageIcon /> },
   { title: 'চ্যাট', href: '/admin/chat', icon: <MessageSquare /> },
@@ -82,6 +82,14 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
     [firestore]
   );
   const { data: settings, isLoading: isLoadingSettings } = useDoc<AppSettings>(settingsDocRef);
+  
+  React.useEffect(() => {
+    if (settings?.companyName) {
+      document.title = `${settings.companyName} | অ্যাডমিন প্যানেল`;
+    } else {
+      document.title = 'অ্যাডমিন প্যানেল | গার্মেন্টফ্লো';
+    }
+  }, [settings]);
 
   React.useEffect(() => {
     if (isUserLoading || pathname === '/admin/login') {

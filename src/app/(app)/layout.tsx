@@ -68,6 +68,14 @@ function AppLayoutContent({ children }: { children: React.ReactNode }) {
   );
   const { data: settings, isLoading: isLoadingSettings } = useDoc<AppSettings>(settingsDocRef);
   
+    React.useEffect(() => {
+    if (settings?.companyName) {
+      document.title = `${settings.companyName} | কর্মী প্যানেল`;
+    } else {
+      document.title = 'কর্মী প্যানেল | গার্মেন্টফ্লো';
+    }
+  }, [settings]);
+
   React.useEffect(() => {
     // This is the single source of truth for protecting the app routes.
     // If auth state is determined and there is no user, redirect to login.
