@@ -2,6 +2,7 @@
 
 
 
+
 export type NavItem = {
   title: string;
   href: string;
@@ -96,7 +97,7 @@ export type AdvancePayment = {
   workerName?: string;
   date: string;
   amount: number;
-  deducted?: boolean;
+  isDeducted?: boolean;
 };
 
 export type Bonus = {
@@ -181,4 +182,5 @@ export type ActivityLog = {
     
 
     
+
 

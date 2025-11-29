@@ -18,11 +18,18 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
-import { useCollection, useFirestore, useMemoFirebase, addDocumentNonBlocking } from '@/firebase';
-import { collection, query, orderBy, getDocs } from 'firebase/firestore';
+import {
+  useCollection,
+  useFirestore,
+  useMemoFirebase,
+  addDocumentNonBlocking,
+  updateDocumentNonBlocking,
+  deleteDocumentNonBlocking,
+} from '@/firebase';
+import { collection, query, orderBy, getDocs, doc } from 'firebase/firestore';
 import type { Worker, AdvancePayment } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
-import { PlusCircle, Landmark } from 'lucide-react';
+import { PlusCircle, Landmark, MoreHorizontal, CheckCircle, Trash2 } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -37,6 +44,23 @@ import { DatePicker } from '@/components/DatePicker';
 import { useToast } from '@/hooks/use-toast';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useUser } from '@/firebase';
+import { Badge } from '@/components/ui/badge';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 
 
 const formatCurrency = (amount: number) =>
@@ -59,7 +83,6 @@ function GiveAdvanceDialog({
 }) {
   const { toast } = useToast();
   const firestore = useFirestore();
-  const { user: adminUser } = useUser();
 
   const [date, setDate] = useState<Date | undefined>(new Date());
   const [amount, setAmount] = useState(0);
@@ -88,7 +111,7 @@ function GiveAdvanceDialog({
       date: date.toISOString(),
       amount,
       workerId: worker.id,
-      deducted: false,
+      isDeducted: false,
     };
 
     try {
@@ -143,11 +166,13 @@ function GiveAdvanceDialog({
 
 export default function AdvancePaymentsPage() {
   const firestore = useFirestore();
+  const { toast } = useToast();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [allAdvances, setAllAdvances] = useState<AdvancePayment[]>([]);
+  const [allAdvances, setAllAdvances] = useState<(AdvancePayment & { workerName: string })[]>([]);
   const [workerAdvances, setWorkerAdvances] = useState<Map<string, number>>(new Map());
   const [isLoading, setIsLoading] = useState(true);
   const [selectedWorker, setSelectedWorker] = useState<Worker | null>(null);
+  const [advanceToDelete, setAdvanceToDelete] = useState<AdvancePayment | null>(null);
 
   const { data: workers, isLoading: isLoadingWorkers } = useCollection<Worker>(
     useMemoFirebase(() => firestore ? query(collection(firestore, 'workers'), orderBy('name')) : null, [firestore])
@@ -160,7 +185,7 @@ export default function AdvancePaymentsPage() {
     }
     setIsLoading(true);
     try {
-      const advances: AdvancePayment[] = [];
+      const advances: (AdvancePayment & { workerName: string })[] = [];
       const workerAdvanceMap = new Map<string, number>();
       
       for (const worker of workers) {
@@ -172,8 +197,10 @@ export default function AdvancePaymentsPage() {
         const querySnapshot = await getDocs(advanceQuery);
         querySnapshot.forEach(doc => {
           const data = doc.data();
-          advances.push({ id: doc.id, workerName: worker.name, ...data } as AdvancePayment);
-          totalAdvance += data.amount || 0;
+          advances.push({ id: doc.id, workerId: worker.id, workerName: worker.name, ...data } as (AdvancePayment & { workerName: string }));
+          if (!data.isDeducted) {
+            totalAdvance += data.amount || 0;
+          }
         });
         workerAdvanceMap.set(worker.id, totalAdvance);
       }
@@ -187,8 +214,35 @@ export default function AdvancePaymentsPage() {
   }, [firestore, workers]);
 
   useEffect(() => {
-    fetchAdvances();
-  }, [fetchAdvances]);
+    if (workers) {
+      fetchAdvances();
+    }
+  }, [workers, fetchAdvances]);
+  
+  const handleToggleDeducted = (advance: AdvancePayment) => {
+    if (!firestore) return;
+    const advanceDocRef = doc(firestore, 'workers', advance.workerId, 'advancePayments', advance.id);
+    const newStatus = !advance.isDeducted;
+    updateDocumentNonBlocking(advanceDocRef, { isDeducted: newStatus });
+    toast({
+        title: `হালনাগাদ সফল`,
+        description: `অগ্রিমটি ${newStatus ? 'পরিশোধিত' : 'অপরিশোধিত'} হিসেবে চিহ্নিত করা হয়েছে।`,
+    });
+    fetchAdvances(); // Refetch to update UI
+  }
+
+  const handleDeleteAdvance = () => {
+    if (!firestore || !advanceToDelete) return;
+    const advanceDocRef = doc(firestore, 'workers', advanceToDelete.workerId, 'advancePayments', advanceToDelete.id);
+    deleteDocumentNonBlocking(advanceDocRef);
+    toast({
+        title: `অগ্রিম মুছে ফেলা হয়েছে`,
+        variant: 'destructive',
+    });
+    setAdvanceToDelete(null);
+    fetchAdvances(); // Refetch to update UI
+  }
+
 
   const handleOpenDialog = (worker: Worker) => {
     setSelectedWorker(worker);
@@ -203,6 +257,23 @@ export default function AdvancePaymentsPage() {
         onAdvanceGiven={fetchAdvances}
         worker={selectedWorker} 
       />
+      <AlertDialog open={!!advanceToDelete} onOpenChange={(open) => !open && setAdvanceToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>আপনি কি নিশ্চিত?</AlertDialogTitle>
+            <AlertDialogDescription>
+              এই পদক্ষেপটি необрати। এটি স্থায়ীভাবে এই অগ্রিমের রেকর্ড মুছে ফেলবে।
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>বাতিল করুন</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteAdvance} className="bg-destructive hover:bg-destructive/90">
+              মুছে ফেলুন
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
 
       <Card>
         <CardHeader>
@@ -216,7 +287,7 @@ export default function AdvancePaymentsPage() {
                 <TableRow>
                   <TableHead>কর্মী</TableHead>
                   <TableHead>পদবি</TableHead>
-                  <TableHead className="text-right">মোট অগ্রিম</TableHead>
+                  <TableHead className="text-right">মোট বকেয়া অগ্রিম</TableHead>
                   <TableHead className="text-right">কার্যকলাপ</TableHead>
                 </TableRow>
               </TableHeader>
@@ -241,7 +312,7 @@ export default function AdvancePaymentsPage() {
                       </div>
                     </TableCell>
                     <TableCell>{worker.designation}</TableCell>
-                    <TableCell className="text-right">{formatCurrency(workerAdvances.get(worker.id) || 0)}</TableCell>
+                    <TableCell className="text-right font-medium">{formatCurrency(workerAdvances.get(worker.id) || 0)}</TableCell>
                     <TableCell className="text-right">
                       <Button onClick={() => handleOpenDialog(worker)}>অগ্রিম দিন</Button>
                     </TableCell>
@@ -258,7 +329,9 @@ export default function AdvancePaymentsPage() {
                 <TableRow>
                   <TableHead>তারিখ</TableHead>
                   <TableHead>কর্মী</TableHead>
+                  <TableHead>স্ট্যাটাস</TableHead>
                   <TableHead className="text-right">পরিমাণ</TableHead>
+                  <TableHead className="text-right w-[100px]">কার্যকলাপ</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -266,7 +339,9 @@ export default function AdvancePaymentsPage() {
                   <TableRow key={i}>
                     <TableCell><Skeleton className="h-5 w-24" /></TableCell>
                     <TableCell><Skeleton className="h-5 w-32" /></TableCell>
+                    <TableCell><Skeleton className="h-6 w-24" /></TableCell>
                     <TableCell className="text-right"><Skeleton className="h-5 w-20 ml-auto" /></TableCell>
+                    <TableCell className="text-right"><Skeleton className="h-8 w-8 ml-auto" /></TableCell>
                   </TableRow>
                 ))}
                 {!isLoading && allAdvances.length > 0 ? (
@@ -274,13 +349,45 @@ export default function AdvancePaymentsPage() {
                     <TableRow key={advance.id}>
                       <TableCell className="font-medium">{new Date(advance.date).toLocaleDateString('bn-BD')}</TableCell>
                       <TableCell>{advance.workerName}</TableCell>
+                      <TableCell>
+                        {advance.isDeducted ? (
+                           <Badge variant="default" className='bg-green-600 hover:bg-green-700'>
+                            <CheckCircle className="mr-1 h-3 w-3" /> পরিশোধিত
+                          </Badge>
+                        ) : (
+                          <Badge variant="secondary">অপরিশোধিত</Badge>
+                        )}
+                      </TableCell>
                       <TableCell className="text-right">{formatCurrency(advance.amount)}</TableCell>
+                       <TableCell className="text-right">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" className="h-8 w-8 p-0">
+                              <span className="sr-only">মেনু খুলুন</span>
+                              <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem onClick={() => handleToggleDeducted(advance)}>
+                                <CheckCircle className="mr-2 h-4 w-4" />
+                                {advance.isDeducted ? 'অপরিশোধিত করুন' : 'পরিশোধিত করুন'}
+                            </DropdownMenuItem>
+                            <DropdownMenuItem 
+                                className="text-red-500 focus:text-red-500 focus:bg-red-50"
+                                onClick={() => setAdvanceToDelete(advance)}
+                            >
+                                <Trash2 className="mr-2 h-4 w-4" />
+                                মুছে ফেলুন
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </TableCell>
                     </TableRow>
                   ))
                 ) : (
                   !isLoading && (
                     <TableRow>
-                      <TableCell colSpan={3} className="h-24 text-center">
+                      <TableCell colSpan={5} className="h-24 text-center">
                         কোনো অগ্রিম প্রদানের রেকর্ড পাওয়া যায়নি।
                       </TableCell>
                     </TableRow>
