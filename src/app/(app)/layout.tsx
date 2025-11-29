@@ -93,46 +93,43 @@ function AppLayoutContent({ children }: { children: React.ReactNode }) {
   // Render the full layout only when we are sure a user is logged in.
   return (
     <div className='flex min-h-screen w-full flex-col'>
-       <header className="sticky top-0 flex h-16 items-center gap-4 border-b bg-background px-4 md:px-6 z-30">
-          <div className="flex items-center gap-2">
-             <Link
-                href="/dashboard"
-                className="flex items-center gap-3 text-lg font-semibold md:text-base"
-              >
-                {settings?.logoUrl ? (
-                   <div className="relative h-10 w-40">
-                    <Image 
-                      src={settings.logoUrl} 
-                      alt="Company Logo" 
-                      fill 
-                      className='object-contain'
-                    />
-                  </div>
-                ) : settings?.companyName ? (
-                    <span className="font-bold">{settings.companyName}</span>
-                ) : (
-                    <>
-                        <GarmentFlowIcon className="size-8 text-primary" />
-                        <span className="font-bold">গার্মেন্টফ্লো</span>
-                    </>
-                )}
-              </Link>
-          </div>
+       <header className="sticky top-0 flex h-16 items-center justify-between gap-4 border-b bg-background px-4 md:px-6 z-30">
+          <Link
+            href="/dashboard"
+            className="flex items-center gap-3 text-lg font-semibold"
+          >
+            {settings?.logoUrl ? (
+                <div className="relative h-12 w-48">
+                <Image 
+                    src={settings.logoUrl} 
+                    alt="Company Logo" 
+                    fill 
+                    className='object-contain'
+                />
+                </div>
+            ) : settings?.companyName ? (
+                <span className="font-bold">{settings.companyName}</span>
+            ) : (
+                <>
+                    <GarmentFlowIcon className="size-8 text-primary" />
+                    <span className="font-bold">গার্মেন্টফ্লো</span>
+                </>
+            )}
+          </Link>
           
-          <div className="flex w-full items-center gap-4 md:ml-auto md:gap-2 lg:gap-4">
-            <div className='flex-1'></div>
-             <nav className="hidden flex-col gap-6 text-lg font-medium md:flex md:flex-row md:items-center md:gap-5 md:text-sm lg:gap-6">
-              {mainNavItems.map(item => (
-                   <Link
-                      key={item.title}
-                      href={item.href}
-                      className={cn("transition-colors hover:text-foreground", pathname.startsWith(item.href) ? "text-foreground" : "text-muted-foreground")}
-                  >
-                      {item.title}
-                  </Link>
-              ))}
-            </nav>
-            <Sheet>
+          <nav className="hidden flex-col gap-6 text-lg font-medium md:flex md:flex-row md:items-center md:gap-5 md:text-sm lg:gap-6">
+          {mainNavItems.map(item => (
+              <Link
+                  key={item.title}
+                  href={item.href}
+                  className={cn("transition-colors hover:text-foreground", pathname.startsWith(item.href) ? "text-foreground" : "text-muted-foreground")}
+              >
+                  {item.title}
+              </Link>
+          ))}
+          </nav>
+          
+          <Sheet>
             <SheetTrigger asChild>
               <Button
                 variant="outline"
@@ -180,7 +177,6 @@ function AppLayoutContent({ children }: { children: React.ReactNode }) {
               </nav>
             </SheetContent>
           </Sheet>
-          </div>
         </header>
         <main className="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-8 pb-20 md:pb-8">{children}</main>
         <BottomNav navItems={bottomNavItems} />
