@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState } from 'react';
@@ -42,7 +43,7 @@ const formatCurrency = (amount: number) =>
   new Intl.NumberFormat('bn-BD', {
     style: 'currency',
     currency: 'BDT',
-    minimumFractionDigits: 2,
+    minimumFractionDigits: 0,
   }).format(amount);
 
 export function RecentProductionTable() {

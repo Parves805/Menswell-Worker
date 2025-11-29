@@ -32,7 +32,7 @@ const formatCurrency = (amount: number) =>
   new Intl.NumberFormat('bn-BD', {
     style: 'currency',
     currency: 'BDT',
-    minimumFractionDigits: 2,
+    minimumFractionDigits: 0,
   }).format(amount);
 
 export default function DashboardPage() {

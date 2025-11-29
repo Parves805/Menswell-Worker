@@ -1,3 +1,4 @@
+
 'use client';
 
 import {
@@ -118,7 +119,7 @@ export default function EntryPage() {
     new Intl.NumberFormat('bn-BD', {
       style: 'currency',
       currency: 'BDT',
-      minimumFractionDigits: 2,
+      minimumFractionDigits: 0,
     }).format(amount);
 
   return (
