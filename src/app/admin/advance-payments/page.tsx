@@ -29,7 +29,7 @@ import {
 import { collection, query, orderBy, getDocs, doc } from 'firebase/firestore';
 import type { Worker, AdvancePayment } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
-import { PlusCircle, Landmark, MoreHorizontal, CheckCircle, Trash2 } from 'lucide-react';
+import { PlusCircle, Landmark, MoreHorizontal, CheckCircle, Trash2, TakaIcon } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -43,7 +43,6 @@ import { Label } from '@/components/ui/label';
 import { DatePicker } from '@/components/DatePicker';
 import { useToast } from '@/hooks/use-toast';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { useUser } from '@/firebase';
 import { Badge } from '@/components/ui/badge';
 import {
   DropdownMenu,
@@ -111,7 +110,8 @@ function GiveAdvanceDialog({
       date: date.toISOString(),
       amount,
       workerId: worker.id,
-      isDeducted: false,
+      paidAmount: 0,
+      status: 'unpaid',
     };
 
     try {
@@ -164,14 +164,102 @@ function GiveAdvanceDialog({
   );
 }
 
+function AddPaymentDialog({
+  isOpen,
+  onOpenChange,
+  onPaymentAdded,
+  advance,
+}: {
+  isOpen: boolean;
+  onOpenChange: (open: boolean) => void;
+  onPaymentAdded: () => void;
+  advance: AdvancePayment | null;
+}) {
+  const { toast } = useToast();
+  const firestore = useFirestore();
+
+  const [paymentAmount, setPaymentAmount] = useState(0);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const remainingBalance = advance ? (advance.amount || 0) - (advance.paidAmount || 0) : 0;
+
+  useEffect(() => {
+    if (!isOpen) {
+      setPaymentAmount(0);
+    }
+  }, [isOpen]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (paymentAmount <= 0 || !advance || !firestore) {
+      toast({ variant: 'destructive', title: 'ফর্ম অসম্পূর্ণ', description: 'অনুগ্রহ করে টাকার পরিমাণ পূরণ করুন।' });
+      return;
+    }
+    if (paymentAmount > remainingBalance) {
+        toast({ variant: 'destructive', title: 'অবৈধ পরিমাণ', description: 'পরিশোধের পরিমাণ বকেয়ার চেয়ে বেশি হতে পারবে না।' });
+        return;
+    }
+    setIsSubmitting(true);
+    
+    const newPaidAmount = (advance.paidAmount || 0) + paymentAmount;
+    const newStatus = newPaidAmount >= advance.amount ? 'paid' : 'partially-paid';
+
+    const advanceDocRef = doc(firestore, 'workers', advance.workerId, 'advancePayments', advance.id);
+    const updateData = {
+        paidAmount: newPaidAmount,
+        status: newStatus,
+    };
+
+    try {
+        await updateDocumentNonBlocking(advanceDocRef, updateData);
+        toast({ title: 'পরিশোধ যোগ হয়েছে', description: `${formatCurrency(paymentAmount)} সফলভাবে যোগ করা হয়েছে।` });
+        onPaymentAdded();
+        onOpenChange(false);
+    } catch (error) {
+        toast({ variant: 'destructive', title: 'ত্রুটি', description: 'পরিশোধ যোগ করার সময় সমস্যা হয়েছে।' });
+    } finally {
+        setIsSubmitting(false);
+    }
+  };
+
+  return (
+    <Dialog open={isOpen} onOpenChange={onOpenChange}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>অগ্রিমের কিস্তি পরিশোধ</DialogTitle>
+          <DialogDescription>
+             {advance?.workerName}-এর {formatCurrency(advance?.amount || 0)} অগ্রিমের জন্য একটি পরিশোধ যোগ করুন।
+             <br />
+             বর্তমান বকেয়া: <span className='font-bold text-red-500'>{formatCurrency(remainingBalance)}</span>
+          </DialogDescription>
+        </DialogHeader>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="paymentAmount">পরিশোধের পরিমাণ</Label>
+            <Input id="paymentAmount" type="number" max={remainingBalance} value={paymentAmount || ''} onChange={(e) => setPaymentAmount(Number(e.target.value))} required />
+          </div>
+          <DialogFooter>
+            <Button type="submit" disabled={isSubmitting}>
+              {isSubmitting ? 'জমা হচ্ছে...' : 'পরিশোধ যোগ করুন'}
+            </Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+
 export default function AdvancePaymentsPage() {
   const firestore = useFirestore();
   const { toast } = useToast();
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isGiveAdvanceOpen, setIsGiveAdvanceOpen] = useState(false);
+  const [isAddPaymentOpen, setIsAddPaymentOpen] = useState(false);
   const [allAdvances, setAllAdvances] = useState<(AdvancePayment & { workerName: string })[]>([]);
   const [workerAdvances, setWorkerAdvances] = useState<Map<string, number>>(new Map());
   const [isLoading, setIsLoading] = useState(true);
   const [selectedWorker, setSelectedWorker] = useState<Worker | null>(null);
+  const [selectedAdvance, setSelectedAdvance] = useState<AdvancePayment | null>(null);
   const [advanceToDelete, setAdvanceToDelete] = useState<AdvancePayment | null>(null);
 
   const { data: workers, isLoading: isLoadingWorkers } = useCollection<Worker>(
@@ -189,20 +277,21 @@ export default function AdvancePaymentsPage() {
       const workerAdvanceMap = new Map<string, number>();
       
       for (const worker of workers) {
-        let totalAdvance = 0;
+        let totalDue = 0;
         const advanceQuery = query(
           collection(firestore, 'workers', worker.id, 'advancePayments'),
           orderBy('date', 'desc')
         );
         const querySnapshot = await getDocs(advanceQuery);
         querySnapshot.forEach(doc => {
-          const data = doc.data();
-          advances.push({ id: doc.id, workerId: worker.id, workerName: worker.name, ...data } as (AdvancePayment & { workerName: string }));
-          if (!data.isDeducted) {
-            totalAdvance += data.amount || 0;
+          const data = doc.data() as AdvancePayment;
+          advances.push({ id: doc.id, workerId: worker.id, workerName: worker.name, ...data });
+          const remaining = (data.amount || 0) - (data.paidAmount || 0);
+          if (remaining > 0) {
+            totalDue += remaining;
           }
         });
-        workerAdvanceMap.set(worker.id, totalAdvance);
+        workerAdvanceMap.set(worker.id, totalDue);
       }
       setAllAdvances(advances.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()));
       setWorkerAdvances(workerAdvanceMap);
@@ -219,18 +308,6 @@ export default function AdvancePaymentsPage() {
     }
   }, [workers, fetchAdvances]);
   
-  const handleToggleDeducted = (advance: AdvancePayment) => {
-    if (!firestore) return;
-    const advanceDocRef = doc(firestore, 'workers', advance.workerId, 'advancePayments', advance.id);
-    const newStatus = !advance.isDeducted;
-    updateDocumentNonBlocking(advanceDocRef, { isDeducted: newStatus });
-    toast({
-        title: `হালনাগাদ সফল`,
-        description: `অগ্রিমটি ${newStatus ? 'পরিশোধিত' : 'অপরিশোধিত'} হিসেবে চিহ্নিত করা হয়েছে।`,
-    });
-    fetchAdvances(); // Refetch to update UI
-  }
-
   const handleDeleteAdvance = () => {
     if (!firestore || !advanceToDelete) return;
     const advanceDocRef = doc(firestore, 'workers', advanceToDelete.workerId, 'advancePayments', advanceToDelete.id);
@@ -244,18 +321,43 @@ export default function AdvancePaymentsPage() {
   }
 
 
-  const handleOpenDialog = (worker: Worker) => {
+  const handleOpenGiveAdvance = (worker: Worker) => {
     setSelectedWorker(worker);
-    setIsDialogOpen(true);
+    setIsGiveAdvanceOpen(true);
   }
+  
+  const handleOpenAddPayment = (advance: AdvancePayment) => {
+    setSelectedAdvance(advance);
+    setIsAddPaymentOpen(true);
+  }
+  
+  const getStatusBadge = (status: 'unpaid' | 'partially-paid' | 'paid') => {
+      switch(status) {
+          case 'paid':
+              return <Badge variant="default" className='bg-green-600 hover:bg-green-700'><CheckCircle className="mr-1 h-3 w-3" /> পরিশোধিত</Badge>
+          case 'partially-paid':
+              return <Badge variant="secondary" className='bg-yellow-500 text-black hover:bg-yellow-600'>আংশিক পরিশোধিত</Badge>
+          case 'unpaid':
+              return <Badge variant="destructive">অপরিশোধিত</Badge>
+          default:
+              return <Badge variant="outline">অজানা</Badge>
+      }
+  }
+
 
   return (
     <div className='space-y-6'>
       <GiveAdvanceDialog 
-        isOpen={isDialogOpen} 
-        onOpenChange={setIsDialogOpen} 
+        isOpen={isGiveAdvanceOpen} 
+        onOpenChange={setIsGiveAdvanceOpen} 
         onAdvanceGiven={fetchAdvances}
         worker={selectedWorker} 
+      />
+      <AddPaymentDialog
+        isOpen={isAddPaymentOpen}
+        onOpenChange={setIsAddPaymentOpen}
+        onPaymentAdded={fetchAdvances}
+        advance={selectedAdvance}
       />
       <AlertDialog open={!!advanceToDelete} onOpenChange={(open) => !open && setAdvanceToDelete(null)}>
         <AlertDialogContent>
@@ -314,7 +416,7 @@ export default function AdvancePaymentsPage() {
                     <TableCell>{worker.designation}</TableCell>
                     <TableCell className="text-right font-medium">{formatCurrency(workerAdvances.get(worker.id) || 0)}</TableCell>
                     <TableCell className="text-right">
-                      <Button onClick={() => handleOpenDialog(worker)}>অগ্রিম দিন</Button>
+                      <Button onClick={() => handleOpenGiveAdvance(worker)}>অগ্রিম দিন</Button>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -331,7 +433,9 @@ export default function AdvancePaymentsPage() {
                   <TableHead>কর্মী</TableHead>
                   <TableHead>স্ট্যাটাস</TableHead>
                   <TableHead className="text-right">পরিমাণ</TableHead>
-                  <TableHead className="text-right w-[100px]">কার্যকলাপ</TableHead>
+                  <TableHead className="text-right">পরিশোধিত</TableHead>
+                  <TableHead className="text-right">বকেয়া</TableHead>
+                  <TableHead className="text-center w-[120px]">কার্যকলাপ</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -341,53 +445,54 @@ export default function AdvancePaymentsPage() {
                     <TableCell><Skeleton className="h-5 w-32" /></TableCell>
                     <TableCell><Skeleton className="h-6 w-24" /></TableCell>
                     <TableCell className="text-right"><Skeleton className="h-5 w-20 ml-auto" /></TableCell>
-                    <TableCell className="text-right"><Skeleton className="h-8 w-8 ml-auto" /></TableCell>
+                    <TableCell className="text-right"><Skeleton className="h-5 w-20 ml-auto" /></TableCell>
+                    <TableCell className="text-right"><Skeleton className="h-5 w-20 ml-auto" /></TableCell>
+                    <TableCell className="text-center"><Skeleton className="h-8 w-24 mx-auto" /></TableCell>
                   </TableRow>
                 ))}
                 {!isLoading && allAdvances.length > 0 ? (
-                  allAdvances.map((advance) => (
-                    <TableRow key={advance.id}>
-                      <TableCell className="font-medium">{new Date(advance.date).toLocaleDateString('bn-BD')}</TableCell>
-                      <TableCell>{advance.workerName}</TableCell>
-                      <TableCell>
-                        {advance.isDeducted ? (
-                           <Badge variant="default" className='bg-green-600 hover:bg-green-700'>
-                            <CheckCircle className="mr-1 h-3 w-3" /> পরিশোধিত
-                          </Badge>
-                        ) : (
-                          <Badge variant="secondary">অপরিশোধিত</Badge>
-                        )}
-                      </TableCell>
-                      <TableCell className="text-right">{formatCurrency(advance.amount)}</TableCell>
-                       <TableCell className="text-right">
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" className="h-8 w-8 p-0">
-                              <span className="sr-only">মেনু খুলুন</span>
-                              <MoreHorizontal className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem onClick={() => handleToggleDeducted(advance)}>
-                                <CheckCircle className="mr-2 h-4 w-4" />
-                                {advance.isDeducted ? 'অপরিশোধিত করুন' : 'পরিশোধিত করুন'}
-                            </DropdownMenuItem>
-                            <DropdownMenuItem 
-                                className="text-red-500 focus:text-red-500 focus:bg-red-50"
-                                onClick={() => setAdvanceToDelete(advance)}
-                            >
-                                <Trash2 className="mr-2 h-4 w-4" />
-                                মুছে ফেলুন
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </TableCell>
-                    </TableRow>
-                  ))
+                  allAdvances.map((advance) => {
+                    const due = (advance.amount || 0) - (advance.paidAmount || 0);
+                    return (
+                        <TableRow key={advance.id}>
+                        <TableCell className="font-medium">{new Date(advance.date).toLocaleDateString('bn-BD')}</TableCell>
+                        <TableCell>{advance.workerName}</TableCell>
+                        <TableCell>{getStatusBadge(advance.status)}</TableCell>
+                        <TableCell className="text-right font-semibold">{formatCurrency(advance.amount)}</TableCell>
+                        <TableCell className="text-right text-green-600">{formatCurrency(advance.paidAmount)}</TableCell>
+                        <TableCell className="text-right text-red-600 font-bold">{formatCurrency(due)}</TableCell>
+                        <TableCell className="text-center">
+                            {advance.status !== 'paid' ? (
+                                <Button size="sm" variant="outline" onClick={() => handleOpenAddPayment(advance)}>
+                                    <TakaIcon className="mr-1 h-4 w-4" /> পরিশোধ
+                                </Button>
+                            ) : (
+                                <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                    <Button variant="ghost" className="h-8 w-8 p-0">
+                                    <span className="sr-only">মেনু খুলুন</span>
+                                    <MoreHorizontal className="h-4 w-4" />
+                                    </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end">
+                                    <DropdownMenuItem 
+                                        className="text-red-500 focus:text-red-500 focus:bg-red-50"
+                                        onClick={() => setAdvanceToDelete(advance)}
+                                    >
+                                        <Trash2 className="mr-2 h-4 w-4" />
+                                        মুছে ফেলুন
+                                    </DropdownMenuItem>
+                                </DropdownMenuContent>
+                                </DropdownMenu>
+                            )}
+                        </TableCell>
+                        </TableRow>
+                    )
+                })
                 ) : (
                   !isLoading && (
                     <TableRow>
-                      <TableCell colSpan={5} className="h-24 text-center">
+                      <TableCell colSpan={7} className="h-24 text-center">
                         কোনো অগ্রিম প্রদানের রেকর্ড পাওয়া যায়নি।
                       </TableCell>
                     </TableRow>

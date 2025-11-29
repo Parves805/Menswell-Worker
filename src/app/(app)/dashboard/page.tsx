@@ -77,9 +77,10 @@ export default function DashboardPage() {
   
   const totalAdvance = React.useMemo(() => {
     if (!advances) return 0;
-    return advances
-        .filter(advance => !advance.isDeducted)
-        .reduce((sum, advance) => sum + advance.amount, 0);
+    return advances.reduce((sum, advance) => {
+        const remaining = (advance.amount || 0) - (advance.paidAmount || 0);
+        return sum + (remaining > 0 ? remaining : 0);
+    }, 0);
   }, [advances]);
 
   const totalExpenses = React.useMemo(() => {
@@ -99,7 +100,7 @@ export default function DashboardPage() {
     }, 3000);
   }
 
-  const isLoading = isLoadingAllEntries || isLoadingExpenses;
+  const isLoading = isLoadingAllEntries || isLoadingExpenses || isLoadingAdvances;
 
   return (
     <div className="flex flex-col gap-6">

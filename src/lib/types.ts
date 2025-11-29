@@ -3,6 +3,7 @@
 
 
 
+
 export type NavItem = {
   title: string;
   href: string;
@@ -97,8 +98,11 @@ export type AdvancePayment = {
   workerName?: string;
   date: string;
   amount: number;
-  isDeducted?: boolean;
+  paidAmount: number;
+  status: 'unpaid' | 'partially-paid' | 'paid';
+  isDeducted?: boolean; // Kept for backward compatibility but status is preferred
 };
+
 
 export type Bonus = {
   id: string;
@@ -182,5 +186,6 @@ export type ActivityLog = {
     
 
     
+
 
 
