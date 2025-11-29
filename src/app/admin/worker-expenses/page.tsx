@@ -81,6 +81,12 @@ function AddWorkerExpenseDialog({
     setAmount(0);
     setSelectedWorkerId('');
   };
+  
+  useEffect(() => {
+    if (!isOpen) {
+        resetForm();
+    }
+  }, [isOpen]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -116,7 +122,6 @@ function AddWorkerExpenseDialog({
         title: 'খরচ যোগ হয়েছে',
         description: `${worker.name}-এর জন্য আপনার খরচ সফলভাবে যোগ করা হয়েছে।`,
       });
-      resetForm();
       onExpenseAdded();
       onOpenChange(false);
     } catch (error) {
@@ -137,7 +142,7 @@ function AddWorkerExpenseDialog({
           <DialogTitle>কর্মীর খরচ যোগ করুন</DialogTitle>
           <DialogDescription>একজন কর্মীর জন্য একটি নতুন খরচ যোগ করুন।</DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4 pt-4">
           <div className="space-y-2">
             <Label htmlFor="worker">কর্মী</Label>
             <Select name="worker" required onValueChange={setSelectedWorkerId} value={selectedWorkerId}>
@@ -291,4 +296,3 @@ export default function WorkerExpensesPage() {
     </div>
   );
 }
-
