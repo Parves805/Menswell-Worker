@@ -16,7 +16,7 @@ import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
 import { collection, query, getDocs } from 'firebase/firestore';
 import { ProductionChart } from '@/components/admin/ProductionChart';
 import { ActivityFeed } from '@/components/admin/ActivityFeed';
-import type { Worker } from '@/lib/types';
+import type { Worker, AdvancePayment } from '@/lib/types';
 import { TakaIcon } from '@/components/icons';
 import { Skeleton } from '@/components/ui/skeleton';
 
@@ -53,7 +53,7 @@ export default function AdminDashboardPage() {
       setIsLoadingWorkerExpenses(true);
 
       let totalPcs = 0;
-      let totalAdv = 0;
+      let totalOutstandingAdvance = 0;
       let totalWorkerExp = 0;
       const prodData: { date: string, pieces: number }[] = [];
 
@@ -81,7 +81,11 @@ export default function AdminDashboardPage() {
         });
         
         advanceSnapshot.forEach(doc => {
-            totalAdv += doc.data().amount || 0;
+            const advance = doc.data() as AdvancePayment;
+            const remaining = (advance.amount || 0) - (advance.paidAmount || 0);
+            if (remaining > 0) {
+                totalOutstandingAdvance += remaining;
+            }
         });
 
         expenseSnapshot.forEach(doc => {
@@ -89,7 +93,7 @@ export default function AdminDashboardPage() {
         });
       }
       setTotalPieces(totalPcs);
-      setTotalAdvances(totalAdv);
+      setTotalAdvances(totalOutstandingAdvance);
       setTotalWorkerExpenses(totalWorkerExp);
       setProductionData(prodData.sort((a,b) => new Date(a.date).getTime() - new Date(b.date).getTime()));
       
@@ -150,12 +154,12 @@ export default function AdminDashboardPage() {
         <Link href="/admin/advance-payments" className="transform transition-transform duration-200 hover:scale-105 group">
           <Card className="transition-colors bg-primary text-primary-foreground group-hover:bg-primary/90">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">অগ্রিম প্রদান</CardTitle>
+              <CardTitle className="text-sm font-medium">মোট বকেয়া অগ্রিম</CardTitle>
               <TakaIcon className="h-4 w-4 text-primary-foreground/80" />
             </CardHeader>
             <CardContent>
               {isLoadingAdvances ? <Skeleton className="h-7 w-28 bg-white/20" /> : <div className="text-2xl font-bold">{formatCurrency(totalAdvances)}</div>}
-              <p className="text-xs text-primary-foreground/80">চলতি মাসে মোট প্রদান</p>
+              <p className="text-xs text-primary-foreground/80">কর্মীদের মোট বকেয়া</p>
             </CardContent>
           </Card>
         </Link>
