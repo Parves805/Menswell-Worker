@@ -19,7 +19,7 @@ import {
 } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Check, X } from 'lucide-react';
+import { Check, X, PlusCircle } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   useCollection,
@@ -29,9 +29,21 @@ import {
   addDocumentNonBlocking,
 } from '@/firebase';
 import { collection, query, doc, orderBy } from 'firebase/firestore';
-import type { AdvancePaymentRequest, WorkerExpense } from '@/lib/types';
+import type { AdvancePaymentRequest, WorkerExpense, Worker } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { DatePicker } from '@/components/DatePicker';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 const formatCurrency = (amount: number) =>
   new Intl.NumberFormat('bn-BD', {
@@ -39,6 +51,144 @@ const formatCurrency = (amount: number) =>
     currency: 'BDT',
     minimumFractionDigits: 2,
   }).format(amount);
+
+function AddDirectExpenseDialog({
+  isOpen,
+  onOpenChange,
+  onExpenseAdded,
+}: {
+  isOpen: boolean;
+  onOpenChange: (open: boolean) => void;
+  onExpenseAdded: () => void;
+}) {
+  const { toast } = useToast();
+  const firestore = useFirestore();
+
+  const [date, setDate] = useState<Date | undefined>(new Date());
+  const [description, setDescription] = useState('');
+  const [amount, setAmount] = useState(0);
+  const [selectedWorkerId, setSelectedWorkerId] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const workersQuery = useMemoFirebase(
+    () => (firestore ? query(collection(firestore, 'workers'), orderBy('name')) : null),
+    [firestore]
+  );
+  const { data: workers, isLoading: isLoadingWorkers } = useCollection<Worker>(workersQuery);
+
+  const resetForm = () => {
+    setDate(new Date());
+    setDescription('');
+    setAmount(0);
+    setSelectedWorkerId('');
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!date || !description || amount <= 0 || !selectedWorkerId || !firestore) {
+      toast({
+        variant: 'destructive',
+        title: 'ফর্ম অসম্পূর্ণ',
+        description: 'অনুগ্রহ করে সমস্ত ঘর পূরণ করুন।',
+      });
+      return;
+    }
+    setIsSubmitting(true);
+
+    const worker = workers?.find(w => w.id === selectedWorkerId);
+    if (!worker) {
+      toast({ variant: 'destructive', title: 'কর্মী পাওয়া যায়নি' });
+      setIsSubmitting(false);
+      return;
+    }
+
+    const newExpense: Omit<WorkerExpense, 'id'> = {
+      date: date.toISOString(),
+      description,
+      amount,
+      workerId: selectedWorkerId,
+      workerName: worker.name,
+    };
+
+    try {
+      const expenseColRef = collection(firestore, 'workers', selectedWorkerId, 'expenses');
+      await addDocumentNonBlocking(expenseColRef, newExpense);
+      
+      const notificationMessage = `${worker.name}-কে ${formatCurrency(amount)} টাকা (${description}) প্রদান করা হয়েছে।`;
+      toast({
+        title: 'খরচ প্রদান সফল',
+        description: notificationMessage,
+      });
+
+      const notificationsCol = collection(firestore, 'workers', selectedWorkerId, 'notifications');
+      addDocumentNonBlocking(notificationsCol, {
+        workerId: selectedWorkerId,
+        title: 'খরচ প্রদান করা হয়েছে',
+        message: `আপনাকে "${description}" বাবদ ${formatCurrency(amount)} প্রদান করা হয়েছে।`,
+        isRead: false,
+        createdAt: new Date().toISOString(),
+      });
+
+      resetForm();
+      onExpenseAdded();
+      onOpenChange(false);
+    } catch (error) {
+      toast({
+        variant: 'destructive',
+        title: 'ত্রুটি',
+        description: 'খরচ যোগ করার সময় একটি সমস্যা হয়েছে।',
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  return (
+    <Dialog open={isOpen} onOpenChange={onOpenChange}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>সরাসরি খরচ প্রদান করুন</DialogTitle>
+          <DialogDescription>একজন কর্মীর জন্য একটি নতুন খরচ যোগ করুন। এটি সরাসরি কর্মীর হিসাবে যুক্ত হবে।</DialogDescription>
+        </DialogHeader>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="worker">কর্মী</Label>
+            <Select name="worker" required onValueChange={setSelectedWorkerId} value={selectedWorkerId}>
+              <SelectTrigger id="worker">
+                <SelectValue placeholder="কর্মী নির্বাচন করুন" />
+              </SelectTrigger>
+              <SelectContent>
+                {isLoadingWorkers ? (
+                  <SelectItem value="loading" disabled>লোড হচ্ছে...</SelectItem>
+                ) : (
+                  workers?.map(w => <SelectItem key={w.id} value={w.id}>{w.name}</SelectItem>)
+                )}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="date">তারিখ</Label>
+            <DatePicker value={date} onSelect={setDate} />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="description">বিবরণ</Label>
+            <Input id="description" value={description} onChange={(e) => setDescription(e.target.value)} placeholder="e.g., যাতায়াত ভাড়া" required />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="amount">পরিমাণ</Label>
+            <Input id="amount" type="number" value={amount || ''} onChange={(e) => setAmount(Number(e.target.value))} required />
+          </div>
+          <DialogFooter>
+            <Button type="submit" disabled={isSubmitting}>
+              {isSubmitting ? 'জমা হচ্ছে...' : 'খরচ যোগ করুন'}
+            </Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 
 function RequestsTable({
   requests,
@@ -175,6 +325,7 @@ export default function AdvanceRequestsPage() {
   const firestore = useFirestore();
   const { toast } = useToast();
   const [processingId, setProcessingId] = useState<string | null>(null);
+  const [isExpenseDialogOpen, setIsExpenseDialogOpen] = useState(false);
   const [activeTab, setActiveTab] =
     useState<'pending' | 'approved' | 'rejected'>('pending');
 
@@ -189,7 +340,7 @@ export default function AdvanceRequestsPage() {
     [firestore]
   );
 
-  const { data: allRequests, isLoading } =
+  const { data: allRequests, isLoading, forceRefetch } =
     useCollection<AdvancePaymentRequest>(requestsQuery);
     
   const filteredRequests = useMemo(() => {
@@ -218,7 +369,7 @@ export default function AdvanceRequestsPage() {
       workerId: request.workerId,
       workerName: request.workerName,
       amount: request.amount,
-      description: request.description || `Approved expense request`,
+      description: request.description || `অনুমোদিত খরচের অনুরোধ`,
     };
 
     const workerExpenseColRef = collection(
@@ -303,13 +454,24 @@ export default function AdvanceRequestsPage() {
   };
 
   return (
+    <>
+    <AddDirectExpenseDialog
+      isOpen={isExpenseDialogOpen}
+      onOpenChange={setIsExpenseDialogOpen}
+      onExpenseAdded={forceRefetch}
+    />
     <Card>
-      <CardHeader>
-        <CardTitle>খরচের অনুরোধ</CardTitle>
-        <CardDescription>
-          কর্মীদের পাঠানো খরচের অনুরোধগুলো অনুমোদন বা বাতিল করুন এবং ইতিহাস
-          দেখুন।
-        </CardDescription>
+      <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div>
+          <CardTitle>খরচের অনুরোধ</CardTitle>
+          <CardDescription>
+            কর্মীদের পাঠানো খরচের অনুরোধগুলো অনুমোদন বা বাতিল করুন।
+          </CardDescription>
+        </div>
+        <Button onClick={() => setIsExpenseDialogOpen(true)}>
+          <PlusCircle className="mr-2 h-4 w-4" />
+          নতুন খরচ যোগ করুন
+        </Button>
       </CardHeader>
       <CardContent>
         <Tabs
@@ -353,5 +515,7 @@ export default function AdvanceRequestsPage() {
         </Tabs>
       </CardContent>
     </Card>
+    </>
   );
 }
+
