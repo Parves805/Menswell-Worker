@@ -48,6 +48,7 @@ import { useAuth, useUser, useDoc, useFirestore, useMemoFirebase } from '@/fireb
 import { useRouter, usePathname } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 import { doc } from 'firebase/firestore';
+import { Skeleton } from '@/components/ui/skeleton';
 
 
 const mainNavItems: NavItem[] = [
@@ -78,7 +79,7 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
     firestore ? doc(firestore, 'settings', 'global') : null,
     [firestore]
   );
-  const { data: settings } = useDoc<AppSettings>(settingsDocRef);
+  const { data: settings, isLoading: isLoadingSettings } = useDoc<AppSettings>(settingsDocRef);
 
   React.useEffect(() => {
     if (isUserLoading || pathname === '/admin/login') {
@@ -128,7 +129,9 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
       <Sidebar side="left" collapsible="icon">
         <SidebarHeader>
           <Link href="/admin/dashboard" className="flex items-center gap-2">
-            {settings?.logoUrl ? (
+            {isLoadingSettings ? (
+              <Skeleton className="h-8 w-32" />
+            ) : settings?.logoUrl ? (
                 <div className="relative h-8 w-32">
                     <Image 
                       src={settings.logoUrl} 
@@ -140,10 +143,10 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
             ) : settings?.companyName ? (
               <h1 className="text-lg font-semibold tracking-tight">{settings.companyName}</h1>
             ) : (
-                <>
+                <div className="flex items-center gap-2">
                     <GarmentFlowIcon className="size-6" />
                     <h1 className="text-lg font-semibold tracking-tight">অ্যাডমিন</h1>
-                </>
+                </div>
             )}
           </Link>
         </SidebarHeader>

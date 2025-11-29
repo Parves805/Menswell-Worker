@@ -37,6 +37,7 @@ import {
 } from "@/components/ui/sheet"
 import { cn } from '@/lib/utils';
 import { doc } from 'firebase/firestore';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const mainNavItems: NavItem[] = [
   { title: 'হোম', href: '/dashboard', icon: <Home /> },
@@ -65,7 +66,7 @@ function AppLayoutContent({ children }: { children: React.ReactNode }) {
     firestore ? doc(firestore, 'settings', 'global') : null,
     [firestore]
   );
-  const { data: settings } = useDoc<AppSettings>(settingsDocRef);
+  const { data: settings, isLoading: isLoadingSettings } = useDoc<AppSettings>(settingsDocRef);
   
   React.useEffect(() => {
     // This is the single source of truth for protecting the app routes.
@@ -98,7 +99,9 @@ function AppLayoutContent({ children }: { children: React.ReactNode }) {
             href="/dashboard"
             className="flex items-center gap-3 text-lg font-semibold pl-2"
           >
-             {settings?.logoUrl ? (
+             {isLoadingSettings ? (
+                <Skeleton className="h-12 w-48" />
+             ) : settings?.logoUrl ? (
                 <div className="relative h-12 w-48">
                 <Image 
                     src={settings.logoUrl} 
@@ -110,14 +113,14 @@ function AppLayoutContent({ children }: { children: React.ReactNode }) {
             ) : settings?.companyName ? (
                 <span className="font-bold">{settings.companyName}</span>
             ) : (
-                <>
+                <div className="flex items-center gap-2">
                     <GarmentFlowIcon className="size-8 text-primary" />
                     <span>গার্মেন্টফ্লো</span>
-                </>
+                </div>
             )}
           </Link>
           
-        <div className="flex items-center gap-4 ml-auto">
+        <div className="ml-auto flex items-center gap-4">
             <nav className="hidden flex-col gap-6 text-lg font-medium md:flex md:flex-row md:items-center md:gap-5 md:text-sm lg:gap-6">
             {mainNavItems.map(item => (
                 <Link
@@ -147,7 +150,7 @@ function AppLayoutContent({ children }: { children: React.ReactNode }) {
                     href="/dashboard"
                     className="flex items-center gap-2 text-lg font-semibold"
                     >
-                        {settings?.logoUrl ? (
+                        {isLoadingSettings ? <Skeleton className="h-10 w-40" /> : settings?.logoUrl ? (
                             <div className="relative h-10 w-40">
                                 <Image 
                                 src={settings.logoUrl} 
