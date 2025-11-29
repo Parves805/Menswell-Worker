@@ -107,7 +107,7 @@ export default function AdminDashboardPage() {
 
 
   return (
-    <div className="flex flex-col gap-6">
+    <>
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">ড্যাশবোর্ড</h1>
@@ -119,47 +119,47 @@ export default function AdminDashboardPage() {
       </div>
       
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card className='bg-primary text-primary-foreground'>
+        <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">মোট কর্মী</CardTitle>
-            <Users className="h-4 w-4 text-primary-foreground/80" />
+            <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            {isLoadingWorkers ? <Skeleton className="h-7 w-12 bg-white/20" /> : <div className="text-2xl font-bold">{workers?.length ?? 0}</div>}
-            <p className="text-xs text-primary-foreground/80">নিবন্ধিত কর্মীর সংখ্যা</p>
+            {isLoadingWorkers ? <Skeleton className="h-7 w-12" /> : <div className="text-2xl font-bold">{workers?.length ?? 0}</div>}
+            <p className="text-xs text-muted-foreground">নিবন্ধিত কর্মীর সংখ্যা</p>
           </CardContent>
         </Card>
-        <Card className='bg-primary text-primary-foreground'>
+        <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">আজকের উৎপাদন</CardTitle>
-            <Scissors className="h-4 w-4 text-primary-foreground/80" />
+            <Scissors className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            {isLoadingProduction ? <Skeleton className="h-7 w-20 bg-white/20" /> : <div className="text-2xl font-bold">{totalPieces.toLocaleString('bn-BD')} পিস</div>}
-            <p className="text-xs text-primary-foreground/80">আজ সকল কর্মীর মোট কাজ</p>
+            {isLoadingProduction ? <Skeleton className="h-7 w-20" /> : <div className="text-2xl font-bold">{totalPieces.toLocaleString('bn-BD')} পিস</div>}
+            <p className="text-xs text-muted-foreground">আজ সকল কর্মীর মোট কাজ</p>
           </CardContent>
         </Card>
         <Link href="/admin/expenses" className="transform transition-transform duration-200 hover:scale-105 group">
-          <Card className="transition-colors bg-primary text-primary-foreground group-hover:bg-primary/90">
+          <Card className="transition-colors group-hover:border-primary">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">কর্মীদের মোট খরচ</CardTitle>
-              <Wallet2 className="h-4 w-4 text-primary-foreground/80" />
+              <Wallet2 className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              {isLoadingWorkerExpenses ? <Skeleton className="h-7 w-28 bg-white/20" /> : <div className="text-2xl font-bold">{formatCurrency(totalWorkerExpenses)}</div>}
-              <p className="text-xs text-primary-foreground/80">এখন পর্যন্ত মোট খরচ</p>
+              {isLoadingWorkerExpenses ? <Skeleton className="h-7 w-28" /> : <div className="text-2xl font-bold">{formatCurrency(totalWorkerExpenses)}</div>}
+              <p className="text-xs text-muted-foreground">এখন পর্যন্ত মোট খরচ</p>
             </CardContent>
           </Card>
         </Link>
         <Link href="/admin/advance-payments" className="transform transition-transform duration-200 hover:scale-105 group">
-          <Card className="transition-colors bg-primary text-primary-foreground group-hover:bg-primary/90">
+          <Card className="transition-colors group-hover:border-primary">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">মোট বকেয়া অগ্রিম</CardTitle>
-              <TakaIcon className="h-4 w-4 text-primary-foreground/80" />
+              <TakaIcon className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              {isLoadingAdvances ? <Skeleton className="h-7 w-28 bg-white/20" /> : <div className="text-2xl font-bold">{formatCurrency(totalAdvances)}</div>}
-              <p className="text-xs text-primary-foreground/80">কর্মীদের মোট বকেয়া</p>
+              {isLoadingAdvances ? <Skeleton className="h-7 w-28" /> : <div className="text-2xl font-bold">{formatCurrency(totalAdvances)}</div>}
+              <p className="text-xs text-muted-foreground">কর্মীদের মোট বকেয়া</p>
             </CardContent>
           </Card>
         </Link>
@@ -169,6 +169,6 @@ export default function AdminDashboardPage() {
         <ProductionChart data={productionData} />
         <ActivityFeed />
       </div>
-    </div>
+    </>
   );
 }

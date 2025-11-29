@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import * as React from 'react';
@@ -16,22 +15,15 @@ import {
   Shapes,
   Wallet,
   CheckSquare,
-  User,
   Image as ImageIcon,
   Landmark,
+  Menu,
 } from 'lucide-react';
 import {
-  SidebarProvider,
-  Sidebar,
-  SidebarHeader,
-  SidebarContent,
-  SidebarMenu,
-  SidebarMenuItem,
-  SidebarMenuButton,
-  SidebarTrigger,
-  SidebarInset,
-  useSidebar,
-} from '@/components/ui/sidebar';
+  Sheet,
+  SheetContent,
+  SheetTrigger,
+} from "@/components/ui/sheet"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -49,8 +41,7 @@ import { useRouter, usePathname } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 import { doc } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
-
-const ADMIN_CREDENTIAL_KEY = 'garmentflow_admin_credential';
+import { cn } from '@/lib/utils';
 
 
 const mainNavItems: NavItem[] = [
@@ -74,7 +65,6 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
   const { toast } = useToast();
-  const { setOpenMobile } = useSidebar();
   const firestore = useFirestore();
 
   const settingsDocRef = useMemoFirebase(() => 
@@ -86,6 +76,8 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
   React.useEffect(() => {
     if (settings?.companyName) {
       document.title = `${settings.companyName} | অ্যাডমিন প্যানেল`;
+    } else {
+        document.title = 'মেনসওয়েল | অ্যাডমিন প্যানেল';
     }
   }, [settings]);
 
@@ -107,16 +99,11 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
         description: 'শুধুমাত্র অ্যাডমিন এই প্যানেলে প্রবেশ করতে পারবেন।',
       });
       router.replace('/admin/login');
-    } else {
-        if(user.email) {
-          localStorage.setItem('garmentflow_admin_credential', user.email);
-        }
     }
   }, [user, isUserLoading, router, auth, toast, pathname]);
 
   const handleLogout = () => {
     if (auth) {
-      localStorage.removeItem(ADMIN_CREDENTIAL_KEY);
       auth.signOut().then(() => router.push('/admin/login'));
     }
   };
@@ -134,98 +121,109 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
   }
   
   return (
-    <>
-      <Sidebar side="left" collapsible="icon">
-        <SidebarHeader>
-          <Link href="/admin/dashboard" className="flex items-center gap-2">
-            {isLoadingSettings ? (
-              <Skeleton className="h-8 w-32" />
-            ) : settings?.logoUrl ? (
-                <div className="relative h-8 w-32">
-                    <Image 
-                      src={settings.logoUrl} 
-                      alt="Company Logo" 
-                      fill 
-                      className='object-contain'
-                    />
-                  </div>
-            ) : settings?.companyName ? (
-              <h1 className="text-lg font-semibold tracking-tight">{settings.companyName}</h1>
-            ) : (
-                <div className="flex items-center gap-2">
-                    <GarmentFlowIcon className="size-8 text-primary" />
-                    <h1 className="text-lg font-semibold tracking-tight">অ্যাডমিন</h1>
-                </div>
-            )}
-          </Link>
-        </SidebarHeader>
-        <SidebarContent>
-          <SidebarMenu>
-            {mainNavItems.map((item) => {
-              const isActive = item.href === '/admin/dashboard' 
-                ? pathname === item.href
-                : pathname.startsWith(item.href);
-              return (
-                <SidebarMenuItem key={item.title}>
-                  <Link href={item.href} className="w-full" onClick={() => setOpenMobile(false)}>
-                    <SidebarMenuButton
-                      tooltip={item.title}
-                      isActive={isActive}
-                      asChild
-                    >
-                      <div className="flex items-center gap-2">
-                          {item.icon}
-                          <span>{item.title}</span>
-                      </div>
-                    </SidebarMenuButton>
-                  </Link>
-                </SidebarMenuItem>
-              );
-            })}
-          </SidebarMenu>
-        </SidebarContent>
-      </Sidebar>
-      <SidebarInset className="flex flex-col">
-        <header className="sticky top-0 z-10 flex h-16 items-center gap-4 border-b bg-background px-4 sm:px-6">
-          <SidebarTrigger className="flex text-foreground hover:text-foreground md:hidden" />
-          <div className="relative flex-1">
+    <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">
+      <aside className="hidden border-r bg-muted/40 md:block">
+        <div className="flex h-full max-h-screen flex-col gap-2">
+          <div className="flex h-14 items-center border-b px-4 lg:h-[60px] lg:px-6">
+            <Link href="/admin/dashboard" className="flex items-center gap-2 font-semibold">
+              <GarmentFlowIcon className="size-6 text-primary" />
+              <span className="">অ্যাডমিন প্যানেল</span>
+            </Link>
           </div>
+          <div className="flex-1 overflow-auto py-2">
+            <nav className="grid items-start px-2 text-sm font-medium lg:px-4">
+              {mainNavItems.map((item) => (
+                <Link
+                  key={item.title}
+                  href={item.href}
+                  className={cn(
+                    'flex items-center gap-3 rounded-lg px-3 py-2 text-muted-foreground transition-all hover:text-primary',
+                    pathname.startsWith(item.href) && 'bg-muted text-primary'
+                  )}
+                >
+                  {item.icon}
+                  {item.title}
+                </Link>
+              ))}
+            </nav>
+          </div>
+        </div>
+      </aside>
+      <div className="flex flex-col">
+        <header className="flex h-14 items-center gap-4 border-b bg-muted/40 px-4 lg:h-[60px] lg:px-6">
+          <Sheet>
+            <SheetTrigger asChild>
+              <Button
+                variant="outline"
+                size="icon"
+                className="shrink-0 md:hidden"
+              >
+                <Menu className="h-5 w-5" />
+                <span className="sr-only">ন্যাভিগেশন মেনু খুলুন</span>
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="left" className="flex flex-col p-0">
+              <nav className="grid gap-2 text-lg font-medium p-4">
+                <Link
+                  href="/admin/dashboard"
+                  className="flex items-center gap-2 text-lg font-semibold mb-4"
+                >
+                  <GarmentFlowIcon className="size-8 text-primary" />
+                  <span>অ্যাডমিন প্যানেল</span>
+                </Link>
+                {mainNavItems.map((item) => (
+                  <Link
+                    key={item.title}
+                    href={item.href}
+                    className={cn(
+                      'flex items-center gap-4 rounded-xl px-3 py-2 text-muted-foreground hover:text-foreground',
+                      pathname.startsWith(item.href) && 'bg-muted text-foreground'
+                    )}
+                  >
+                    {item.icon}
+                    {item.title}
+                  </Link>
+                ))}
+              </nav>
+            </SheetContent>
+          </Sheet>
+
+          <div className="w-full flex-1">
+            {/* You can add a search bar here if needed */}
+          </div>
+
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="flex items-center gap-3 cursor-pointer p-1 h-auto rounded-full hover:bg-muted">
-                <Avatar className="h-9 w-9">
+               <Button variant="secondary" size="icon" className="rounded-full">
+                <Avatar>
                   <AvatarImage src={user.photoURL ?? "https://picsum.photos/seed/admin/40/40"} alt="অ্যাডমিনের ছবি" />
                   <AvatarFallback>{user.email?.charAt(0).toUpperCase()}</AvatarFallback>
                 </Avatar>
-                <div className="hidden md:flex flex-col items-start">
-                    <span className="text-sm font-medium text-foreground">{user.displayName ?? "অ্যাডমিন"}</span>
-                    <span className="text-xs text-muted-foreground">সুপার অ্যাডমিন</span>
-                </div>
+                <span className="sr-only">ব্যবহারকারী মেনু</span>
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuLabel>{user.displayName ?? user.email}</DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={handleLogout}>
-                <LogOut className="mr-2 h-4 w-4" />
-                <span>লগআউট</span>
-              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => router.push('/admin/settings')}>সেটিংস</DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={handleLogout}>লগআউট</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </header>
-        <main className="flex-1 overflow-auto p-4 sm:p-6">{children}</main>
-      </SidebarInset>
-    </>
+        <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">
+          {children}
+        </main>
+      </div>
+    </div>
   );
 }
 
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   return (
-    <SidebarProvider>
       <div className="admin-panel">
           <AdminLayoutContent>{children}</AdminLayoutContent>
       </div>
-    </SidebarProvider>
   )
 }
