@@ -222,10 +222,10 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="admin-panel">
-      <SidebarProvider>
-        <AdminLayoutContent>{children}</AdminLayoutContent>
-      </SidebarProvider>
-    </div>
+    <SidebarProvider>
+      <div className="admin-panel">
+          <AdminLayoutContent>{children}</AdminLayoutContent>
+      </div>
+    </SidebarProvider>
   )
 }
