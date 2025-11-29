@@ -40,8 +40,8 @@ export default function LoginPage() {
   useEffect(() => {
     const savedCredential = localStorage.getItem(USER_CREDENTIAL_KEY);
     if (savedCredential) {
-      setRememberedCredential(savedCredential);
-      setCredential(savedCredential);
+      // setRememberedCredential(savedCredential);
+      // setCredential(savedCredential);
     }
   }, []);
 

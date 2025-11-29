@@ -39,8 +39,8 @@ export default function AdminLoginPage() {
     // Check for remembered credential on mount
     const savedCredential = localStorage.getItem(ADMIN_CREDENTIAL_KEY);
     if (savedCredential) {
-      setRememberedEmail(savedCredential);
-      setEmail(savedCredential);
+      // setRememberedEmail(savedCredential);
+      // setEmail(savedCredential);
     }
   }, []);
 
