@@ -172,7 +172,7 @@ export default function LoginPage() {
               <Input
                 id="credential"
                 type="text"
-                placeholder="email@example.com or 01..."
+                placeholder="এখানে লিখুন..."
                 required
                 value={credential}
                 onChange={(e) => setCredential(e.target.value)}
