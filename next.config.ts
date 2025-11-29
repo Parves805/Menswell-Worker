@@ -82,6 +82,12 @@ const nextConfig: NextConfig = {
         hostname: 'sourcingjournal.com',
         port: '',
         pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'menswell.stapler.studio',
+        port: '',
+        pathname: '/**',
       }
     ],
   },
