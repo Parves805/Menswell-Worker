@@ -115,20 +115,20 @@ export default function AdminLoginPage() {
       <div className="absolute inset-0 -z-10 h-full w-full bg-background bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-[size:14px_24px]"></div>
       <Card className="w-full max-w-md shadow-2xl">
         <CardHeader className="items-center text-center">
-          <div className="mb-4 h-12 flex items-center justify-center">
+          <div className="mb-4 flex h-12 items-center justify-center">
             {isLoadingSettings ? (
               <Skeleton className="h-12 w-48" />
             ) : settings?.logoUrl ? (
               <div className="relative h-12 w-48">
-                <Image 
-                  src={settings.logoUrl} 
-                  alt={settings.companyName || 'Company Logo'} 
-                  fill 
+                <Image
+                  src={settings.logoUrl}
+                  alt={settings.companyName || 'Company Logo'}
+                  fill
                   className="object-contain"
                 />
               </div>
             ) : (
-               <GarmentFlowIcon className="h-12 w-12 text-primary" />
+              <GarmentFlowIcon className="h-12 w-12 text-primary" />
             )}
           </div>
           <CardTitle className="text-2xl font-bold">অ্যাডমিন লগইন</CardTitle>
