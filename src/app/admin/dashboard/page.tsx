@@ -44,7 +44,7 @@ export default function AdminDashboardPage() {
   const [productionData, setProductionData] = React.useState<{ date: string; pieces: number }[]>([]);
   const [totalPieces, setTotalPieces] = React.useState(0);
   const [totalWorkerExpenses, setTotalWorkerExpenses] = React.useState(0);
-  const [totalExpenses, setTotalExpenses] = React.useState(0);
+  const [totalAdvances, setTotalAdvances] = React.useState(0);
 
   React.useEffect(() => {
     if (!firestore || !workers) return;
@@ -52,11 +52,13 @@ export default function AdminDashboardPage() {
     const fetchData = async () => {
       let totalPcs = 0;
       let totalWorkerExp = 0;
+      let totalAdv = 0;
       const prodData: { date: string, pieces: number }[] = [];
 
       for (const worker of workers) {
         const prodQuery = query(collection(firestore, 'workers', worker.id, 'productionEntries'));
         const workerExpQuery = query(collection(firestore, 'workers', worker.id, 'expenses'));
+        const advanceQuery = query(collection(firestore, 'workers', worker.id, 'advancePayments'));
         
         const prodSnapshot = await getDocs(prodQuery);
         prodSnapshot.forEach(doc => {
@@ -75,20 +77,26 @@ export default function AdminDashboardPage() {
         workerExpSnapshot.forEach(doc => {
             totalWorkerExp += doc.data().amount || 0;
         });
+        
+        const advanceSnapshot = await getDocs(advanceQuery);
+        advanceSnapshot.forEach(doc => {
+            totalAdv += doc.data().amount || 0;
+        });
       }
       setTotalPieces(totalPcs);
       setTotalWorkerExpenses(totalWorkerExp);
+      setTotalAdvances(totalAdv);
       setProductionData(prodData.sort((a,b) => new Date(a.date).getTime() - new Date(b.date).getTime()));
     };
 
     fetchData();
   }, [firestore, workers]);
 
-  React.useEffect(() => {
+  const totalCompanyExpenses = React.useMemo(() => {
     if(expenses) {
-        const total = expenses.reduce((sum, expense) => sum + (expense.amount || 0), 0);
-        setTotalExpenses(total);
+        return expenses.reduce((sum, expense) => sum + (expense.amount || 0), 0);
     }
+    return 0;
   }, [expenses]);
 
 
@@ -133,21 +141,21 @@ export default function AdminDashboardPage() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-destructive">
-                {formatCurrency(totalWorkerExpenses)}
+                {formatCurrency(totalAdvances)}
               </div>
               <p className="text-xs text-muted-foreground">চলতি মাসে মোট প্রদান</p>
             </CardContent>
           </Card>
         </Link>
-         <Link href="/admin/expenses" className="transform transition-transform duration-200 hover:scale-105 group">
+         <Link href="/admin/worker-expenses" className="transform transition-transform duration-200 hover:scale-105 group">
             <Card className="transition-colors group-hover:border-primary">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">অন্যান্য খরচ</CardTitle>
+                    <CardTitle className="text-sm font-medium">কর্মীর খরচ প্রদান</CardTitle>
                     <Wallet2 className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
                     <div className="text-2xl font-bold">
-                    {isLoadingExpenses ? '...' : formatCurrency(totalExpenses)}
+                    {formatCurrency(totalWorkerExpenses)}
                     </div>
                     <p className="text-xs text-muted-foreground">এখন পর্যন্ত মোট খরচ</p>
                 </CardContent>
