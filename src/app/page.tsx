@@ -162,7 +162,7 @@ export default function LoginPage() {
           <CardContent className="space-y-4">
             <div className="grid gap-2">
               <div className="flex justify-between items-center">
-                 <Label htmlFor="credential">ইমেইল অথবা মোবাইল নম্বর</Label>
+                 <Label htmlFor="credential">ইমেইল</Label>
                  {rememberedCredential && (
                     <Button variant="link" size="sm" className="h-auto p-0" onClick={handleForgetCredential}>
                       পরিবর্তন করুন
