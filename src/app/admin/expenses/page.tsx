@@ -192,7 +192,10 @@ export default function ExpensesPage() {
             );
             const querySnapshot = await getDocs(expenseQuery);
             querySnapshot.forEach(doc => {
-                expenses.push({ id: doc.id, ...doc.data() } as WorkerExpense);
+              const expenseData = { id: doc.id, ...doc.data() } as WorkerExpense;
+              if (expenseData.description !== 'Approved expense request') {
+                expenses.push(expenseData);
+              }
             });
         }
         setAllExpenses(expenses.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()));
@@ -302,7 +305,7 @@ export default function ExpensesPage() {
               <div className='flex gap-2'>
                 <Button onClick={() => setIsDialogOpen(true)} variant="default">
                     <PlusCircle className="mr-2 h-4 w-4" />
-                    নতুন খরচ
+                    খরচ যোগ করুন
                 </Button>
                 <Button onClick={handleDownloadPdf} variant="outline">
                     <Download className="mr-2 h-4 w-4" />
