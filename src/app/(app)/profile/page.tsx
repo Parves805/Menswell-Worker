@@ -15,7 +15,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useUser, useFirestore, useAuth, useDoc, useMemoFirebase, updateDocumentNonBlocking } from '@/firebase';
 import { Camera, Eye, EyeOff, LogOut } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
-import { useRef, useState, ChangeEvent } from 'react';
+import { useRef, useState, ChangeEvent, FormEvent } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { updateProfile } from 'firebase/auth';
@@ -42,7 +42,7 @@ export default function ProfilePage() {
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isUploading, setIsUploading] = useState(false);
-  const [newPhotoURL, setNewPhotoURL] = useState<string | null>(null);
+  
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
 
@@ -52,6 +52,21 @@ export default function ProfilePage() {
   }, [firestore, user]);
 
   const { data: workerData, isLoading: isLoadingWorker } = useDoc<{ contact: string, photo: string }>(workerDocRef);
+  
+  const [name, setName] = useState(user?.displayName ?? '');
+  const [contact, setContact] = useState(workerData?.contact ?? '');
+  const [photoUrl, setPhotoUrl] = useState(workerData?.photo ?? user?.photoURL ?? '');
+  const [isSaving, setIsSaving] = useState(false);
+  
+  
+  // Sync state when data loads
+  useState(() => {
+    if (user?.displayName) setName(user.displayName);
+    if (workerData?.contact) setContact(workerData.contact);
+    if (workerData?.photo) setPhotoUrl(workerData.photo);
+    else if (user?.photoURL) setPhotoUrl(user.photoURL);
+  });
+  
 
   const handleLogout = () => {
     if (auth) {
@@ -71,7 +86,7 @@ export default function ProfilePage() {
 
   const handleFileChange = async (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (!file || !user || !auth) return;
+    if (!file || !user || !auth?.currentUser) return;
 
     setIsUploading(true);
 
@@ -82,17 +97,17 @@ export default function ProfilePage() {
 
       // Upload the file
       const snapshot = await uploadBytes(fileRef, file);
-      const photoURL = await getDownloadURL(snapshot.ref);
+      const downloadedPhotoURL = await getDownloadURL(snapshot.ref);
 
       // Update Firebase Auth profile
-      await updateProfile(user, { photoURL });
+      await updateProfile(auth.currentUser, { photoURL: downloadedPhotoURL });
 
       // Update Firestore document using non-blocking update
       if (workerDocRef) {
-        updateDocumentNonBlocking(workerDocRef, { photo: photoURL });
+        updateDocumentNonBlocking(workerDocRef, { photo: downloadedPhotoURL });
       }
 
-      setNewPhotoURL(photoURL); // Update local state to re-render avatar
+      setPhotoUrl(downloadedPhotoURL);
       
       toast({
         title: 'ছবি সফলভাবে আপলোড হয়েছে',
@@ -109,9 +124,47 @@ export default function ProfilePage() {
       setIsUploading(false);
     }
   };
-  
-  const currentUserPhoto = newPhotoURL || workerData?.photo || user.photoURL;
 
+  const handleProfileUpdate = async (e: FormEvent) => {
+    e.preventDefault();
+    if (!user || !auth?.currentUser || !workerDocRef) return;
+
+    setIsSaving(true);
+    try {
+        // Update auth profile
+        if (user.displayName !== name || user.photoURL !== photoUrl) {
+            await updateProfile(auth.currentUser, {
+                displayName: name,
+                photoURL: photoUrl,
+            });
+        }
+        
+        // Update firestore document
+        const workerUpdateData: any = {};
+        if (workerData?.name !== name) workerUpdateData.name = name;
+        if (workerData?.contact !== contact) workerUpdateData.contact = contact;
+        if (workerData?.photo !== photoUrl) workerUpdateData.photo = photoUrl;
+
+        if (Object.keys(workerUpdateData).length > 0) {
+            updateDocumentNonBlocking(workerDocRef, workerUpdateData);
+        }
+
+        toast({
+            title: 'প্রোফাইল আপডেট হয়েছে',
+            description: 'আপনার তথ্য সফলভাবে আপডেট করা হয়েছে।',
+        });
+
+    } catch (error) {
+         toast({
+            variant: 'destructive',
+            title: 'আপডেট ব্যর্থ হয়েছে',
+            description: 'তথ্য আপডেট করার সময় একটি সমস্যা হয়েছে।',
+        });
+    } finally {
+        setIsSaving(false);
+    }
+  }
+  
   return (
     <div className="space-y-6">
       <Card>
@@ -126,9 +179,9 @@ export default function ProfilePage() {
             <div className="relative">
               <Avatar className="h-24 w-24 border">
                 <AvatarImage
-                  src={currentUserPhoto ?? 'https://picsum.photos/seed/99/200/200'}
+                  src={photoUrl ?? 'https://picsum.photos/seed/99/200/200'}
                   alt="ব্যবহারকারীর ছবি"
-                  key={currentUserPhoto}
+                  key={photoUrl}
                 />
                 <AvatarFallback>
                   {user.displayName?.charAt(0) ?? user.email?.charAt(0)}
@@ -140,7 +193,7 @@ export default function ProfilePage() {
                 onClick={handleCameraClick}
                 disabled={isUploading}
               >
-                <Camera className="h-4 w-4" />
+                {isUploading ? "..." : <Camera className="h-4 w-4" />}
                 <span className="sr-only">ছবি পরিবর্তন করুন</span>
               </Button>
               <input
@@ -152,18 +205,18 @@ export default function ProfilePage() {
               />
             </div>
             <div className="text-center sm:text-left">
-              <h2 className="text-2xl font-bold">{user.displayName ?? "আয়েশা খানম"}</h2>
+              <h2 className="text-2xl font-bold">{name || "নাম পাওয়া যায়নি"}</h2>
               <p className="text-muted-foreground">সুইং অপারেটর</p>
             </div>
           </div>
           
           <Separator />
 
-          <form className="space-y-4">
+          <form onSubmit={handleProfileUpdate} className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="name">পুরো নাম</Label>
-                <Input id="name" defaultValue={user.displayName ?? "আয়েশা খানম"} />
+                <Input id="name" value={name} onChange={(e) => setName(e.target.value)} />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="email">ইমেইল</Label>
@@ -176,14 +229,20 @@ export default function ProfilePage() {
               </div>
                <div className="space-y-2">
                 <Label htmlFor="phone">মোবাইল নম্বর</Label>
-                <Input id="phone" type="tel" defaultValue={workerData?.contact ?? user.phoneNumber ?? ""} />
+                <Input id="phone" type="tel" value={contact} onChange={(e) => setContact(e.target.value)} />
               </div>
                <div className="space-y-2">
                 <Label htmlFor="department">বিভাগ</Label>
                 <Input id="department" defaultValue="সুইং" disabled />
               </div>
             </div>
-            <Button>পরিবর্তন সংরক্ষণ করুন</Button>
+            <div className="space-y-2">
+                <Label htmlFor="photoUrl">প্রোফাইল ছবির URL</Label>
+                <Input id="photoUrl" value={photoUrl} onChange={(e) => setPhotoUrl(e.target.value)} placeholder="আপনার প্রোফাইল ছবির লিঙ্ক দিন"/>
+            </div>
+            <Button type="submit" disabled={isSaving}>
+                {isSaving ? 'সংরক্ষণ করা হচ্ছে...' : 'পরিবর্তন সংরক্ষণ করুন'}
+            </Button>
           </form>
         </CardContent>
       </Card>
