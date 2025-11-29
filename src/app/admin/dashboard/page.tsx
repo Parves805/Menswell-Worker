@@ -18,6 +18,7 @@ import { ProductionChart } from '@/components/admin/ProductionChart';
 import { ActivityFeed } from '@/components/admin/ActivityFeed';
 import type { Worker } from '@/lib/types';
 import { TakaIcon } from '@/components/icons';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const formatCurrency = (amount: number) =>
   new Intl.NumberFormat('bn-BD', {
@@ -42,22 +43,32 @@ export default function AdminDashboardPage() {
   const { data: expenses, isLoading: isLoadingExpenses } = useCollection(expensesQuery);
 
   const [productionData, setProductionData] = React.useState<{ date: string; pieces: number }[]>([]);
+  const [isLoadingProduction, setIsLoadingProduction] = React.useState(true);
   const [totalPieces, setTotalPieces] = React.useState(0);
-  const [totalWorkerExpenses, setTotalWorkerExpenses] = React.useState(0);
   const [totalAdvances, setTotalAdvances] = React.useState(0);
+  const [isLoadingAdvances, setIsLoadingAdvances] = React.useState(true);
+  
+  const totalCompanyExpenses = React.useMemo(() => {
+    if(expenses) {
+        return expenses.reduce((sum, expense) => sum + (expense.amount || 0), 0);
+    }
+    return 0;
+  }, [expenses]);
+
 
   React.useEffect(() => {
     if (!firestore || !workers) return;
 
     const fetchData = async () => {
+      setIsLoadingProduction(true);
+      setIsLoadingAdvances(true);
+
       let totalPcs = 0;
-      let totalWorkerExp = 0;
       let totalAdv = 0;
       const prodData: { date: string, pieces: number }[] = [];
 
       for (const worker of workers) {
         const prodQuery = query(collection(firestore, 'workers', worker.id, 'productionEntries'));
-        const workerExpQuery = query(collection(firestore, 'workers', worker.id, 'expenses'));
         const advanceQuery = query(collection(firestore, 'workers', worker.id, 'advancePayments'));
         
         const prodSnapshot = await getDocs(prodQuery);
@@ -72,11 +83,6 @@ export default function AdminDashboardPage() {
                 prodData.push({ date: dateStr, pieces: data.pieceCount || 0 });
             }
         });
-
-        const workerExpSnapshot = await getDocs(workerExpQuery);
-        workerExpSnapshot.forEach(doc => {
-            totalWorkerExp += doc.data().amount || 0;
-        });
         
         const advanceSnapshot = await getDocs(advanceQuery);
         advanceSnapshot.forEach(doc => {
@@ -84,20 +90,15 @@ export default function AdminDashboardPage() {
         });
       }
       setTotalPieces(totalPcs);
-      setTotalWorkerExpenses(totalWorkerExp);
       setTotalAdvances(totalAdv);
       setProductionData(prodData.sort((a,b) => new Date(a.date).getTime() - new Date(b.date).getTime()));
+      
+      setIsLoadingProduction(false);
+      setIsLoadingAdvances(false);
     };
 
     fetchData();
   }, [firestore, workers]);
-
-  const totalCompanyExpenses = React.useMemo(() => {
-    if(expenses) {
-        return expenses.reduce((sum, expense) => sum + (expense.amount || 0), 0);
-    }
-    return 0;
-  }, [expenses]);
 
 
   return (
@@ -119,7 +120,7 @@ export default function AdminDashboardPage() {
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{isLoadingWorkers ? '...' : workers?.length ?? 0}</div>
+            {isLoadingWorkers ? <Skeleton className="h-7 w-12" /> : <div className="text-2xl font-bold">{workers?.length ?? 0}</div>}
             <p className="text-xs text-muted-foreground">নিবন্ধিত কর্মীর সংখ্যা</p>
           </CardContent>
         </Card>
@@ -129,8 +130,18 @@ export default function AdminDashboardPage() {
             <Scissors className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{totalPieces.toLocaleString('bn-BD')} পিস</div>
+            {isLoadingProduction ? <Skeleton className="h-7 w-20" /> : <div className="text-2xl font-bold">{totalPieces.toLocaleString('bn-BD')} পিস</div>}
             <p className="text-xs text-muted-foreground">আজ সকল কর্মীর মোট কাজ</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">অন্যান্য খরচ</CardTitle>
+            <Wallet2 className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            {isLoadingExpenses ? <Skeleton className="h-7 w-28" /> : <div className="text-2xl font-bold">{formatCurrency(totalCompanyExpenses)}</div>}
+            <p className="text-xs text-muted-foreground">এখন পর্যন্ত মোট খরচ</p>
           </CardContent>
         </Card>
         <Link href="/admin/advance-payments" className="transform transition-transform duration-200 hover:scale-105 group">
@@ -140,27 +151,11 @@ export default function AdminDashboardPage() {
               <TakaIcon className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-destructive">
-                {formatCurrency(totalAdvances)}
-              </div>
+              {isLoadingAdvances ? <Skeleton className="h-7 w-28" /> : <div className="text-2xl font-bold text-destructive">{formatCurrency(totalAdvances)}</div>}
               <p className="text-xs text-muted-foreground">চলতি মাসে মোট প্রদান</p>
             </CardContent>
           </Card>
         </Link>
-         <Link href="/admin/worker-expenses" className="transform transition-transform duration-200 hover:scale-105 group">
-            <Card className="transition-colors group-hover:border-primary">
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">কর্মীর খরচ প্রদান</CardTitle>
-                    <Wallet2 className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                    <div className="text-2xl font-bold">
-                    {formatCurrency(totalWorkerExpenses)}
-                    </div>
-                    <p className="text-xs text-muted-foreground">এখন পর্যন্ত মোট খরচ</p>
-                </CardContent>
-            </Card>
-         </Link>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
