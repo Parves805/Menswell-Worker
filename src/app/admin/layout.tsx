@@ -121,27 +121,22 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
     );
   }
   
-  const companyLogo = settings?.logoUrl ? (
-    <Avatar className="size-6 rounded-none">
-        <AvatarImage src={settings.logoUrl} alt="Company Logo" className='object-contain' />
-        <AvatarFallback className="bg-transparent"><GarmentFlowIcon className="size-6" /></AvatarFallback>
-    </Avatar>
-    ) : <GarmentFlowIcon className="size-6" />;
-  
   return (
     <>
       <Sidebar side="left" collapsible="icon">
         <SidebarHeader>
-          <div className="flex items-center gap-2">
-            <Button variant="ghost" size="icon" className="shrink-0" asChild>
-              <Link href="/admin/dashboard">
-                {companyLogo}
-              </Link>
-            </Button>
-            <h1 className="text-lg font-semibold tracking-tight">
-              অ্যাডমিন
-            </h1>
-          </div>
+          <Link href="/admin/dashboard" className="flex items-center gap-2">
+            {settings?.logoUrl ? (
+               <Avatar className="size-6 rounded-none">
+                  <AvatarImage src={settings.logoUrl} alt="Company Logo" className='object-contain' />
+                  <AvatarFallback className="bg-transparent"></AvatarFallback>
+              </Avatar>
+            ) : (
+              !settings?.companyName && <GarmentFlowIcon className="size-6" />
+            )}
+             {settings?.companyName && <h1 className="text-lg font-semibold tracking-tight">{settings.companyName}</h1>}
+             {!settings?.logoUrl && !settings?.companyName && <h1 className="text-lg font-semibold tracking-tight">অ্যাডমিন</h1>}
+          </Link>
         </SidebarHeader>
         <SidebarContent>
           <SidebarMenu>

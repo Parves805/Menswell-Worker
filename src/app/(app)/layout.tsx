@@ -66,15 +66,6 @@ function AppLayoutContent({ children }: { children: React.ReactNode }) {
   );
   const { data: settings } = useDoc<AppSettings>(settingsDocRef);
   
-  const companyName = settings?.companyName || 'গার্মেন্টফ্লো';
-  const companyLogo = settings?.logoUrl ? (
-    <Avatar className="size-8 rounded-none">
-        <AvatarImage src={settings.logoUrl} alt="Company Logo" className='object-contain' />
-        <AvatarFallback className="bg-transparent"><GarmentFlowIcon className="size-8 text-primary" /></AvatarFallback>
-    </Avatar>
-    ) : <GarmentFlowIcon className="size-8 text-primary" />;
-
-
   React.useEffect(() => {
     // This is the single source of truth for protecting the app routes.
     // If auth state is determined and there is no user, redirect to login.
@@ -107,8 +98,16 @@ function AppLayoutContent({ children }: { children: React.ReactNode }) {
                 href="/dashboard"
                 className="flex items-center gap-3 text-lg font-semibold md:text-base"
               >
-                {companyLogo}
-                <span className="font-bold">{companyName}</span>
+                {settings?.logoUrl ? (
+                  <Avatar className="size-8 rounded-none">
+                      <AvatarImage src={settings.logoUrl} alt="Company Logo" className='object-contain' />
+                      <AvatarFallback className="bg-transparent"></AvatarFallback>
+                  </Avatar>
+                ) : (
+                  !settings?.companyName && <GarmentFlowIcon className="size-8 text-primary" />
+                )}
+                {settings?.companyName && <span className="font-bold">{settings.companyName}</span>}
+                {!settings?.logoUrl && !settings?.companyName && <span className="font-bold">গার্মেন্টফ্লো</span>}
               </Link>
           </div>
           
@@ -142,8 +141,16 @@ function AppLayoutContent({ children }: { children: React.ReactNode }) {
                   href="/dashboard"
                   className="flex items-center gap-2 text-lg font-semibold"
                 >
-                  {companyLogo}
-                  <span>{companyName}</span>
+                  {settings?.logoUrl ? (
+                    <Avatar className="size-8 rounded-none">
+                        <AvatarImage src={settings.logoUrl} alt="Company Logo" className='object-contain' />
+                        <AvatarFallback className="bg-transparent"></AvatarFallback>
+                    </Avatar>
+                  ) : (
+                     !settings?.companyName && <GarmentFlowIcon className="size-8 text-primary" />
+                  )}
+                  {settings?.companyName && <span>{settings.companyName}</span>}
+                  {!settings?.logoUrl && !settings?.companyName && <span>গার্মেন্টফ্লো</span>}
                 </Link>
                  {mainNavItems.map(item => (
                     <Link
