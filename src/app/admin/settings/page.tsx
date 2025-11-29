@@ -23,13 +23,13 @@ export default function SettingsPage() {
     );
     const { data: savedSettings, isLoading } = useDoc<AppSettings>(settingsDocRef);
 
-    const [companyName, setCompanyName] = React.useState('গার্মেন্টফ্লো');
+    const [companyName, setCompanyName] = React.useState('মেনসওয়েল');
     const [logoUrl, setLogoUrl] = React.useState('');
     const [themeColor, setThemeColor] = React.useState('#16A34A'); // Default green
 
     useEffect(() => {
         if (savedSettings) {
-            setCompanyName(savedSettings.companyName || 'গার্মেন্টফ্লো');
+            setCompanyName(savedSettings.companyName || 'মেনসওয়েল');
             setLogoUrl(savedSettings.logoUrl || '');
             setThemeColor(savedSettings.themeColor || '#16A34A');
         }
