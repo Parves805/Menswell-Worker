@@ -11,8 +11,6 @@ import {
   User,
   Wallet2,
   LogOut,
-  CircleDollarSign,
-  Scissors,
   Bell,
   Menu,
 } from 'lucide-react';
@@ -26,7 +24,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { GarmentFlowIcon } from '@/components/icons';
+import { GarmentFlowIcon, TakaIcon } from '@/components/icons';
 import type { NavItem, AppSettings } from '@/lib/types';
 import { useAuth, useUser, useDoc, useFirestore, useMemoFirebase } from '@/firebase';
 import { usePathname, useRouter } from 'next/navigation';
@@ -42,8 +40,8 @@ import { doc } from 'firebase/firestore';
 const mainNavItems: NavItem[] = [
   { title: 'হোম', href: '/dashboard', icon: <Home /> },
   { title: 'দৈনিক এন্ট্রি', href: '/entry', icon: <PlusSquare /> },
-  { title: 'সকল এন্ট্রি', href: '/all-entries', icon: <Scissors /> },
-  { title: 'অগ্রিম', href: '/advances', icon: <CircleDollarSign /> },
+  { title: 'সকল এন্ট্রি', href: '/all-entries', icon: <TakaIcon /> },
+  { title: 'অগ্রিম', href: '/advances', icon: <TakaIcon /> },
   { title: 'চ্যাট', href: '/chat', icon: <MessageCircle /> },
 ];
 
@@ -173,5 +171,3 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     <AppLayoutContent>{children}</AppLayoutContent>
   )
 }
-
-    

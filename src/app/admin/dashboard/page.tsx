@@ -9,7 +9,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Users, Scissors, Wallet2, Landmark, CircleDollarSign } from 'lucide-react';
+import { Users, Scissors, Wallet2, Landmark } from 'lucide-react';
 import Link from 'next/link';
 import React from 'react';
 import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
@@ -17,6 +17,7 @@ import { collection, query, getDocs } from 'firebase/firestore';
 import { ProductionChart } from '@/components/admin/ProductionChart';
 import { ActivityFeed } from '@/components/admin/ActivityFeed';
 import type { Worker } from '@/lib/types';
+import { TakaIcon } from '@/components/icons';
 
 const formatCurrency = (amount: number) =>
   new Intl.NumberFormat('bn-BD', {
@@ -128,7 +129,7 @@ export default function AdminDashboardPage() {
           <Card className="transition-colors group-hover:border-primary">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">কর্মীর খরচ প্রদান</CardTitle>
-              <CircleDollarSign className="h-4 w-4 text-muted-foreground" />
+              <TakaIcon className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-destructive">

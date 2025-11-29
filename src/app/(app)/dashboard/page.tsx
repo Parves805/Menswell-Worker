@@ -26,6 +26,7 @@ import React, { useState } from 'react';
 import { ProductionEntry, SliderImage, AdvancePayment, WorkerExpense } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
+import { TakaIcon } from '@/components/icons';
 
 const formatCurrency = (amount: number) =>
   new Intl.NumberFormat('bn-BD', {
@@ -199,7 +200,7 @@ export default function DashboardPage() {
           <Card className="transition-colors group-hover:border-primary">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">মোট অগ্রিম</CardTitle>
-              <CircleDollarSign className="h-4 w-4 text-muted-foreground" />
+              <TakaIcon className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
                {isLoadingAdvances ? <Skeleton className="h-7 w-28" /> : (
