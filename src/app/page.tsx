@@ -35,15 +35,6 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [rememberedCredential, setRememberedCredential] = useState<string | null>(null);
-
-  useEffect(() => {
-    const savedCredential = localStorage.getItem(USER_CREDENTIAL_KEY);
-    if (savedCredential) {
-      // setRememberedCredential(savedCredential);
-      // setCredential(savedCredential);
-    }
-  }, []);
 
   useEffect(() => {
     if (!isUserLoading && user) {
@@ -133,14 +124,6 @@ export default function LoginPage() {
     }, 5000);
   };
   
-  const handleForgetCredential = () => {
-    localStorage.removeItem(USER_CREDENTIAL_KEY);
-    setRememberedCredential(null);
-    setCredential('');
-    setPassword('');
-  }
-
-
   if (isUserLoading || user) {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center">
@@ -163,11 +146,6 @@ export default function LoginPage() {
             <div className="grid gap-2">
               <div className="flex justify-between items-center">
                  <Label htmlFor="credential">ইমেইল</Label>
-                 {rememberedCredential && (
-                    <Button variant="link" size="sm" className="h-auto p-0" onClick={handleForgetCredential}>
-                      পরিবর্তন করুন
-                    </Button>
-                 )}
               </div>
               <Input
                 id="credential"
@@ -176,8 +154,6 @@ export default function LoginPage() {
                 required
                 value={credential}
                 onChange={(e) => setCredential(e.target.value)}
-                disabled={!!rememberedCredential}
-                className={!!rememberedCredential ? 'bg-muted' : ''}
               />
             </div>
             <div className="grid gap-2">

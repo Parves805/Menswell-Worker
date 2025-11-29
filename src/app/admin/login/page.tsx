@@ -33,16 +33,6 @@ export default function AdminLoginPage() {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [rememberedEmail, setRememberedEmail] = useState<string | null>(null);
-
-  useEffect(() => {
-    // Check for remembered credential on mount
-    const savedCredential = localStorage.getItem(ADMIN_CREDENTIAL_KEY);
-    if (savedCredential) {
-      // setRememberedEmail(savedCredential);
-      // setEmail(savedCredential);
-    }
-  }, []);
 
   useEffect(() => {
     // If a user is already logged in, redirect them away from the login page
@@ -96,13 +86,6 @@ export default function AdminLoginPage() {
     }, 5000);
   };
   
-  const handleForgetCredential = () => {
-    localStorage.removeItem(ADMIN_CREDENTIAL_KEY);
-    setRememberedEmail(null);
-    setEmail('');
-    setPassword('');
-  }
-
   // Show a loading screen while we determine auth state
   if (isUserLoading || user) {
     return (
@@ -127,11 +110,6 @@ export default function AdminLoginPage() {
             <div className="grid gap-2">
                <div className="flex justify-between items-center">
                  <Label htmlFor="email">ইমেইল</Label>
-                 {rememberedEmail && (
-                    <Button variant="link" size="sm" className="h-auto p-0" onClick={handleForgetCredential}>
-                      পরিবর্তন করুন
-                    </Button>
-                 )}
               </div>
               <Input
                 id="email"
@@ -140,8 +118,6 @@ export default function AdminLoginPage() {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                disabled={!!rememberedEmail}
-                className={!!rememberedEmail ? 'bg-muted' : ''}
               />
             </div>
             <div className="grid gap-2">
