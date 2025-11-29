@@ -1,7 +1,7 @@
 
 'use client';
 
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import {
   Card,
   CardContent,
@@ -195,14 +195,18 @@ export default function WorkerExpensesPage() {
     try {
         const expenses: WorkerExpense[] = [];
         for (const worker of workers) {
-        const expenseQuery = query(
-            collection(firestore, 'workers', worker.id, 'expenses'),
-            orderBy('date', 'desc')
-        );
-        const querySnapshot = await getDocs(expenseQuery);
-        querySnapshot.forEach(doc => {
-            expenses.push({ id: doc.id, ...doc.data() } as WorkerExpense);
-        });
+            const expenseQuery = query(
+                collection(firestore, 'workers', worker.id, 'expenses'),
+                orderBy('date', 'desc')
+            );
+            const querySnapshot = await getDocs(expenseQuery);
+            querySnapshot.forEach(doc => {
+                const expenseData = { id: doc.id, ...doc.data() } as WorkerExpense;
+                // Filter out expenses that are from approved requests
+                if (expenseData.description !== 'Approved expense request') {
+                    expenses.push(expenseData);
+                }
+            });
         }
         setAllExpenses(expenses.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()));
     } catch(e) {
@@ -212,7 +216,7 @@ export default function WorkerExpensesPage() {
     }
   }, [firestore, workers]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     fetchExpenses();
   }, [fetchExpenses]);
   
