@@ -652,7 +652,7 @@
             "description": "The primary theme color for the user panel (HEX code)."
         }
       },
-      "required": ["id", "companyName"]
+      "required": ["id"]
     }
   },
   "auth": {

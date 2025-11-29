@@ -4,6 +4,7 @@
 
 
 
+
 export type NavItem = {
   title: string;
   href: string;
@@ -148,8 +149,8 @@ export type WorkerExpense = {
 
 export type AppSettings = {
     id?: string;
-    companyName: string;
-    logoUrl: string;
+    companyName?: string;
+    logoUrl?: string;
     themeColor: string;
 };
 
@@ -186,6 +187,7 @@ export type ActivityLog = {
     
 
     
+
 
 
 
