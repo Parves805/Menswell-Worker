@@ -29,7 +29,8 @@ import {
 import { collection, query, orderBy, getDocs, doc } from 'firebase/firestore';
 import type { Worker, AdvancePayment } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
-import { PlusCircle, Landmark, MoreHorizontal, CheckCircle, Trash2, TakaIcon } from 'lucide-react';
+import { PlusCircle, Landmark, MoreHorizontal, CheckCircle, Trash2 } from 'lucide-react';
+import { TakaIcon } from '@/components/icons';
 import {
   Dialog,
   DialogContent,
