@@ -115,47 +115,47 @@ export default function AdminDashboardPage() {
       </div>
       
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card>
+        <Card className='bg-primary text-primary-foreground'>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">মোট কর্মী</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
+            <Users className="h-4 w-4 text-primary-foreground/80" />
           </CardHeader>
           <CardContent>
-            {isLoadingWorkers ? <Skeleton className="h-7 w-12" /> : <div className="text-2xl font-bold">{workers?.length ?? 0}</div>}
-            <p className="text-xs text-muted-foreground">নিবন্ধিত কর্মীর সংখ্যা</p>
+            {isLoadingWorkers ? <Skeleton className="h-7 w-12 bg-white/20" /> : <div className="text-2xl font-bold">{workers?.length ?? 0}</div>}
+            <p className="text-xs text-primary-foreground/80">নিবন্ধিত কর্মীর সংখ্যা</p>
           </CardContent>
         </Card>
-        <Card>
+        <Card className='bg-primary text-primary-foreground'>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">আজকের উৎপাদন</CardTitle>
-            <Scissors className="h-4 w-4 text-muted-foreground" />
+            <Scissors className="h-4 w-4 text-primary-foreground/80" />
           </CardHeader>
           <CardContent>
-            {isLoadingProduction ? <Skeleton className="h-7 w-20" /> : <div className="text-2xl font-bold">{totalPieces.toLocaleString('bn-BD')} পিস</div>}
-            <p className="text-xs text-muted-foreground">আজ সকল কর্মীর মোট কাজ</p>
+            {isLoadingProduction ? <Skeleton className="h-7 w-20 bg-white/20" /> : <div className="text-2xl font-bold">{totalPieces.toLocaleString('bn-BD')} পিস</div>}
+            <p className="text-xs text-primary-foreground/80">আজ সকল কর্মীর মোট কাজ</p>
           </CardContent>
         </Card>
         <Link href="/admin/expenses" className="transform transition-transform duration-200 hover:scale-105 group">
-          <Card className="transition-colors group-hover:border-primary">
+          <Card className="transition-colors bg-primary text-primary-foreground group-hover:bg-primary/90">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">কর্মীদের মোট খরচ</CardTitle>
-              <Wallet2 className="h-4 w-4 text-muted-foreground" />
+              <Wallet2 className="h-4 w-4 text-primary-foreground/80" />
             </CardHeader>
             <CardContent>
-              {isLoadingWorkerExpenses ? <Skeleton className="h-7 w-28" /> : <div className="text-2xl font-bold">{formatCurrency(totalWorkerExpenses)}</div>}
-              <p className="text-xs text-muted-foreground">এখন পর্যন্ত মোট খরচ</p>
+              {isLoadingWorkerExpenses ? <Skeleton className="h-7 w-28 bg-white/20" /> : <div className="text-2xl font-bold">{formatCurrency(totalWorkerExpenses)}</div>}
+              <p className="text-xs text-primary-foreground/80">এখন পর্যন্ত মোট খরচ</p>
             </CardContent>
           </Card>
         </Link>
         <Link href="/admin/advance-payments" className="transform transition-transform duration-200 hover:scale-105 group">
-          <Card className="transition-colors group-hover:border-primary">
+          <Card className="transition-colors bg-primary text-primary-foreground group-hover:bg-primary/90">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">অগ্রিম প্রদান</CardTitle>
-              <TakaIcon className="h-4 w-4 text-muted-foreground" />
+              <TakaIcon className="h-4 w-4 text-primary-foreground/80" />
             </CardHeader>
             <CardContent>
-              {isLoadingAdvances ? <Skeleton className="h-7 w-28" /> : <div className="text-2xl font-bold text-destructive">{formatCurrency(totalAdvances)}</div>}
-              <p className="text-xs text-muted-foreground">চলতি মাসে মোট প্রদান</p>
+              {isLoadingAdvances ? <Skeleton className="h-7 w-28 bg-white/20" /> : <div className="text-2xl font-bold">{formatCurrency(totalAdvances)}</div>}
+              <p className="text-xs text-primary-foreground/80">চলতি মাসে মোট প্রদান</p>
             </CardContent>
           </Card>
         </Link>
