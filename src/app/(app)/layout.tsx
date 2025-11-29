@@ -96,7 +96,7 @@ function AppLayoutContent({ children }: { children: React.ReactNode }) {
        <header className="sticky top-0 flex h-16 items-center gap-4 border-b bg-background pr-4 md:pr-6 z-30">
           <Link
             href="/dashboard"
-            className="flex items-center gap-3 text-lg font-semibold pl-4"
+            className="flex items-center gap-3 text-lg font-semibold pl-2"
           >
              {settings?.logoUrl ? (
                 <div className="relative h-12 w-48">
