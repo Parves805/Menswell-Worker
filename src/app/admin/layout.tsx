@@ -50,6 +50,7 @@ const mainNavItems: NavItem[] = [
   { title: 'উৎপাদন', href: '/admin/production', icon: <Scissors /> },
   { title: 'উৎপাদন অনুরোধ', href: '/admin/production-requests', icon: <CheckSquare /> },
   { title: 'টাকার অনুরোধ', href: '/admin/advance-requests', icon: <Wallet /> },
+  { title: 'কর্মীর খরচ', href: '/admin/worker-expenses', icon: <Wallet /> },
   { title: 'অগ্রিম প্রদান', href: '/admin/advance-payments', icon: <Landmark /> },
   { title: 'ক্যাটাগরি', href: '/admin/categories', icon: <Shapes /> },
   { title: 'স্লাইডার', href: '/admin/slider', icon: <ImageIcon /> },
@@ -145,7 +146,7 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">
-      <aside className="hidden border-r bg-muted/40 md:block">
+      <aside className="hidden border-r md:block">
         <div className="flex h-full max-h-screen flex-col gap-2">
           <div className="flex h-14 items-center border-b px-4 lg:h-[60px] lg:px-6">
             <Link href="/admin/dashboard" className="flex items-center gap-2 font-semibold">
@@ -181,29 +182,9 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
           </Link>
           
           <div className="w-full flex-1 md:hidden">
-             {renderLogoOrName()}
           </div>
 
           <div className="flex items-center gap-2">
-             <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="secondary" size="icon" className="rounded-full">
-                  <Avatar>
-                    <AvatarImage src={user.photoURL ?? "https://picsum.photos/seed/admin/40/40"} alt="অ্যাডমিনের ছবি" />
-                    <AvatarFallback>{user.email?.charAt(0).toUpperCase()}</AvatarFallback>
-                  </Avatar>
-                  <span className="sr-only">ব্যবহারকারী মেনু</span>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuLabel>{user.displayName ?? user.email}</DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => router.push('/admin/settings')}>সেটিংস</DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={handleLogout}>লগআউট</DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-
             <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
               <SheetTrigger asChild>
                 <Button
@@ -239,6 +220,25 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
                 </nav>
               </SheetContent>
             </Sheet>
+
+             <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="secondary" size="icon" className="rounded-full">
+                  <Avatar>
+                    <AvatarImage src={user.photoURL ?? "https://picsum.photos/seed/admin/40/40"} alt="অ্যাডমিনের ছবি" />
+                    <AvatarFallback>{user.email?.charAt(0).toUpperCase()}</AvatarFallback>
+                  </Avatar>
+                  <span className="sr-only">ব্যবহারকারী মেনু</span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuLabel>{user.displayName ?? user.email}</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => router.push('/admin/settings')}>সেটিংস</DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={handleLogout}>লগআউট</DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </header>
         <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">
