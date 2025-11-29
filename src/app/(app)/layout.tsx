@@ -93,12 +93,12 @@ function AppLayoutContent({ children }: { children: React.ReactNode }) {
   // Render the full layout only when we are sure a user is logged in.
   return (
     <div className='flex min-h-screen w-full flex-col'>
-       <header className="sticky top-0 flex h-16 items-center justify-between gap-4 border-b bg-background px-4 md:px-6 z-30">
+       <header className="sticky top-0 flex h-16 items-center gap-4 border-b bg-background px-4 md:px-6 z-30">
           <Link
             href="/dashboard"
             className="flex items-center gap-3 text-lg font-semibold"
           >
-            {settings?.logoUrl ? (
+             {settings?.logoUrl ? (
                 <div className="relative h-12 w-48">
                 <Image 
                     src={settings.logoUrl} 
@@ -117,66 +117,68 @@ function AppLayoutContent({ children }: { children: React.ReactNode }) {
             )}
           </Link>
           
-          <nav className="hidden flex-col gap-6 text-lg font-medium md:flex md:flex-row md:items-center md:gap-5 md:text-sm lg:gap-6">
-          {mainNavItems.map(item => (
-              <Link
-                  key={item.title}
-                  href={item.href}
-                  className={cn("transition-colors hover:text-foreground", pathname.startsWith(item.href) ? "text-foreground" : "text-muted-foreground")}
-              >
-                  {item.title}
-              </Link>
-          ))}
-          </nav>
-          
-          <Sheet>
-            <SheetTrigger asChild>
-              <Button
-                variant="outline"
-                size="icon"
-                className="shrink-0 md:hidden"
-              >
-                <Menu className="h-5 w-5" />
-                <span className="sr-only">Toggle navigation menu</span>
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="left">
-              <nav className="grid gap-6 text-lg font-medium">
+        <div className="flex items-center gap-4 ml-auto">
+            <nav className="hidden flex-col gap-6 text-lg font-medium md:flex md:flex-row md:items-center md:gap-5 md:text-sm lg:gap-6">
+            {mainNavItems.map(item => (
                 <Link
-                  href="/dashboard"
-                  className="flex items-center gap-2 text-lg font-semibold"
+                    key={item.title}
+                    href={item.href}
+                    className={cn("transition-colors hover:text-foreground", pathname.startsWith(item.href) ? "text-foreground" : "text-muted-foreground")}
                 >
-                    {settings?.logoUrl ? (
-                         <div className="relative h-10 w-40">
-                            <Image 
-                            src={settings.logoUrl} 
-                            alt="Company Logo" 
-                            fill 
-                            className='object-contain'
-                            />
-                        </div>
-                    ) : settings?.companyName ? (
-                        <span className='font-bold'>{settings.companyName}</span>
-                    ) : (
-                        <>
-                            <GarmentFlowIcon className="size-8 text-primary" />
-                            <span>গার্মেন্টফ্লো</span>
-                        </>
-                    )}
+                    {item.title}
                 </Link>
-                 {mainNavItems.map(item => (
+            ))}
+            </nav>
+            
+            <Sheet>
+                <SheetTrigger asChild>
+                <Button
+                    variant="outline"
+                    size="icon"
+                    className="shrink-0 md:hidden"
+                >
+                    <Menu className="h-5 w-5" />
+                    <span className="sr-only">Toggle navigation menu</span>
+                </Button>
+                </SheetTrigger>
+                <SheetContent side="left">
+                <nav className="grid gap-6 text-lg font-medium">
                     <Link
-                        key={item.title}
-                        href={item.href}
-                        className={cn("flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:text-primary", pathname.startsWith(item.href) ? "text-primary bg-muted" : "text-muted-foreground")}
+                    href="/dashboard"
+                    className="flex items-center gap-2 text-lg font-semibold"
                     >
-                      {React.cloneElement(item.icon, { className: "h-4 w-4"})}
-                      {item.title}
+                        {settings?.logoUrl ? (
+                            <div className="relative h-10 w-40">
+                                <Image 
+                                src={settings.logoUrl} 
+                                alt="Company Logo" 
+                                fill 
+                                className='object-contain'
+                                />
+                            </div>
+                        ) : settings?.companyName ? (
+                            <span className='font-bold'>{settings.companyName}</span>
+                        ) : (
+                            <>
+                                <GarmentFlowIcon className="size-8 text-primary" />
+                                <span>গার্মেন্টফ্লো</span>
+                            </>
+                        )}
                     </Link>
-                ))}
-              </nav>
-            </SheetContent>
-          </Sheet>
+                    {mainNavItems.map(item => (
+                        <Link
+                            key={item.title}
+                            href={item.href}
+                            className={cn("flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:text-primary", pathname.startsWith(item.href) ? "text-primary bg-muted" : "text-muted-foreground")}
+                        >
+                        {React.cloneElement(item.icon, { className: "h-4 w-4"})}
+                        {item.title}
+                        </Link>
+                    ))}
+                </nav>
+                </SheetContent>
+            </Sheet>
+        </div>
         </header>
         <main className="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-8 pb-20 md:pb-8">{children}</main>
         <BottomNav navItems={bottomNavItems} />
