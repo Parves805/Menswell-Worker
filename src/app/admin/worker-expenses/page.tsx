@@ -177,12 +177,12 @@ function AddWorkerExpenseDialog({
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent>
+      <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>{isEditMode ? 'কর্মীর খরচ সম্পাদনা করুন' : 'কর্মীর খরচ যোগ করুন'}</DialogTitle>
           <DialogDescription>{isEditMode ? `"${expenseToEdit?.workerName}"-এর খরচের বিবরণ পরিবর্তন করুন।` : 'একজন কর্মীর জন্য একটি নতুন খরচ যোগ করুন (যেমন: যাতায়াত, চিকিৎসা)।'}</DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4 pt-4">
+        <form onSubmit={handleSubmit} className="space-y-4 pt-2">
           <div className="space-y-2">
             <Label htmlFor="worker">কর্মী</Label>
             <Select name="worker" required onValueChange={setSelectedWorkerId} value={selectedWorkerId} disabled={isEditMode}>
@@ -210,7 +210,7 @@ function AddWorkerExpenseDialog({
             <Label htmlFor="amount">পরিমাণ</Label>
             <Input id="amount" type="number" value={amount} onChange={(e) => setAmount(Number(e.target.value))} required />
           </div>
-          <DialogFooter>
+          <DialogFooter className="pt-2">
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>বাতিল করুন</Button>
             <Button type="submit" disabled={isSubmitting}>
               {isSubmitting ? 'প্রসেসিং...' : (isEditMode ? 'পরিবর্তন সংরক্ষণ করুন' : 'খরচ যোগ করুন')}
@@ -322,17 +322,17 @@ export default function WorkerExpensesPage() {
         </AlertDialogContent>
       </AlertDialog>
       <Card>
-        <CardHeader className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <CardHeader className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 p-4 md:p-6">
           <div>
             <CardTitle className="flex items-center gap-2"><Wallet /> কর্মীর খরচ</CardTitle>
-            <CardDescription>কর্মীদের প্রদান করা সমস্ত খরচের হিসাব দেখুন এবং নতুন খরচ যোগ করুন।</CardDescription>
+            <CardDescription className="mt-1">কর্মীদের প্রদান করা সমস্ত খরচের হিসাব দেখুন এবং নতুন খরচ যোগ করুন।</CardDescription>
           </div>
-          <Button onClick={() => handleOpenDialog()} className="w-full md:w-auto">
+          <Button onClick={() => handleOpenDialog()} className="w-full md:w-auto" size="sm">
             <PlusCircle className="mr-2 h-4 w-4" />
             খরচ যোগ করুন
           </Button>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-0 md:p-6 md:pt-0">
           <div className="rounded-md border w-full">
             <Table>
               <TableHeader>

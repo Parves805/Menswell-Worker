@@ -138,14 +138,14 @@ function GiveAdvanceDialog({
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent>
+      <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>অগ্রিম প্রদান করুন</DialogTitle>
           <DialogDescription>
             {worker?.name}-কে অগ্রিম টাকা প্রদান করুন।
           </DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4 pt-2">
           <div className="space-y-2">
             <Label htmlFor="date">তারিখ</Label>
             <DatePicker value={date} onSelect={setDate} />
@@ -154,7 +154,7 @@ function GiveAdvanceDialog({
             <Label htmlFor="amount">পরিমাণ</Label>
             <Input id="amount" type="number" value={amount || ''} onChange={(e) => setAmount(Number(e.target.value))} required />
           </div>
-          <DialogFooter>
+          <DialogFooter className="pt-2">
             <Button type="submit" disabled={isSubmitting}>
               {isSubmitting ? 'জমা হচ্ছে...' : 'জমা দিন'}
             </Button>
@@ -225,7 +225,7 @@ function AddPaymentDialog({
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent>
+      <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>অগ্রিমের কিস্তি পরিশোধ</DialogTitle>
           <DialogDescription>
@@ -234,12 +234,12 @@ function AddPaymentDialog({
              বর্তমান বকেয়া: <span className='font-bold text-red-500'>{formatCurrency(remainingBalance)}</span>
           </DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4 pt-2">
           <div className="space-y-2">
             <Label htmlFor="paymentAmount">পরিশোধের পরিমাণ</Label>
             <Input id="paymentAmount" type="number" max={remainingBalance} value={paymentAmount || ''} onChange={(e) => setPaymentAmount(Number(e.target.value))} required />
           </div>
-          <DialogFooter>
+          <DialogFooter className="pt-2">
             <Button type="submit" disabled={isSubmitting}>
               {isSubmitting ? 'জমা হচ্ছে...' : 'পরিশোধ যোগ করুন'}
             </Button>
@@ -379,18 +379,18 @@ export default function AdvancePaymentsPage() {
 
 
       <Card>
-        <CardHeader>
+        <CardHeader className="p-4 md:p-6">
           <CardTitle className="flex items-center gap-2"><Landmark /> অগ্রিম প্রদান</CardTitle>
-          <CardDescription>কর্মীদের অগ্রিম টাকা প্রদান করুন এবং সকল হিসাব দেখুন।</CardDescription>
+          <CardDescription className="mt-1">কর্মীদের অগ্রিম টাকা প্রদান করুন এবং সকল হিসাব দেখুন।</CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-4 md:p-6 pt-0">
           <div className="rounded-md border mb-6 w-full">
             <Table>
               <TableHeader>
                 <TableRow>
                   <TableHead>কর্মী</TableHead>
                   <TableHead>পদবি</TableHead>
-                  <TableHead className="text-right">মোট বকেয়া অগ্রিম</TableHead>
+                  <TableHead className="text-right">মোট বকেয়া</TableHead>
                   <TableHead className="text-right">কার্যকলাপ</TableHead>
                 </TableRow>
               </TableHeader>
@@ -417,7 +417,7 @@ export default function AdvancePaymentsPage() {
                     <TableCell>{worker.designation}</TableCell>
                     <TableCell className="text-right font-medium">{formatCurrency(workerAdvances.get(worker.id) || 0)}</TableCell>
                     <TableCell className="text-right">
-                      <Button onClick={() => handleOpenGiveAdvance(worker)}>অগ্রিম দিন</Button>
+                      <Button onClick={() => handleOpenGiveAdvance(worker)} size="sm">অগ্রিম দিন</Button>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -425,7 +425,7 @@ export default function AdvancePaymentsPage() {
             </Table>
           </div>
 
-          <CardTitle className="text-lg mb-2 mt-8">সকল অগ্রিম প্রদানের তালিকা</CardTitle>
+          <h3 className="text-lg font-semibold mb-2 mt-6">সকল অগ্রিম প্রদানের তালিকা</h3>
           <div className="rounded-md border w-full">
             <Table>
               <TableHeader>

@@ -151,14 +151,14 @@ export function AddProductionEntryDialog({
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-lg">
+      <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>নতুন উৎপাদন এন্ট্রি</DialogTitle>
           <DialogDescription>
             একজন কর্মীর জন্য দৈনিক কাজের হিসাব যোগ করুন।
           </DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4 pt-4">
+        <form onSubmit={handleSubmit} className="space-y-4 pt-2">
           <div className="space-y-2">
             <Label htmlFor="date">তারিখ</Label>
             <DatePicker name="date" value={date} onSelect={setDate} />
@@ -181,23 +181,24 @@ export function AddProductionEntryDialog({
               </Select>
             </div>
           )}
+          
+          <div className="space-y-2">
+            <Label htmlFor="category">ক্যাটাগরি</Label>
+            <Select name="category" required onValueChange={setSelectedCategoryId} value={selectedCategoryId}>
+              <SelectTrigger id="category">
+                <SelectValue placeholder="ক্যাটাগরি নির্বাচন করুন" />
+              </SelectTrigger>
+              <SelectContent>
+                {isLoadingCategories ? (
+                  <SelectItem value="loading" disabled>লোড হচ্ছে...</SelectItem>
+                ) : (
+                  categories?.map(cat => <SelectItem key={cat.id} value={cat.id}>{cat.name}</SelectItem>)
+                )}
+              </SelectContent>
+            </Select>
+          </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="category">ক্যাটাগরি</Label>
-              <Select name="category" required onValueChange={setSelectedCategoryId} value={selectedCategoryId}>
-                <SelectTrigger id="category">
-                  <SelectValue placeholder="ক্যাটাগরি নির্বাচন করুন" />
-                </SelectTrigger>
-                <SelectContent>
-                  {isLoadingCategories ? (
-                    <SelectItem value="loading" disabled>লোড হচ্ছে...</SelectItem>
-                  ) : (
-                    categories?.map(cat => <SelectItem key={cat.id} value={cat.id}>{cat.name}</SelectItem>)
-                  )}
-                </SelectContent>
-              </Select>
-            </div>
+          <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="piece-count">পিস</Label>
               <Input
@@ -210,11 +211,8 @@ export function AddProductionEntryDialog({
                 onChange={(e) => setPieces(Number(e.target.value))}
               />
             </div>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="rate">দর (প্রতি পিস)</Label>
+             <div className="space-y-2">
+              <Label htmlFor="rate">দর</Label>
               <Input
                 id="rate"
                 name="rate"
@@ -228,7 +226,9 @@ export function AddProductionEntryDialog({
                 className={selectedCategoryId ? 'bg-muted' : ''}
               />
             </div>
-            <div className="space-y-2">
+          </div>
+          
+           <div className="space-y-2">
               <Label>মোট টাকা</Label>
               <Input
                 id="total"
@@ -239,9 +239,8 @@ export function AddProductionEntryDialog({
                 className="font-bold bg-muted"
               />
             </div>
-          </div>
 
-          <DialogFooter>
+          <DialogFooter className="pt-2">
             <Button type="submit" className="w-full" disabled={isSubmitting}>
               {isSubmitting ? 'জমা হচ্ছে...' : 'জমা দিন'}
             </Button>

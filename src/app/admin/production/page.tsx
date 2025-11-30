@@ -92,19 +92,19 @@ export default function ProductionPage() {
         onEntryAdded={handleEntryAdded}
       />
       <Card>
-        <CardHeader className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <CardHeader className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 p-4 md:p-6">
           <div>
             <CardTitle>উৎপাদন এন্ট্রি</CardTitle>
-            <CardDescription>
+            <CardDescription className="mt-1">
               সকল কর্মীর কাজের হিসাব দেখুন এবং নতুন এন্ট্রি যোগ করুন।
             </CardDescription>
           </div>
-          <Button onClick={() => setIsDialogOpen(true)} className="w-full md:w-auto">
+          <Button onClick={() => setIsDialogOpen(true)} className="w-full md:w-auto" size="sm">
             <PlusCircle className="mr-2 h-4 w-4" />
             এন্ট্রি যোগ করুন
           </Button>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-0 md:p-6 md:pt-0">
           <div className="rounded-md border w-full">
             <Table>
               <TableHeader>

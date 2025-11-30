@@ -326,13 +326,13 @@ export default function ProductionRequestsPage() {
 
   return (
     <Card>
-      <CardHeader>
+      <CardHeader className="p-4 md:p-6">
         <CardTitle>উৎপাদন এন্ট্রি অনুরোধ</CardTitle>
         <CardDescription>
           কর্মীদের পাঠানো কাজের অনুরোধগুলো অনুমোদন বা বাতিল করুন এবং ইতিহাস দেখুন।
         </CardDescription>
       </CardHeader>
-      <CardContent>
+      <CardContent className="p-4 md:p-6 pt-0">
         <Tabs
           defaultValue="pending"
           onValueChange={(value) =>

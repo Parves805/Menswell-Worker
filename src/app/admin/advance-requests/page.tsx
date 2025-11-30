@@ -145,12 +145,12 @@ function AddDirectExpenseDialog({
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent>
+      <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>সরাসরি খরচ প্রদান করুন</DialogTitle>
           <DialogDescription>একজন কর্মীর জন্য একটি নতুন খরচ যোগ করুন। এটি সরাসরি কর্মীর হিসাবে যুক্ত হবে।</DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4 pt-2">
           <div className="space-y-2">
             <Label htmlFor="worker">কর্মী</Label>
             <Select name="worker" required onValueChange={setSelectedWorkerId} value={selectedWorkerId}>
@@ -178,7 +178,7 @@ function AddDirectExpenseDialog({
             <Label htmlFor="amount">পরিমাণ</Label>
             <Input id="amount" type="number" value={amount || ''} onChange={(e) => setAmount(Number(e.target.value))} required />
           </div>
-          <DialogFooter>
+          <DialogFooter className="pt-2">
             <Button type="submit" disabled={isSubmitting}>
               {isSubmitting ? 'জমা হচ্ছে...' : 'খরচ যোগ করুন'}
             </Button>
@@ -461,19 +461,19 @@ export default function AdvanceRequestsPage() {
       onExpenseAdded={forceRefetch}
     />
     <Card>
-      <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+      <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-4 md:p-6">
         <div>
           <CardTitle>খরচের অনুরোধ</CardTitle>
-          <CardDescription>
+          <CardDescription className="mt-1">
             কর্মীদের পাঠানো খরচের অনুরোধগুলো অনুমোদন বা বাতিল করুন।
           </CardDescription>
         </div>
-        <Button onClick={() => setIsExpenseDialogOpen(true)}>
+        <Button onClick={() => setIsExpenseDialogOpen(true)} size="sm">
           <PlusCircle className="mr-2 h-4 w-4" />
           নতুন খরচ যোগ করুন
         </Button>
       </CardHeader>
-      <CardContent>
+      <CardContent className="p-4 md:p-6 pt-0">
         <Tabs
           defaultValue="pending"
           onValueChange={(value) =>
@@ -518,4 +518,3 @@ export default function AdvanceRequestsPage() {
     </>
   );
 }
-
