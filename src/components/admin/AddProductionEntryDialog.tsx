@@ -158,94 +158,96 @@ export function AddProductionEntryDialog({
             একজন কর্মীর জন্য দৈনিক কাজের হিসাব যোগ করুন।
           </DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4 pt-2">
-          <div className="space-y-2">
-            <Label htmlFor="date">তারিখ</Label>
-            <DatePicker name="date" value={date} onSelect={setDate} />
-          </div>
-
-          {!workerId && (
+        <div className="max-h-[70vh] overflow-y-auto pr-2">
+            <form onSubmit={handleSubmit} className="space-y-4 pt-2">
             <div className="space-y-2">
-              <Label htmlFor="worker">কর্মী</Label>
-              <Select name="worker" required onValueChange={setSelectedWorkerId} value={selectedWorkerId}>
-                <SelectTrigger id="worker">
-                  <SelectValue placeholder="কর্মী নির্বাচন করুন" />
+                <Label htmlFor="date">তারিখ</Label>
+                <DatePicker name="date" value={date} onSelect={setDate} />
+            </div>
+
+            {!workerId && (
+                <div className="space-y-2">
+                <Label htmlFor="worker">কর্মী</Label>
+                <Select name="worker" required onValueChange={setSelectedWorkerId} value={selectedWorkerId}>
+                    <SelectTrigger id="worker">
+                    <SelectValue placeholder="কর্মী নির্বাচন করুন" />
+                    </SelectTrigger>
+                    <SelectContent>
+                    {isLoadingWorkers ? (
+                        <SelectItem value="loading" disabled>লোড হচ্ছে...</SelectItem>
+                    ) : (
+                        workers?.map(w => <SelectItem key={w.id} value={w.id}>{w.name}</SelectItem>)
+                    )}
+                    </SelectContent>
+                </Select>
+                </div>
+            )}
+            
+            <div className="space-y-2">
+                <Label htmlFor="category">ক্যাটাগরি</Label>
+                <Select name="category" required onValueChange={setSelectedCategoryId} value={selectedCategoryId}>
+                <SelectTrigger id="category">
+                    <SelectValue placeholder="ক্যাটাগরি নির্বাচন করুন" />
                 </SelectTrigger>
                 <SelectContent>
-                  {isLoadingWorkers ? (
+                    {isLoadingCategories ? (
                     <SelectItem value="loading" disabled>লোড হচ্ছে...</SelectItem>
-                  ) : (
-                    workers?.map(w => <SelectItem key={w.id} value={w.id}>{w.name}</SelectItem>)
-                  )}
+                    ) : (
+                    categories?.map(cat => <SelectItem key={cat.id} value={cat.id}>{cat.name}</SelectItem>)
+                    )}
                 </SelectContent>
-              </Select>
+                </Select>
             </div>
-          )}
-          
-          <div className="space-y-2">
-            <Label htmlFor="category">ক্যাটাগরি</Label>
-            <Select name="category" required onValueChange={setSelectedCategoryId} value={selectedCategoryId}>
-              <SelectTrigger id="category">
-                <SelectValue placeholder="ক্যাটাগরি নির্বাচন করুন" />
-              </SelectTrigger>
-              <SelectContent>
-                {isLoadingCategories ? (
-                  <SelectItem value="loading" disabled>লোড হচ্ছে...</SelectItem>
-                ) : (
-                  categories?.map(cat => <SelectItem key={cat.id} value={cat.id}>{cat.name}</SelectItem>)
-                )}
-              </SelectContent>
-            </Select>
-          </div>
 
-          <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                <Label htmlFor="piece-count">পিস</Label>
+                <Input
+                    id="piece-count"
+                    name="piece-count"
+                    type="number"
+                    placeholder="e.g., 120"
+                    required
+                    value={pieces || ''}
+                    onChange={(e) => setPieces(Number(e.target.value))}
+                />
+                </div>
+                <div className="space-y-2">
+                <Label htmlFor="rate">দর</Label>
+                <Input
+                    id="rate"
+                    name="rate"
+                    type="number"
+                    step="0.01"
+                    placeholder="e.g., 5.5"
+                    required
+                    value={rate || ''}
+                    onChange={(e) => setRate(Number(e.target.value))}
+                    readOnly={!!selectedCategoryId}
+                    className={selectedCategoryId ? 'bg-muted' : ''}
+                />
+                </div>
+            </div>
+            
             <div className="space-y-2">
-              <Label htmlFor="piece-count">পিস</Label>
-              <Input
-                id="piece-count"
-                name="piece-count"
-                type="number"
-                placeholder="e.g., 120"
-                required
-                value={pieces || ''}
-                onChange={(e) => setPieces(Number(e.target.value))}
-              />
-            </div>
-             <div className="space-y-2">
-              <Label htmlFor="rate">দর</Label>
-              <Input
-                id="rate"
-                name="rate"
-                type="number"
-                step="0.01"
-                placeholder="e.g., 5.5"
-                required
-                value={rate || ''}
-                onChange={(e) => setRate(Number(e.target.value))}
-                readOnly={!!selectedCategoryId}
-                className={selectedCategoryId ? 'bg-muted' : ''}
-              />
-            </div>
-          </div>
-          
-           <div className="space-y-2">
-              <Label>মোট টাকা</Label>
-              <Input
-                id="total"
-                name="total"
-                type="text"
-                value={formatCurrency(total)}
-                readOnly
-                className="font-bold bg-muted"
-              />
-            </div>
+                <Label>মোট টাকা</Label>
+                <Input
+                    id="total"
+                    name="total"
+                    type="text"
+                    value={formatCurrency(total)}
+                    readOnly
+                    className="font-bold bg-muted"
+                />
+                </div>
 
-          <DialogFooter className="pt-2">
-            <Button type="submit" className="w-full" disabled={isSubmitting}>
-              {isSubmitting ? 'জমা হচ্ছে...' : 'জমা দিন'}
-            </Button>
-          </DialogFooter>
-        </form>
+            <DialogFooter className="pt-2 sticky bottom-0 bg-background pb-0 -mb-4">
+                <Button type="submit" className="w-full" disabled={isSubmitting}>
+                {isSubmitting ? 'জমা হচ্ছে...' : 'জমা দিন'}
+                </Button>
+            </DialogFooter>
+            </form>
+        </div>
       </DialogContent>
     </Dialog>
   );
