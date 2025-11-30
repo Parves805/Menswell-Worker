@@ -384,7 +384,7 @@ export default function AdvancePaymentsPage() {
           <CardDescription>কর্মীদের অগ্রিম টাকা প্রদান করুন এবং সকল হিসাব দেখুন।</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="rounded-md border mb-6">
+          <div className="rounded-md border mb-6 w-full">
             <Table>
               <TableHeader>
                 <TableRow>
@@ -426,7 +426,7 @@ export default function AdvancePaymentsPage() {
           </div>
 
           <CardTitle className="text-lg mb-2 mt-8">সকল অগ্রিম প্রদানের তালিকা</CardTitle>
-          <div className="rounded-md border">
+          <div className="rounded-md border w-full">
             <Table>
               <TableHeader>
                 <TableRow>

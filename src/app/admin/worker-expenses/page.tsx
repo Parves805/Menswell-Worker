@@ -322,18 +322,18 @@ export default function WorkerExpensesPage() {
         </AlertDialogContent>
       </AlertDialog>
       <Card>
-        <CardHeader className="flex flex-row items-center justify-between gap-4">
+        <CardHeader className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
             <CardTitle className="flex items-center gap-2"><Wallet /> কর্মীর খরচ</CardTitle>
             <CardDescription>কর্মীদের প্রদান করা সমস্ত খরচের হিসাব দেখুন এবং নতুন খরচ যোগ করুন।</CardDescription>
           </div>
-          <Button onClick={() => handleOpenDialog()}>
+          <Button onClick={() => handleOpenDialog()} className="w-full md:w-auto">
             <PlusCircle className="mr-2 h-4 w-4" />
             খরচ যোগ করুন
           </Button>
         </CardHeader>
         <CardContent>
-          <div className="rounded-md border">
+          <div className="rounded-md border w-full">
             <Table>
               <TableHeader>
                 <TableRow>

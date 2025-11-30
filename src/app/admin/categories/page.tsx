@@ -167,7 +167,7 @@ export default function CategoriesPage() {
             </Button>
         </CardHeader>
         <CardContent>
-           <div className="rounded-md border">
+           <div className="rounded-md border w-full">
             <Table>
               <TableHeader>
                 <TableRow>
