@@ -215,7 +215,7 @@ export default function WorkersPage() {
                     </div>
                 </CardContent>
                 <CardFooter className="bg-muted/30 p-3">
-                    <Button variant="secondary" className="w-full" asChild>
+                    <Button variant="default" className="w-full" asChild>
                         <Link href={`/admin/workers/${worker.id}`}>প্রোফাইল দেখুন</Link>
                     </Button>
                 </CardFooter>
