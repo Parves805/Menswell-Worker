@@ -15,7 +15,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useUser, useFirestore, useAuth, useDoc, useMemoFirebase, updateDocumentNonBlocking } from '@/firebase';
 import { Camera, Eye, EyeOff, LogOut } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
-import { useRef, useState, ChangeEvent, FormEvent } from 'react';
+import { useRef, useState, ChangeEvent, FormEvent, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { updateProfile } from 'firebase/auth';
@@ -51,34 +51,41 @@ export default function ProfilePage() {
     return doc(firestore, 'workers', user.uid);
   }, [firestore, user]);
 
-  const { data: workerData, isLoading: isLoadingWorker } = useDoc<{ contact: string, photo: string }>(workerDocRef);
+  const { data: workerData, isLoading: isLoadingWorker } = useDoc<{ contact: string, photo: string, name: string }>(workerDocRef);
   
-  const [name, setName] = useState(user?.displayName ?? '');
-  const [contact, setContact] = useState(workerData?.contact ?? '');
-  const [photoUrl, setPhotoUrl] = useState(workerData?.photo ?? user?.photoURL ?? '');
+  const [name, setName] = useState('');
+  const [contact, setContact] = useState('');
+  const [photoUrl, setPhotoUrl] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   
   
-  // Sync state when data loads
-  useState(() => {
+  useEffect(() => {
     if (user?.displayName) setName(user.displayName);
     if (workerData?.contact) setContact(workerData.contact);
-    if (workerData?.photo) setPhotoUrl(workerData.photo);
-    else if (user?.photoURL) setPhotoUrl(user.photoURL);
-  });
+    
+    // Prioritize worker doc photo, then auth photo
+    const pUrl = workerData?.photo ?? user?.photoURL ?? '';
+    setPhotoUrl(pUrl);
+
+  }, [user, workerData]);
   
 
   const handleLogout = () => {
     if (auth) {
       localStorage.removeItem(USER_CREDENTIAL_KEY);
       auth.signOut();
-      // The redirect will be handled by the layout's useEffect
     }
   };
 
-  if (!user || isLoadingWorker) {
+  if (isLoadingWorker) {
     return <p>লোড হচ্ছে...</p>;
   }
+  
+  if (!user) {
+    // This should ideally be handled by the layout, but as a safeguard:
+    return <p>ব্যবহারকারী খুঁজে পাওয়া যায়নি। অনুগ্রহ করে আবার লগইন করুন।</p>
+  }
+
 
   const handleCameraClick = () => {
     fileInputRef.current?.click();
@@ -95,14 +102,11 @@ export default function ProfilePage() {
       const filePath = `profile-photos/${user.uid}/${file.name}`;
       const fileRef = storageRef(storage, filePath);
 
-      // Upload the file
       const snapshot = await uploadBytes(fileRef, file);
       const downloadedPhotoURL = await getDownloadURL(snapshot.ref);
 
-      // Update Firebase Auth profile
       await updateProfile(auth.currentUser, { photoURL: downloadedPhotoURL });
 
-      // Update Firestore document using non-blocking update
       if (workerDocRef) {
         updateDocumentNonBlocking(workerDocRef, { photo: downloadedPhotoURL });
       }
@@ -131,7 +135,6 @@ export default function ProfilePage() {
 
     setIsSaving(true);
     try {
-        // Update auth profile
         if (user.displayName !== name || user.photoURL !== photoUrl) {
             await updateProfile(auth.currentUser, {
                 displayName: name,
@@ -139,7 +142,6 @@ export default function ProfilePage() {
             });
         }
         
-        // Update firestore document
         const workerUpdateData: any = {};
         if (workerData?.name !== name) workerUpdateData.name = name;
         if (workerData?.contact !== contact) workerUpdateData.contact = contact;

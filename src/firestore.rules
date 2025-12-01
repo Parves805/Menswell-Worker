@@ -85,8 +85,11 @@ service cloud.firestore {
     match /workers/{workerId} {
       allow get: if isOwner(workerId) || isAdmin();
       allow list: if isSignedIn();
+      // Allow any authenticated user to create their own worker document.
       allow create: if isOwner(workerId) && request.resource.data.id == workerId;
-      allow update: if isExistingOwner(workerId) && request.resource.data.id == resource.data.id || isAdmin();
+      // Allow user to update their own doc, but not change their ID.
+      // Admin can update anything.
+      allow update: if (isOwner(workerId) && request.resource.data.id == resource.data.id) || isAdmin();
       allow delete: if isAdmin();
     }
 
@@ -99,20 +102,11 @@ service cloud.firestore {
     }
     
     /**
-     * @description Rules for the /chats/{workerId}/messages/{messageId} collection.
-     * @path /chats/{workerId}/messages/{messageId}
+     * @description Rules for the /chats/{workerId}/{path=**} collection.
+     * Allows workers to read/write to their own chat path, and admins to read/write to any.
      */
-    match /chats/{workerId}/messages/{messageId} {
-        // Worker can read their own chat messages. Admin can read any chat message.
-        allow get, list: if isOwner(workerId) || isAdmin();
-        
-        // Worker can create messages in their own chat.
-        // Admin can create messages in any worker's chat (e.g. to reply).
-        allow create: if (isOwner(workerId) && request.resource.data.senderId == workerId)
-                      || (isAdmin() && request.resource.data.senderId == 'admin');
-
-        // Messages are immutable once created.
-        allow update, delete: if false;
+    match /chats/{workerId}/{path=**} {
+        allow read, write: if isOwner(workerId) || isAdmin();
     }
 
     /**
@@ -191,5 +185,16 @@ service cloud.firestore {
     match /activityLogs/{activityLogId} {
       allow read, write: if isAdmin();
     }
+    
+    /**
+     * @description Rules for the /settings/{settingId} collection.
+     * @path /settings/{settingId}
+     */
+    match /settings/{settingId} {
+        allow read: if isSignedIn();
+        allow write: if isAdmin();
+    }
   }
 }
+
+    
