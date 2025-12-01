@@ -1,6 +1,7 @@
 
 'use client';
 
+import React, { useMemo } from 'react';
 import {
   Card,
   CardContent,
@@ -9,29 +10,29 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { useDoc, useFirestore, useMemoFirebase } from '@/firebase';
-import { Briefcase, Calendar, Phone, Scissors, Hourglass, CircleDollarSign } from 'lucide-react';
+import { useDoc, useFirestore, useMemoFirebase, useCollection } from '@/firebase';
+import { Briefcase, Calendar, Phone, Scissors, Wallet2 } from 'lucide-react';
 import { TakaIcon } from '@/components/icons';
 import { Separator } from '@/components/ui/separator';
-import { doc } from 'firebase/firestore';
+import { doc, collection, query } from 'firebase/firestore';
 import { useParams } from 'next/navigation';
-import type { Worker } from '@/lib/types';
+import type { Worker, ProductionEntry, AdvancePayment, WorkerExpense } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
 
 const formatCurrency = (amount: number) =>
   new Intl.NumberFormat('bn-BD', {
     style: 'currency',
     currency: 'BDT',
-    minimumFractionDigits: 2,
+    minimumFractionDigits: 0,
   }).format(amount);
 
-function StatCard({ icon, label, value }: { icon: React.ReactNode, label: string, value: string | number }) {
+function StatCard({ icon, label, value, valueClassName }: { icon: React.ReactNode, label: string, value: string | number, valueClassName?: string }) {
   return (
-    <div className="flex items-center gap-4 rounded-lg border bg-background p-4">
-      {icon}
+    <div className="flex items-center gap-4 rounded-lg border bg-background p-4 shadow-sm transition-all hover:shadow-md">
+      <div className="rounded-lg bg-muted p-3">{icon}</div>
       <div>
         <p className="text-sm text-muted-foreground">{label}</p>
-        <p className="text-lg font-bold">{value}</p>
+        <p className={`text-xl font-bold ${valueClassName}`}>{value}</p>
       </div>
     </div>
   );
@@ -47,7 +48,44 @@ export default function WorkerProfilePage() {
     return doc(firestore, 'workers', workerId);
   }, [firestore, workerId]);
 
+  const productionQuery = useMemoFirebase(() => 
+    firestore && workerId ? query(collection(firestore, 'workers', workerId, 'productionEntries')) : null, 
+    [firestore, workerId]
+  );
+  const advancesQuery = useMemoFirebase(() => 
+    firestore && workerId ? query(collection(firestore, 'workers', workerId, 'advancePayments')) : null, 
+    [firestore, workerId]
+  );
+  const expensesQuery = useMemoFirebase(() => 
+    firestore && workerId ? query(collection(firestore, 'workers', workerId, 'expenses')) : null, 
+    [firestore, workerId]
+  );
+
+
   const { data: workerData, isLoading: isLoadingWorker } = useDoc<Worker>(workerDocRef);
+  const { data: productionEntries, isLoading: isLoadingProduction } = useCollection<ProductionEntry>(productionQuery);
+  const { data: advances, isLoading: isLoadingAdvances } = useCollection<AdvancePayment>(advancesQuery);
+  const { data: expenses, isLoading: isLoadingExpenses } = useCollection<WorkerExpense>(expensesQuery);
+
+  const totalProduction = useMemo(() => {
+    if (!productionEntries) return 0;
+    return productionEntries.reduce((sum, entry) => sum + (entry.pieceCount || 0), 0);
+  }, [productionEntries]);
+
+  const totalExpenses = useMemo(() => {
+    if (!expenses) return 0;
+    return expenses.reduce((sum, expense) => sum + expense.amount, 0);
+  }, [expenses]);
+  
+  const totalAdvanceDue = useMemo(() => {
+    if (!advances) return 0;
+    return advances.reduce((sum, advance) => {
+        const remaining = (advance.amount || 0) - (advance.paidAmount || 0);
+        return sum + (remaining > 0 ? remaining : 0);
+    }, 0);
+  }, [advances]);
+
+  const isLoadingStats = isLoadingProduction || isLoadingAdvances || isLoadingExpenses;
 
   if (isLoadingWorker) {
     return (
@@ -93,22 +131,19 @@ export default function WorkerProfilePage() {
         <CardContent className="space-y-6">
           <Separator />
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-             <StatCard 
-                icon={<Briefcase className="h-8 w-8 text-primary" />}
-                label="বিভাগ"
-                value={workerData.department}
-             />
-             <StatCard 
-                icon={<Calendar className="h-8 w-8 text-primary" />}
-                label="যোগদানের তারিখ"
-                value={new Date(workerData.joinDate).toLocaleDateString('bn-BD')}
-             />
-             <StatCard 
-                icon={<Phone className="h-8 w-8 text-primary" />}
-                label="মোবাইল নম্বর"
-                value={workerData.contact}
-             />
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+             <div className="flex items-center gap-3 text-muted-foreground p-3 bg-muted/50 rounded-lg">
+                <Briefcase className="h-5 w-5 text-primary"/>
+                <span>বিভাগ: <span className="font-medium text-foreground">{workerData.department}</span></span>
+            </div>
+             <div className="flex items-center gap-3 text-muted-foreground p-3 bg-muted/50 rounded-lg">
+                <Calendar className="h-5 w-5 text-primary"/>
+                <span>যোগদান: <span className="font-medium text-foreground">{new Date(workerData.joinDate).toLocaleDateString('bn-BD')}</span></span>
+            </div>
+             <div className="flex items-center gap-3 text-muted-foreground p-3 bg-muted/50 rounded-lg">
+                <Phone className="h-5 w-5 text-primary"/>
+                <span>মোবাইল: <span className="font-medium text-foreground">{workerData.contact}</span></span>
+            </div>
           </div>
 
         </CardContent>
@@ -119,21 +154,32 @@ export default function WorkerProfilePage() {
               <CardTitle>কাজের সারসংক্ষেপ</CardTitle>
           </CardHeader>
           <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <StatCard 
-                    icon={<Scissors className="h-8 w-8 text-green-500" />}
-                    label="মোট পিস"
-                    value="১২,৩৪৫"
-                />
-                <StatCard 
-                    icon={<Hourglass className="h-8 w-8 text-orange-500" />}
-                    label="মোট ওভারটাইম"
-                    value="১২০ ঘণ্টা"
-                />
-                <StatCard 
-                    icon={<CircleDollarSign className="h-8 w-8 text-red-500" />}
-                    label="মোট অগ্রিম"
-                    value={formatCurrency(5000)}
-                />
+                {isLoadingStats ? (
+                  <>
+                    <Skeleton className='h-24' />
+                    <Skeleton className='h-24' />
+                    <Skeleton className='h-24' />
+                  </>
+                ) : (
+                  <>
+                    <StatCard 
+                        icon={<Scissors className="h-8 w-8 text-primary" />}
+                        label="মোট সেলাই"
+                        value={`${totalProduction.toLocaleString('bn-BD')} পিস`}
+                    />
+                    <StatCard 
+                        icon={<Wallet2 className="h-8 w-8 text-primary" />}
+                        label="মোট খরচ"
+                        value={formatCurrency(totalExpenses)}
+                    />
+                    <StatCard 
+                        icon={<TakaIcon className="h-8 w-8 text-destructive" />}
+                        label="মোট বকেয়া অগ্রিম"
+                        value={formatCurrency(totalAdvanceDue)}
+                        valueClassName='text-destructive'
+                    />
+                  </>
+                )}
           </CardContent>
       </Card>
 
