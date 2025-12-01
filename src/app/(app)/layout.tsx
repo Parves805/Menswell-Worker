@@ -51,7 +51,6 @@ const bottomNavItems: NavItem[] = [
     { title: 'হোম', href: '/dashboard', icon: <Home /> },
     { title: 'টাকার অনুরোধ', href: '/request-advance', icon: <Wallet2 /> },
     { title: 'চ্যাট', href: '/chat', icon: <MessageCircle /> },
-    { title: 'নোটিফিকেশন', href: '/notifications', icon: <Bell /> },
     { title: 'অ্যাকাউন্ট', href: '/profile', icon: <User /> },
 ]
 
@@ -123,7 +122,7 @@ function AppLayoutContent({ children }: { children: React.ReactNode }) {
             )}
           </Link>
           
-        <div className="ml-auto flex items-center gap-4">
+        <div className="ml-auto flex items-center gap-2">
             <nav className="hidden flex-col gap-6 text-lg font-medium md:flex md:flex-row md:items-center md:gap-5 md:text-sm lg:gap-6">
             {mainNavItems.map(item => (
                 <Link
@@ -135,6 +134,13 @@ function AppLayoutContent({ children }: { children: React.ReactNode }) {
                 </Link>
             ))}
             </nav>
+
+            <Button variant="ghost" size="icon" className="rounded-full" asChild>
+                <Link href="/notifications">
+                    <Bell />
+                    <span className="sr-only">নোটিফিকেশন</span>
+                </Link>
+            </Button>
             
             <Sheet>
                 <SheetTrigger asChild>
